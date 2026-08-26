@@ -89,8 +89,8 @@ export function toEvidenceMap(fields: ExtractedField[]): EvidenceMap {
       value: effective,
       confidence: f.inspectorValue !== undefined ? 1 : f.confidence,
       images: f.sourceImage ? [f.sourceImage] : [],
-      unreadable: f.inspectorValue !== undefined ? false : f.unreadable,
-      note: f.note,
+      unreadable: f.inspectorValue !== undefined ? false : (f.unreadable ?? false),
+      ...(f.note !== undefined ? { note: f.note } : {}),
     };
   }
   return map;

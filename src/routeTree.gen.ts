@@ -10,13 +10,39 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as ConsumerRouteImport } from './routes/consumer'
 import { Route as InspectorRouteImport } from './routes/inspector'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminAuditRouteImport } from './routes/admin.audit'
+import { Route as AdminRulesRouteImport } from './routes/admin.rules'
+import { Route as AdminSellersRouteImport } from './routes/admin.sellers'
+import { Route as ConsumerIndexRouteImport } from './routes/consumer.index'
+import { Route as ConsumerComplaintsRouteImport } from './routes/consumer.complaints'
+import { Route as ConsumerRightsRouteImport } from './routes/consumer.rights'
 import { Route as InspectorIndexRouteImport } from './routes/inspector.index'
+import { Route as InspectorInspectionsRouteImport } from './routes/inspector.inspections'
+import { Route as InspectorProfileRouteImport } from './routes/inspector.profile'
+import { Route as InspectorReportsRouteImport } from './routes/inspector.reports'
 import { Route as InspectorScanRouteImport } from './routes/inspector.scan'
+import { Route as InspectorInspectionsIndexRouteImport } from './routes/inspector.inspections.index'
+import { Route as InspectorInspectionsIdRouteImport } from './routes/inspector.inspections.$id'
+import { Route as InspectorReportsIndexRouteImport } from './routes/inspector.reports.index'
+import { Route as InspectorReportsIdRouteImport } from './routes/inspector.reports.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConsumerRoute = ConsumerRouteImport.update({
+  id: '/consumer',
+  path: '/consumer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InspectorRoute = InspectorRouteImport.update({
@@ -24,9 +50,59 @@ const InspectorRoute = InspectorRouteImport.update({
   path: '/inspector',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAuditRoute = AdminAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRulesRoute = AdminRulesRouteImport.update({
+  id: '/rules',
+  path: '/rules',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSellersRoute = AdminSellersRouteImport.update({
+  id: '/sellers',
+  path: '/sellers',
+  getParentRoute: () => AdminRoute,
+} as any)
+const ConsumerIndexRoute = ConsumerIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ConsumerRoute,
+} as any)
+const ConsumerComplaintsRoute = ConsumerComplaintsRouteImport.update({
+  id: '/complaints',
+  path: '/complaints',
+  getParentRoute: () => ConsumerRoute,
+} as any)
+const ConsumerRightsRoute = ConsumerRightsRouteImport.update({
+  id: '/rights',
+  path: '/rights',
+  getParentRoute: () => ConsumerRoute,
+} as any)
 const InspectorIndexRoute = InspectorIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => InspectorRoute,
+} as any)
+const InspectorInspectionsRoute = InspectorInspectionsRouteImport.update({
+  id: '/inspections',
+  path: '/inspections',
+  getParentRoute: () => InspectorRoute,
+} as any)
+const InspectorProfileRoute = InspectorProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => InspectorRoute,
+} as any)
+const InspectorReportsRoute = InspectorReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => InspectorRoute,
 } as any)
 const InspectorScanRoute = InspectorScanRouteImport.update({
@@ -34,35 +110,158 @@ const InspectorScanRoute = InspectorScanRouteImport.update({
   path: '/scan',
   getParentRoute: () => InspectorRoute,
 } as any)
+const InspectorInspectionsIndexRoute =
+  InspectorInspectionsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => InspectorInspectionsRoute,
+  } as any)
+const InspectorInspectionsIdRoute = InspectorInspectionsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => InspectorInspectionsRoute,
+} as any)
+const InspectorReportsIndexRoute = InspectorReportsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => InspectorReportsRoute,
+} as any)
+const InspectorReportsIdRoute = InspectorReportsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => InspectorReportsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/consumer': typeof ConsumerRouteWithChildren
   '/inspector': typeof InspectorRouteWithChildren
+  '/admin/audit': typeof AdminAuditRoute
+  '/admin/rules': typeof AdminRulesRoute
+  '/admin/sellers': typeof AdminSellersRoute
+  '/consumer/complaints': typeof ConsumerComplaintsRoute
+  '/consumer/rights': typeof ConsumerRightsRoute
+  '/inspector/inspections': typeof InspectorInspectionsRouteWithChildren
+  '/inspector/profile': typeof InspectorProfileRoute
+  '/inspector/reports': typeof InspectorReportsRouteWithChildren
   '/inspector/scan': typeof InspectorScanRoute
+  '/admin/': typeof AdminIndexRoute
+  '/consumer/': typeof ConsumerIndexRoute
   '/inspector/': typeof InspectorIndexRoute
+  '/inspector/inspections/$id': typeof InspectorInspectionsIdRoute
+  '/inspector/reports/$id': typeof InspectorReportsIdRoute
+  '/inspector/inspections/': typeof InspectorInspectionsIndexRoute
+  '/inspector/reports/': typeof InspectorReportsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin/audit': typeof AdminAuditRoute
+  '/admin/rules': typeof AdminRulesRoute
+  '/admin/sellers': typeof AdminSellersRoute
+  '/consumer/complaints': typeof ConsumerComplaintsRoute
+  '/consumer/rights': typeof ConsumerRightsRoute
+  '/inspector/profile': typeof InspectorProfileRoute
   '/inspector/scan': typeof InspectorScanRoute
+  '/admin': typeof AdminIndexRoute
+  '/consumer': typeof ConsumerIndexRoute
   '/inspector': typeof InspectorIndexRoute
+  '/inspector/inspections/$id': typeof InspectorInspectionsIdRoute
+  '/inspector/reports/$id': typeof InspectorReportsIdRoute
+  '/inspector/inspections': typeof InspectorInspectionsIndexRoute
+  '/inspector/reports': typeof InspectorReportsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/consumer': typeof ConsumerRouteWithChildren
   '/inspector': typeof InspectorRouteWithChildren
+  '/admin/audit': typeof AdminAuditRoute
+  '/admin/rules': typeof AdminRulesRoute
+  '/admin/sellers': typeof AdminSellersRoute
+  '/consumer/complaints': typeof ConsumerComplaintsRoute
+  '/consumer/rights': typeof ConsumerRightsRoute
+  '/inspector/inspections': typeof InspectorInspectionsRouteWithChildren
+  '/inspector/profile': typeof InspectorProfileRoute
+  '/inspector/reports': typeof InspectorReportsRouteWithChildren
   '/inspector/scan': typeof InspectorScanRoute
+  '/admin/': typeof AdminIndexRoute
+  '/consumer/': typeof ConsumerIndexRoute
   '/inspector/': typeof InspectorIndexRoute
+  '/inspector/inspections/$id': typeof InspectorInspectionsIdRoute
+  '/inspector/reports/$id': typeof InspectorReportsIdRoute
+  '/inspector/inspections/': typeof InspectorInspectionsIndexRoute
+  '/inspector/reports/': typeof InspectorReportsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/inspector' | '/inspector/scan' | '/inspector/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/consumer'
+    | '/inspector'
+    | '/admin/audit'
+    | '/admin/rules'
+    | '/admin/sellers'
+    | '/consumer/complaints'
+    | '/consumer/rights'
+    | '/inspector/inspections'
+    | '/inspector/profile'
+    | '/inspector/reports'
+    | '/inspector/scan'
+    | '/admin/'
+    | '/consumer/'
+    | '/inspector/'
+    | '/inspector/inspections/$id'
+    | '/inspector/reports/$id'
+    | '/inspector/inspections/'
+    | '/inspector/reports/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/inspector/scan' | '/inspector'
-  id: '__root__' | '/' | '/inspector' | '/inspector/scan' | '/inspector/'
+  to:
+    | '/'
+    | '/admin/audit'
+    | '/admin/rules'
+    | '/admin/sellers'
+    | '/consumer/complaints'
+    | '/consumer/rights'
+    | '/inspector/profile'
+    | '/inspector/scan'
+    | '/admin'
+    | '/consumer'
+    | '/inspector'
+    | '/inspector/inspections/$id'
+    | '/inspector/reports/$id'
+    | '/inspector/inspections'
+    | '/inspector/reports'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/consumer'
+    | '/inspector'
+    | '/admin/audit'
+    | '/admin/rules'
+    | '/admin/sellers'
+    | '/consumer/complaints'
+    | '/consumer/rights'
+    | '/inspector/inspections'
+    | '/inspector/profile'
+    | '/inspector/reports'
+    | '/inspector/scan'
+    | '/admin/'
+    | '/consumer/'
+    | '/inspector/'
+    | '/inspector/inspections/$id'
+    | '/inspector/reports/$id'
+    | '/inspector/inspections/'
+    | '/inspector/reports/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
+  ConsumerRoute: typeof ConsumerRouteWithChildren
   InspectorRoute: typeof InspectorRouteWithChildren
 }
 
@@ -75,6 +274,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/consumer': {
+      id: '/consumer'
+      path: '/consumer'
+      fullPath: '/consumer'
+      preLoaderRoute: typeof ConsumerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/inspector': {
       id: '/inspector'
       path: '/inspector'
@@ -82,11 +295,81 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InspectorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/audit': {
+      id: '/admin/audit'
+      path: '/audit'
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AdminAuditRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/rules': {
+      id: '/admin/rules'
+      path: '/rules'
+      fullPath: '/admin/rules'
+      preLoaderRoute: typeof AdminRulesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/sellers': {
+      id: '/admin/sellers'
+      path: '/sellers'
+      fullPath: '/admin/sellers'
+      preLoaderRoute: typeof AdminSellersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/consumer/': {
+      id: '/consumer/'
+      path: '/'
+      fullPath: '/consumer/'
+      preLoaderRoute: typeof ConsumerIndexRouteImport
+      parentRoute: typeof ConsumerRoute
+    }
+    '/consumer/complaints': {
+      id: '/consumer/complaints'
+      path: '/complaints'
+      fullPath: '/consumer/complaints'
+      preLoaderRoute: typeof ConsumerComplaintsRouteImport
+      parentRoute: typeof ConsumerRoute
+    }
+    '/consumer/rights': {
+      id: '/consumer/rights'
+      path: '/rights'
+      fullPath: '/consumer/rights'
+      preLoaderRoute: typeof ConsumerRightsRouteImport
+      parentRoute: typeof ConsumerRoute
+    }
     '/inspector/': {
       id: '/inspector/'
       path: '/'
       fullPath: '/inspector/'
       preLoaderRoute: typeof InspectorIndexRouteImport
+      parentRoute: typeof InspectorRoute
+    }
+    '/inspector/inspections': {
+      id: '/inspector/inspections'
+      path: '/inspections'
+      fullPath: '/inspector/inspections'
+      preLoaderRoute: typeof InspectorInspectionsRouteImport
+      parentRoute: typeof InspectorRoute
+    }
+    '/inspector/profile': {
+      id: '/inspector/profile'
+      path: '/profile'
+      fullPath: '/inspector/profile'
+      preLoaderRoute: typeof InspectorProfileRouteImport
+      parentRoute: typeof InspectorRoute
+    }
+    '/inspector/reports': {
+      id: '/inspector/reports'
+      path: '/reports'
+      fullPath: '/inspector/reports'
+      preLoaderRoute: typeof InspectorReportsRouteImport
       parentRoute: typeof InspectorRoute
     }
     '/inspector/scan': {
@@ -96,15 +379,107 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InspectorScanRouteImport
       parentRoute: typeof InspectorRoute
     }
+    '/inspector/inspections/': {
+      id: '/inspector/inspections/'
+      path: '/'
+      fullPath: '/inspector/inspections/'
+      preLoaderRoute: typeof InspectorInspectionsIndexRouteImport
+      parentRoute: typeof InspectorInspectionsRoute
+    }
+    '/inspector/inspections/$id': {
+      id: '/inspector/inspections/$id'
+      path: '/$id'
+      fullPath: '/inspector/inspections/$id'
+      preLoaderRoute: typeof InspectorInspectionsIdRouteImport
+      parentRoute: typeof InspectorInspectionsRoute
+    }
+    '/inspector/reports/': {
+      id: '/inspector/reports/'
+      path: '/'
+      fullPath: '/inspector/reports/'
+      preLoaderRoute: typeof InspectorReportsIndexRouteImport
+      parentRoute: typeof InspectorReportsRoute
+    }
+    '/inspector/reports/$id': {
+      id: '/inspector/reports/$id'
+      path: '/$id'
+      fullPath: '/inspector/reports/$id'
+      preLoaderRoute: typeof InspectorReportsIdRouteImport
+      parentRoute: typeof InspectorReportsRoute
+    }
   }
 }
 
+interface AdminRouteChildren {
+  AdminAuditRoute: typeof AdminAuditRoute
+  AdminRulesRoute: typeof AdminRulesRoute
+  AdminSellersRoute: typeof AdminSellersRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAuditRoute: AdminAuditRoute,
+  AdminRulesRoute: AdminRulesRoute,
+  AdminSellersRoute: AdminSellersRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+interface ConsumerRouteChildren {
+  ConsumerComplaintsRoute: typeof ConsumerComplaintsRoute
+  ConsumerRightsRoute: typeof ConsumerRightsRoute
+  ConsumerIndexRoute: typeof ConsumerIndexRoute
+}
+
+const ConsumerRouteChildren: ConsumerRouteChildren = {
+  ConsumerComplaintsRoute: ConsumerComplaintsRoute,
+  ConsumerRightsRoute: ConsumerRightsRoute,
+  ConsumerIndexRoute: ConsumerIndexRoute,
+}
+
+const ConsumerRouteWithChildren = ConsumerRoute._addFileChildren(
+  ConsumerRouteChildren,
+)
+
+interface InspectorInspectionsRouteChildren {
+  InspectorInspectionsIdRoute: typeof InspectorInspectionsIdRoute
+  InspectorInspectionsIndexRoute: typeof InspectorInspectionsIndexRoute
+}
+
+const InspectorInspectionsRouteChildren: InspectorInspectionsRouteChildren = {
+  InspectorInspectionsIdRoute: InspectorInspectionsIdRoute,
+  InspectorInspectionsIndexRoute: InspectorInspectionsIndexRoute,
+}
+
+const InspectorInspectionsRouteWithChildren =
+  InspectorInspectionsRoute._addFileChildren(InspectorInspectionsRouteChildren)
+
+interface InspectorReportsRouteChildren {
+  InspectorReportsIdRoute: typeof InspectorReportsIdRoute
+  InspectorReportsIndexRoute: typeof InspectorReportsIndexRoute
+}
+
+const InspectorReportsRouteChildren: InspectorReportsRouteChildren = {
+  InspectorReportsIdRoute: InspectorReportsIdRoute,
+  InspectorReportsIndexRoute: InspectorReportsIndexRoute,
+}
+
+const InspectorReportsRouteWithChildren =
+  InspectorReportsRoute._addFileChildren(InspectorReportsRouteChildren)
+
 interface InspectorRouteChildren {
+  InspectorInspectionsRoute: typeof InspectorInspectionsRouteWithChildren
+  InspectorProfileRoute: typeof InspectorProfileRoute
+  InspectorReportsRoute: typeof InspectorReportsRouteWithChildren
   InspectorScanRoute: typeof InspectorScanRoute
   InspectorIndexRoute: typeof InspectorIndexRoute
 }
 
 const InspectorRouteChildren: InspectorRouteChildren = {
+  InspectorInspectionsRoute: InspectorInspectionsRouteWithChildren,
+  InspectorProfileRoute: InspectorProfileRoute,
+  InspectorReportsRoute: InspectorReportsRouteWithChildren,
   InspectorScanRoute: InspectorScanRoute,
   InspectorIndexRoute: InspectorIndexRoute,
 }
@@ -115,6 +490,8 @@ const InspectorRouteWithChildren = InspectorRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
+  ConsumerRoute: ConsumerRouteWithChildren,
   InspectorRoute: InspectorRouteWithChildren,
 }
 export const routeTree = rootRouteImport

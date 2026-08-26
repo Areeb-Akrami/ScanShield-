@@ -46,7 +46,7 @@ function ScanPage() {
   });
   const [seller, setSeller] = useState("");
   const [district, setDistrict] = useState(session?.district ?? "");
-  const [scenarioId, setScenarioId] = useState<string>(SCENARIOS[0].id);
+  const [scenarioId, setScenarioId] = useState<string>(SCENARIOS[0]!.id);
   const [uploads, setUploads] = useState<string[]>([]);
   const [fields, setFields] = useState<ExtractedField[] | null>(null);
   const [images, setImages] = useState<CapturedImage[]>([]);

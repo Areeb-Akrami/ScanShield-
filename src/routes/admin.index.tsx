@@ -66,9 +66,9 @@ function AdminOverview() {
         <PanelHeader title="Legal corpus status" subtitle="Ingestion coverage of the official source documents." />
         <div className="grid grid-cols-2 gap-px border-t border-border bg-border sm:grid-cols-4">
           {[
-            ["Sources expected", stats.sourcesExpected],
+            ["Sources expected", stats.sourceDocuments],
             ["Sources ingested", stats.sourcesIngested],
-            ["Rule records", stats.totalRules],
+            ["Rule records", stats.provisions],
             ["Exemptions", stats.exemptions],
           ].map(([k, v]) => (
             <div key={String(k)} className="bg-card px-3 py-3 text-center">

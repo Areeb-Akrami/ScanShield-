@@ -18,7 +18,7 @@ export const Route = createFileRoute("/consumer/")({
 });
 
 function ConsumerCheck() {
-  const [scenarioId, setScenarioId] = useState(SCENARIOS[0].id);
+  const [scenarioId, setScenarioId] = useState(SCENARIOS[0]!.id);
   const [output, setOutput] = useState<PipelineOutput | null>(null);
   const scenario = scenarioById(scenarioId)!;
 

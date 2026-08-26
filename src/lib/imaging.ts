@@ -180,3 +180,15 @@ export async function preprocessImage(
     quality: grade(metrics, srcW, srcH),
   };
 }
+
+/** Small JPEG copy for durable local storage (localStorage quota is ~5 MB). */
+export async function makeThumbnail(dataUrl: string, maxEdge = 480): Promise<string> {
+  const img = await loadImage(dataUrl);
+  const scale = Math.min(1, maxEdge / Math.max(img.naturalWidth, img.naturalHeight));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
+  canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+  const ctx = canvas.getContext("2d")!;
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL("image/jpeg", 0.7);
+}

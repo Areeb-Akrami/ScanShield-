@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as InspectorRouteImport } from './routes/inspector'
 import { Route as InspectorIndexRouteImport } from './routes/inspector.index'
+import { Route as InspectorInspectionsRouteImport } from './routes/inspector.inspections'
 import { Route as InspectorScanRouteImport } from './routes/inspector.scan'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,6 +30,11 @@ const InspectorIndexRoute = InspectorIndexRouteImport.update({
   path: '/',
   getParentRoute: () => InspectorRoute,
 } as any)
+const InspectorInspectionsRoute = InspectorInspectionsRouteImport.update({
+  id: '/inspections',
+  path: '/inspections',
+  getParentRoute: () => InspectorRoute,
+} as any)
 const InspectorScanRoute = InspectorScanRouteImport.update({
   id: '/scan',
   path: '/scan',
@@ -38,11 +44,13 @@ const InspectorScanRoute = InspectorScanRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/inspector': typeof InspectorRouteWithChildren
+  '/inspector/inspections': typeof InspectorInspectionsRoute
   '/inspector/scan': typeof InspectorScanRoute
   '/inspector/': typeof InspectorIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/inspector/inspections': typeof InspectorInspectionsRoute
   '/inspector/scan': typeof InspectorScanRoute
   '/inspector': typeof InspectorIndexRoute
 }
@@ -50,15 +58,27 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/inspector': typeof InspectorRouteWithChildren
+  '/inspector/inspections': typeof InspectorInspectionsRoute
   '/inspector/scan': typeof InspectorScanRoute
   '/inspector/': typeof InspectorIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/inspector' | '/inspector/scan' | '/inspector/'
+  fullPaths:
+    | '/'
+    | '/inspector'
+    | '/inspector/inspections'
+    | '/inspector/scan'
+    | '/inspector/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/inspector/scan' | '/inspector'
-  id: '__root__' | '/' | '/inspector' | '/inspector/scan' | '/inspector/'
+  to: '/' | '/inspector/inspections' | '/inspector/scan' | '/inspector'
+  id:
+    | '__root__'
+    | '/'
+    | '/inspector'
+    | '/inspector/inspections'
+    | '/inspector/scan'
+    | '/inspector/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -89,6 +109,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InspectorIndexRouteImport
       parentRoute: typeof InspectorRoute
     }
+    '/inspector/inspections': {
+      id: '/inspector/inspections'
+      path: '/inspections'
+      fullPath: '/inspector/inspections'
+      preLoaderRoute: typeof InspectorInspectionsRouteImport
+      parentRoute: typeof InspectorRoute
+    }
     '/inspector/scan': {
       id: '/inspector/scan'
       path: '/scan'
@@ -100,11 +127,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface InspectorRouteChildren {
+  InspectorInspectionsRoute: typeof InspectorInspectionsRoute
   InspectorScanRoute: typeof InspectorScanRoute
   InspectorIndexRoute: typeof InspectorIndexRoute
 }
 
 const InspectorRouteChildren: InspectorRouteChildren = {
+  InspectorInspectionsRoute: InspectorInspectionsRoute,
   InspectorScanRoute: InspectorScanRoute,
   InspectorIndexRoute: InspectorIndexRoute,
 }

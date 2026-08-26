@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ConsumerRouteImport } from './routes/consumer'
 import { Route as InspectorRouteImport } from './routes/inspector'
 import { Route as ConsumerIndexRouteImport } from './routes/consumer.index'
+import { Route as ConsumerRightsRouteImport } from './routes/consumer.rights'
 import { Route as InspectorIndexRouteImport } from './routes/inspector.index'
 import { Route as InspectorInspectionsRouteImport } from './routes/inspector.inspections'
 import { Route as InspectorProfileRouteImport } from './routes/inspector.profile'
@@ -41,6 +42,11 @@ const InspectorRoute = InspectorRouteImport.update({
 const ConsumerIndexRoute = ConsumerIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => ConsumerRoute,
+} as any)
+const ConsumerRightsRoute = ConsumerRightsRouteImport.update({
+  id: '/rights',
+  path: '/rights',
   getParentRoute: () => ConsumerRoute,
 } as any)
 const InspectorIndexRoute = InspectorIndexRouteImport.update({
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/consumer': typeof ConsumerRouteWithChildren
   '/inspector': typeof InspectorRouteWithChildren
+  '/consumer/rights': typeof ConsumerRightsRoute
   '/inspector/inspections': typeof InspectorInspectionsRouteWithChildren
   '/inspector/profile': typeof InspectorProfileRoute
   '/inspector/reports': typeof InspectorReportsRouteWithChildren
@@ -107,6 +114,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/consumer/rights': typeof ConsumerRightsRoute
   '/inspector/profile': typeof InspectorProfileRoute
   '/inspector/scan': typeof InspectorScanRoute
   '/consumer': typeof ConsumerIndexRoute
@@ -121,6 +129,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/consumer': typeof ConsumerRouteWithChildren
   '/inspector': typeof InspectorRouteWithChildren
+  '/consumer/rights': typeof ConsumerRightsRoute
   '/inspector/inspections': typeof InspectorInspectionsRouteWithChildren
   '/inspector/profile': typeof InspectorProfileRoute
   '/inspector/reports': typeof InspectorReportsRouteWithChildren
@@ -138,6 +147,7 @@ export interface FileRouteTypes {
     | '/'
     | '/consumer'
     | '/inspector'
+    | '/consumer/rights'
     | '/inspector/inspections'
     | '/inspector/profile'
     | '/inspector/reports'
@@ -151,6 +161,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/consumer/rights'
     | '/inspector/profile'
     | '/inspector/scan'
     | '/consumer'
@@ -164,6 +175,7 @@ export interface FileRouteTypes {
     | '/'
     | '/consumer'
     | '/inspector'
+    | '/consumer/rights'
     | '/inspector/inspections'
     | '/inspector/profile'
     | '/inspector/reports'
@@ -210,6 +222,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/consumer/'
       preLoaderRoute: typeof ConsumerIndexRouteImport
+      parentRoute: typeof ConsumerRoute
+    }
+    '/consumer/rights': {
+      id: '/consumer/rights'
+      path: '/rights'
+      fullPath: '/consumer/rights'
+      preLoaderRoute: typeof ConsumerRightsRouteImport
       parentRoute: typeof ConsumerRoute
     }
     '/inspector/': {
@@ -279,10 +298,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface ConsumerRouteChildren {
+  ConsumerRightsRoute: typeof ConsumerRightsRoute
   ConsumerIndexRoute: typeof ConsumerIndexRoute
 }
 
 const ConsumerRouteChildren: ConsumerRouteChildren = {
+  ConsumerRightsRoute: ConsumerRightsRoute,
   ConsumerIndexRoute: ConsumerIndexRoute,
 }
 

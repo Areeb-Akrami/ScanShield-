@@ -1,57 +1,55 @@
-# ScanShield — Rule Catalogue
+# ScanShield legal engine — rule catalogue
 
-**Corpus state: `AWAITING_INGESTION`**
+## Corpus state: INGESTED
 
-`/legal_sources/` was not present in this project when the legal engine was scaffolded.
-No official text has been ingested. Every record in `legal_engine/` therefore carries
-`provenance: "PROVISIONAL_UNVERIFIED"`, and `exact_requirement` is `null` on every rule.
+| Field | Value |
+| --- | --- |
+| Source document | The Legal Metrology (Packaged Commodities) Rules, 2011 |
+| Notification | G.S.R. 202(E), dated 7 March 2011 |
+| Gazette | The Gazette of India, Extraordinary, Part II — Section 3 — Sub-section (i), No. 124, 9 March 2011 |
+| Ministry | Consumer Affairs, Food and Public Distribution (Department of Consumer Affairs) |
+| Commencement | 1 April 2011 |
+| Pages in gazette | 83 (Hindi pages 1–36, English pages 37–83) |
+| Text ingested | English text, pages 37–83 |
 
-This is deliberate. The build spec forbids inventing legal requirements, rule numbers or
-notification numbers, so none appear here. What exists is the **structure**: the record
-schema, the amendment/version chains, the exemption model, the applicability dimensions
-and the machine-checkability classification. Dropping the official documents into
-`/legal_sources/` and running Phase 0 ingestion populates the text and flips provenance
-to `VERIFIED_FROM_SOURCE` without touching any application code.
+The English notification was extracted from the supplied PDF (the gazette scan has no text
+layer; pages 37–50 were parsed with document OCR and pages 51–83 with Tesseract at 300 dpi).
+Every rule record carries a verbatim excerpt in `exact_requirement`, together with the printed
+rule number and sub-rule.
+
+**No amendment notification after 2011 has been supplied.** The engine therefore applies the
+principal rules exactly as published. `rule_versions.json` is intentionally empty: when an
+amendment gazette is ingested, the amended provision is appended as a later chain entry with
+its own effective window and the earlier version is given an `effective_to` date, never deleted.
 
 ## Files
 
 | File | Purpose |
-|---|---|
-| `rules.json` | Consolidated rule records with applicability, effective dates, severity, machine-checkability |
-| `rule_versions.json` | Amendment chains preserving history (`INSERT`, `REPLACE`, `SUBSTITUTE`, `CARVE_OUT`, `PRINCIPAL`) |
-| `exemptions.json` | Dated exemptions; resolve to `NOT_APPLICABLE`, never `PASS` |
-| `product_categories.json` | Product categories, package types, transaction contexts, origin contexts |
-| `rule_sources.json` | Expected source documents and their ingestion state |
+| --- | --- |
+| `rule_sources.json` | The ingested source document and its gazette metadata. |
+| `rules.json` | Structured provisions with verbatim text, rule numbers, applicability, severity, evidence and machine-checkability. |
+| `exemptions.json` | Rule 3 and rule 26 exclusions and the scope limits inherent in rules 6(1)(a) and Chapter II. An exemption resolves to `NOT_APPLICABLE`, never to `PASS`. |
+| `rule_versions.json` | Amendment chains (currently empty — no amendment ingested). |
+| `product_categories.json` | Product categories, package types, transaction contexts and origin contexts used for applicability matching. |
 
-## Effective-date engine
+## Provisions encoded (29)
 
-Each rule has `effective_from` / `effective_to`. Against an inspection date the engine
-returns one of `CURRENT`, `FUTURE`, `SUPERSEDED`, `NOT_APPLICABLE`. A future rule is
-never applied before its commencement date. The two e-commerce origin provisions
-(`2026-07-01` and `2027-07-01`) are modelled as one chain with non-overlapping windows
-precisely so the later one cannot overwrite the earlier one prematurely.
+Rules 2(m), 3, 4, 5, 6(1)(a)–(f), 6(2), 6(3), 6(5), 7(2)–(3) with Tables I and II, 8(1), 9(1),
+10(1)–(2), 11(1)–(2), 13(2)–(5), 14, 16, 18(1), 18(2), 18(5)–(6), 25, 27(1) and 31(1).
 
-## Machine-checkability classification
+## Machine-checkability classes
 
 | Class | Meaning |
-|---|---|
-| `FULLY_MACHINE_CHECKABLE` | Determinable from extracted values alone (e.g. date chronology) |
-| `AI_ASSISTED` | OCR/CV evidence + rule logic, confidence-gated |
-| `PARTIALLY_MACHINE_CHECKABLE` | Measurable only within calibration limits (character height, legibility) |
-| `HUMAN_INSPECTION_REQUIRED` | Physical inspection (actual net quantity, inner packages) |
-| `DOCUMENTARY_CHECK_REQUIRED` | Registration, warehouse records, listing evidence |
-| `NOT_RELEVANT_TO_IMAGE_SCAN` | Not inferable from a package image |
+| --- | --- |
+| `FULLY_MACHINE_CHECKABLE` | Decidable from the extracted declaration alone (date consistency, MRP wording, SI units). |
+| `AI_ASSISTED` | Presence and content of a declaration read from the package image, subject to a confidence floor. |
+| `PARTIALLY_MACHINE_CHECKABLE` | Image gives an indication; a measurement or officer judgement decides (character height, legibility, panel layout). |
+| `HUMAN_INSPECTION_REQUIRED` | Needs physical measurement of the goods (net-quantity verification). |
+| `DOCUMENTARY_CHECK_REQUIRED` | Needs invoices, registration records or import papers (sale above MRP, registration, export packages). |
 
-## Scaffold statistics
+## Effective-date behaviour
 
-- Source documents expected: **13**, ingested: **0**
-- Provisional rule records: **22**
-- Version chains: **4**
-- Exemptions: **5**
-- Product categories: **9** · Package types: **8** · Transaction contexts: **3**
-
-Counts by machine-checkability: `FULLY_MACHINE_CHECKABLE` 1 · `AI_ASSISTED` 10 ·
-`PARTIALLY_MACHINE_CHECKABLE` 2 · `HUMAN_INSPECTION_REQUIRED` 3 ·
-`DOCUMENTARY_CHECK_REQUIRED` 6.
-
-Live counts are computed at runtime and shown on the **Rules** screen in the admin console.
+A provision applies only when the inspection date falls inside its effective window. A provision
+that has not commenced returns `NOT_APPLICABLE` with its commencement date, and a superseded
+version returns `NOT_APPLICABLE` citing the version that governs instead. All provisions here
+commence on 1 April 2011.

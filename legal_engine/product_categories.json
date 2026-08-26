@@ -1,0 +1,33 @@
+{
+  "provenance": "PROVISIONAL_UNVERIFIED",
+  "product_categories": [
+    { "id": "FOOD", "label": "Food & beverages", "notes": "Packaged food commodities." },
+    { "id": "EDIBLE_OIL_FAT", "label": "Edible oils & fats", "notes": "Net-quantity determination follows the official SOP as a physical-inspection workflow." },
+    { "id": "ELECTRONICS", "label": "Electronic products", "notes": "QR-code declaration provisions may apply." },
+    { "id": "GARMENT_HOSIERY", "label": "Garments & hosiery", "notes": "Category-specific declaration set." },
+    { "id": "MEDICAL_DEVICE", "label": "Medical devices", "notes": "Declaration / character-size treatment may be governed by the Medical Devices framework." },
+    { "id": "AGRICULTURAL", "label": "Agricultural produce packages", "notes": null },
+    { "id": "COSMETICS", "label": "Cosmetics & toiletries", "notes": null },
+    { "id": "PAN_MASALA", "label": "Pan masala", "notes": "Subject to a dated exclusion." },
+    { "id": "OTHER", "label": "Other packaged commodity", "notes": null }
+  ],
+  "package_types": [
+    { "id": "RETAIL", "label": "Ordinary retail package" },
+    { "id": "GROUP", "label": "Group package" },
+    { "id": "COMBINATION", "label": "Combination package" },
+    { "id": "MULTI_PIECE", "label": "Multi-piece package" },
+    { "id": "PROMOTIONAL", "label": "Promotional package" },
+    { "id": "GIFT", "label": "Gift package" },
+    { "id": "WHOLESALE", "label": "Wholesale package" },
+    { "id": "IMPORTED", "label": "Imported package" }
+  ],
+  "transaction_contexts": [
+    { "id": "RETAIL", "label": "Retail counter sale" },
+    { "id": "WHOLESALE", "label": "Wholesale" },
+    { "id": "ECOMMERCE", "label": "E-commerce listing" }
+  ],
+  "origin_contexts": [
+    { "id": "DOMESTIC", "label": "Domestically manufactured / packed" },
+    { "id": "IMPORTED", "label": "Imported" }
+  ]
+}

@@ -1,84 +1,18 @@
 {
-  "corpus_state": "AWAITING_INGESTION",
-  "corpus_note": "The /legal_sources/ folder was not present in this project at build time. No official text has been ingested. Every record in this legal_engine/ directory is therefore PROVISIONAL and carries provenance = PROVISIONAL_UNVERIFIED. The application surfaces this state in the UI and in every generated report. Verbatim legal text (exact_requirement) is deliberately null everywhere — it must be populated from the official documents, never from model memory.",
+  "corpus_state": "INGESTED",
+  "corpus_note": "The Legal Metrology (Packaged Commodities) Rules, 2011 (Gazette of India, Extraordinary, Part II Section 3(i), No. 124, G.S.R. 202(E) dated 7 March 2011) have been ingested from the official gazette PDF supplied by the user. The English text of the notification (pages 37-83 of the gazette) was extracted and every rule record below carries a verbatim excerpt in exact_requirement together with its rule number. The Hindi portion (pages 1-36) is the same notification and was not separately ingested. No amendment notification after 2011 has been supplied; therefore the engine applies the principal rules as published, and no post-2011 amendment is modelled.",
   "expected_documents": [
     {
       "source_id": "SRC_PCR_2011",
       "title": "Legal Metrology (Packaged Commodities) Rules, 2011 — principal rules",
-      "notification_number": null,
-      "ingested": false
-    },
-    {
-      "source_id": "SRC_AMD_2021",
-      "title": "Amendment Rules, 2021 (unit sale price categories)",
-      "notification_number": null,
-      "ingested": false
-    },
-    {
-      "source_id": "SRC_AMD_2022_07",
-      "title": "Amendment Rules, July 2022 (QR-code handling for certain electronic products)",
-      "notification_number": null,
-      "ingested": false
-    },
-    {
-      "source_id": "SRC_AMD_2022_GARMENT",
-      "title": "Amendment Rules, 2022 (garments / hosiery declarations)",
-      "notification_number": null,
-      "ingested": false
-    },
-    {
-      "source_id": "SRC_AMD_2023",
-      "title": "Amendment Rules, 2023 (combination / group / multi-piece package definitions)",
-      "notification_number": null,
-      "ingested": false
-    },
-    {
-      "source_id": "SRC_CORR_2023",
-      "title": "Corrigenda, 2023",
-      "notification_number": null,
-      "ingested": false
-    },
-    {
-      "source_id": "SRC_AMD_2025",
-      "title": "Amendment Rules, 2025 (medical devices — declaration and character size treatment)",
-      "notification_number": null,
-      "ingested": false
-    },
-    {
-      "source_id": "SRC_AMD_2025_12",
-      "title": "Amendment Rules, December 2025 (pan masala exclusion, effective 1 February 2026)",
-      "notification_number": null,
-      "ingested": false
-    },
-    {
-      "source_id": "SRC_AMD_2026_02",
-      "title": "Amendment Rules, February 2026 (imported-product e-commerce country-of-origin filter, effective 1 July 2026)",
-      "notification_number": null,
-      "ingested": false
-    },
-    {
-      "source_id": "SRC_AMD_2026_04",
-      "title": "Amendment Rules, April 2026 (effective 1 July 2027)",
-      "notification_number": null,
-      "ingested": false
-    },
-    {
-      "source_id": "SRC_AMD_2026_05",
-      "title": "Amendment Rules, 29 May 2026 (AEO Tier-2/Tier-3 bonded warehouse declaration timing)",
-      "notification_number": null,
-      "ingested": false
-    },
-    {
-      "source_id": "SRC_SOP_EDIBLE_OIL",
-      "title": "SOP for determination of net quantity — edible oils and fats",
-      "notification_number": null,
-      "ingested": false
-    },
-    {
-      "source_id": "SRC_IMPL_GUIDE",
-      "title": "Implementation guidelines",
-      "notification_number": null,
-      "ingested": false
+      "notification_number": "G.S.R. 202(E), dated 7 March 2011",
+      "published": "2011-03-09",
+      "effective_from": "2011-04-01",
+      "gazette": "The Gazette of India, Extraordinary, Part II—Section 3—Sub-section (i), No. 124",
+      "ministry": "Ministry of Consumer Affairs, Food and Public Distribution (Department of Consumer Affairs)",
+      "pages": 83,
+      "language_ingested": "English (pages 37-83)",
+      "ingested": true
     }
   ]
 }

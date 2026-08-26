@@ -1,7 +1,6 @@
 import { useSession } from "@/components/AppShell";
 import { CorpusBanner } from "@/components/CorpusBanner";
 import { Button, DemoBadge, Field, Panel, PanelHeader, StatusPill, inputClass } from "@/components/ui";
-import { PACKAGE_TYPES, PRODUCT_CATEGORIES, TRANSACTION_CONTEXTS } from "@/legal/corpus";
 import type { InspectionClassification } from "@/legal/types";
 import { audit, runPipeline, saveInspection, type GeoTag, type Inspection } from "@/lib/store";
 import { SCENARIOS, scenarioById } from "@/pipeline/scenarios";

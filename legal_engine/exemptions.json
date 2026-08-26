@@ -1,0 +1,56 @@
+{
+  "provenance": "PROVISIONAL_UNVERIFIED",
+  "note": "An exemption never yields PASS. It yields NOT_APPLICABLE, with the exemption cited.",
+  "exemptions": [
+    {
+      "exemption_id": "EX_PAN_MASALA_2026",
+      "rule_ids": ["PCR_UNIT_SALE_PRICE_2021"],
+      "title": "Pan masala exclusion",
+      "explanation": "The December 2025 amendment excludes pan masala from a specified provision with effect from 1 February 2026. Modelled as a dated exemption, not as a hard-coded product check.",
+      "source_id": "SRC_AMD_2025_12",
+      "conditions": { "product_categories": ["PAN_MASALA"], "package_types": [], "transaction_contexts": [], "origin": null },
+      "effective_from": "2026-02-01",
+      "effective_to": null
+    },
+    {
+      "exemption_id": "EX_WHOLESALE_RETAIL_DECLARATIONS",
+      "rule_ids": ["PCR_DECL_MRP", "PCR_UNIT_SALE_PRICE_2021"],
+      "title": "Wholesale packages",
+      "explanation": "Retail-price declarations are directed at retail packages. Wholesale packages are handled under their own provisions.",
+      "source_id": "SRC_PCR_2011",
+      "conditions": { "product_categories": [], "package_types": ["WHOLESALE"], "transaction_contexts": [], "origin": null },
+      "effective_from": "2011-04-01",
+      "effective_to": null
+    },
+    {
+      "exemption_id": "EX_DOMESTIC_ORIGIN_DECLARATION",
+      "rule_ids": ["PCR_DECL_COUNTRY_OF_ORIGIN", "PCR_DECL_IMPORTER"],
+      "title": "Domestically manufactured packages",
+      "explanation": "Country-of-origin and importer declarations attach to imported packages.",
+      "source_id": "SRC_PCR_2011",
+      "conditions": { "product_categories": [], "package_types": [], "transaction_contexts": [], "origin": "DOMESTIC" },
+      "effective_from": "2011-04-01",
+      "effective_to": null
+    },
+    {
+      "exemption_id": "EX_MEDICAL_DEVICE_GENERIC_CHARACTER_SIZE",
+      "rule_ids": ["PCR_CHARACTER_SIZE"],
+      "title": "Medical devices follow their own character-size treatment",
+      "explanation": "Where the 2025 amendment directs the Medical Devices framework, the generic character-size rule is not the operative provision.",
+      "source_id": "SRC_AMD_2025",
+      "conditions": { "product_categories": ["MEDICAL_DEVICE"], "package_types": [], "transaction_contexts": [], "origin": null },
+      "effective_from": "2025-01-01",
+      "effective_to": null
+    },
+    {
+      "exemption_id": "EX_NON_ECOMMERCE_LISTING_RULES",
+      "rule_ids": ["PCR_ECOM_ORIGIN_FILTER_2026", "PCR_ECOM_ORIGIN_2027"],
+      "title": "Non e-commerce transactions",
+      "explanation": "Listing-level obligations attach to e-commerce transactions only.",
+      "source_id": "SRC_AMD_2026_02",
+      "conditions": { "product_categories": [], "package_types": [], "transaction_contexts": ["RETAIL", "WHOLESALE"], "origin": null },
+      "effective_from": "2026-07-01",
+      "effective_to": null
+    }
+  ]
+}

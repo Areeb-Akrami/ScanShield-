@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ConsumerRouteImport } from './routes/consumer'
 import { Route as InspectorRouteImport } from './routes/inspector'
 import { Route as InspectorIndexRouteImport } from './routes/inspector.index'
 import { Route as InspectorInspectionsRouteImport } from './routes/inspector.inspections'
@@ -24,6 +25,11 @@ import { Route as InspectorReportsIdRouteImport } from './routes/inspector.repor
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConsumerRoute = ConsumerRouteImport.update({
+  id: '/consumer',
+  path: '/consumer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InspectorRoute = InspectorRouteImport.update({
@@ -80,6 +86,7 @@ const InspectorReportsIdRoute = InspectorReportsIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/consumer': typeof ConsumerRoute
   '/inspector': typeof InspectorRouteWithChildren
   '/inspector/inspections': typeof InspectorInspectionsRouteWithChildren
   '/inspector/profile': typeof InspectorProfileRoute
@@ -93,6 +100,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/consumer': typeof ConsumerRoute
   '/inspector/profile': typeof InspectorProfileRoute
   '/inspector/scan': typeof InspectorScanRoute
   '/inspector': typeof InspectorIndexRoute
@@ -104,6 +112,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/consumer': typeof ConsumerRoute
   '/inspector': typeof InspectorRouteWithChildren
   '/inspector/inspections': typeof InspectorInspectionsRouteWithChildren
   '/inspector/profile': typeof InspectorProfileRoute
@@ -119,6 +128,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/consumer'
     | '/inspector'
     | '/inspector/inspections'
     | '/inspector/profile'
@@ -132,6 +142,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/consumer'
     | '/inspector/profile'
     | '/inspector/scan'
     | '/inspector'
@@ -142,6 +153,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/consumer'
     | '/inspector'
     | '/inspector/inspections'
     | '/inspector/profile'
@@ -156,6 +168,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ConsumerRoute: typeof ConsumerRoute
   InspectorRoute: typeof InspectorRouteWithChildren
 }
 
@@ -166,6 +179,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/consumer': {
+      id: '/consumer'
+      path: '/consumer'
+      fullPath: '/consumer'
+      preLoaderRoute: typeof ConsumerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/inspector': {
@@ -289,6 +309,7 @@ const InspectorRouteWithChildren = InspectorRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ConsumerRoute: ConsumerRoute,
   InspectorRoute: InspectorRouteWithChildren,
 }
 export const routeTree = rootRouteImport

@@ -1,55 +1,134 @@
 {
-  "provenance": "PROVISIONAL_UNVERIFIED",
-  "note": "An exemption never yields PASS. It yields NOT_APPLICABLE, with the exemption cited.",
+  "provenance": "VERIFIED_FROM_SOURCE",
+  "note": "Exemptions are taken verbatim from the Legal Metrology (Packaged Commodities) Rules, 2011. An exemption never yields PASS. It yields NOT_APPLICABLE, with the exemption cited.",
   "exemptions": [
     {
-      "exemption_id": "EX_PAN_MASALA_2026",
-      "rule_ids": ["PCR_UNIT_SALE_PRICE_2021"],
-      "title": "Pan masala exclusion",
-      "explanation": "The December 2025 amendment excludes pan masala from a specified provision with effect from 1 February 2026. Modelled as a dated exemption, not as a hard-coded product check.",
-      "source_id": "SRC_AMD_2025_12",
-      "conditions": { "product_categories": ["PAN_MASALA"], "package_types": [], "transaction_contexts": [], "origin": null },
-      "effective_from": "2026-02-01",
-      "effective_to": null
-    },
-    {
-      "exemption_id": "EX_WHOLESALE_RETAIL_DECLARATIONS",
-      "rule_ids": ["PCR_DECL_MRP", "PCR_UNIT_SALE_PRICE_2021"],
-      "title": "Wholesale packages",
-      "explanation": "Retail-price declarations are directed at retail packages. Wholesale packages are handled under their own provisions.",
+      "exemption_id": "EX_R3_LARGE_PACKAGES",
+      "rule_ids": [
+        "PCR_PREPACK_DECLARATIONS_REQUIRED",
+        "PCR_STANDARD_PACK_SIZE",
+        "PCR_DECL_MANUFACTURER",
+        "PCR_DECL_IMPORTER",
+        "PCR_DECL_PRODUCT_NAME",
+        "PCR_DECL_NET_QUANTITY",
+        "PCR_DECL_DATE_OF_MANUFACTURE",
+        "PCR_DATE_CHRONOLOGY",
+        "PCR_DECL_MRP",
+        "PCR_MRP_FORM",
+        "PCR_DECL_CONSUMER_CARE",
+        "PCR_CHARACTER_SIZE",
+        "PCR_PDP_PLACEMENT",
+        "PCR_LEGIBILITY"
+      ],
+      "title": "Rule 3 — packages above 25 kg / 25 litre and industrial or institutional supplies",
+      "explanation": "Rule 3: 'The provisions of this Chapter shall not apply to,- (a) packages of commodities containing quantity of more than 25 kg or 25 litre excluding cement and fertilizer sold in bags up to 50 kg; and (b) packaged commodities meant for industrial consumers or institutional consumers.'",
       "source_id": "SRC_PCR_2011",
-      "conditions": { "product_categories": [], "package_types": ["WHOLESALE"], "transaction_contexts": [], "origin": null },
+      "conditions": {
+        "product_categories": [],
+        "package_types": ["WHOLESALE"],
+        "transaction_contexts": ["WHOLESALE"],
+        "origin": null
+      },
       "effective_from": "2011-04-01",
       "effective_to": null
     },
     {
-      "exemption_id": "EX_DOMESTIC_ORIGIN_DECLARATION",
-      "rule_ids": ["PCR_DECL_COUNTRY_OF_ORIGIN", "PCR_DECL_IMPORTER"],
-      "title": "Domestically manufactured packages",
-      "explanation": "Country-of-origin and importer declarations attach to imported packages.",
+      "exemption_id": "EX_R26_SMALL_PACKAGES",
+      "rule_ids": [
+        "PCR_DECL_CONSUMER_CARE",
+        "PCR_DECL_DATE_OF_MANUFACTURE",
+        "PCR_CHARACTER_SIZE",
+        "PCR_PDP_PLACEMENT"
+      ],
+      "title": "Rule 26(a) — packages of ten gram or ten millilitre or less",
+      "explanation": "Rule 26(a): 'Nothing contained in these rules shall apply to any package containing a commodity if— (a) the net weight or measure of the commodity is ten gram or ten millilitre or less, if sold by weight or measure; Provided that the declaration in respect of maximum retail price and net quantity shall be declared on packages containing 10g to 20g or 10ml to 20ml.' The MRP and net-quantity declarations are therefore not exempted for 10-20 g / 10-20 ml packages.",
       "source_id": "SRC_PCR_2011",
-      "conditions": { "product_categories": [], "package_types": [], "transaction_contexts": [], "origin": "DOMESTIC" },
+      "conditions": {
+        "product_categories": [],
+        "package_types": [],
+        "transaction_contexts": [],
+        "origin": null
+      },
       "effective_from": "2011-04-01",
       "effective_to": null
     },
     {
-      "exemption_id": "EX_MEDICAL_DEVICE_GENERIC_CHARACTER_SIZE",
-      "rule_ids": ["PCR_CHARACTER_SIZE"],
-      "title": "Medical devices follow their own character-size treatment",
-      "explanation": "Where the 2025 amendment directs the Medical Devices framework, the generic character-size rule is not the operative provision.",
-      "source_id": "SRC_AMD_2025",
-      "conditions": { "product_categories": ["MEDICAL_DEVICE"], "package_types": [], "transaction_contexts": [], "origin": null },
-      "effective_from": "2025-01-01",
+      "exemption_id": "EX_R26_FAST_FOOD",
+      "rule_ids": [
+        "PCR_PREPACK_DECLARATIONS_REQUIRED",
+        "PCR_DECL_MANUFACTURER",
+        "PCR_DECL_PRODUCT_NAME",
+        "PCR_DECL_NET_QUANTITY",
+        "PCR_DECL_DATE_OF_MANUFACTURE",
+        "PCR_DATE_CHRONOLOGY",
+        "PCR_DECL_MRP",
+        "PCR_MRP_FORM",
+        "PCR_DECL_CONSUMER_CARE",
+        "PCR_CHARACTER_SIZE",
+        "PCR_PDP_PLACEMENT",
+        "PCR_LEGIBILITY"
+      ],
+      "title": "Rule 26(b) — fast food packed by a restaurant or hotel",
+      "explanation": "Rule 26(b): 'any package containing fast food items packed by restaurant or hotel and the like'.",
+      "source_id": "SRC_PCR_2011",
+      "conditions": {
+        "product_categories": [],
+        "package_types": [],
+        "transaction_contexts": [],
+        "origin": null
+      },
+      "effective_from": "2011-04-01",
       "effective_to": null
     },
     {
-      "exemption_id": "EX_NON_ECOMMERCE_LISTING_RULES",
-      "rule_ids": ["PCR_ECOM_ORIGIN_FILTER_2026", "PCR_ECOM_ORIGIN_2027"],
-      "title": "Non e-commerce transactions",
-      "explanation": "Listing-level obligations attach to e-commerce transactions only.",
-      "source_id": "SRC_AMD_2026_02",
-      "conditions": { "product_categories": [], "package_types": [], "transaction_contexts": ["RETAIL", "WHOLESALE"], "origin": null },
-      "effective_from": "2026-07-01",
+      "exemption_id": "EX_R26_AGRICULTURAL_ABOVE_50KG",
+      "rule_ids": [
+        "PCR_PREPACK_DECLARATIONS_REQUIRED",
+        "PCR_DECL_MRP",
+        "PCR_MRP_FORM",
+        "PCR_DECL_CONSUMER_CARE",
+        "PCR_STANDARD_PACK_SIZE"
+      ],
+      "title": "Rule 26(d) — agricultural farm produce in packages above 50 kg",
+      "explanation": "Rule 26(d): 'agricultural form produces in packages of above 50 kg.'",
+      "source_id": "SRC_PCR_2011",
+      "conditions": {
+        "product_categories": ["AGRICULTURAL"],
+        "package_types": ["WHOLESALE"],
+        "transaction_contexts": [],
+        "origin": null
+      },
+      "effective_from": "2011-04-01",
+      "effective_to": null
+    },
+    {
+      "exemption_id": "EX_R6_IMPORTER_DOMESTIC",
+      "rule_ids": ["PCR_DECL_IMPORTER"],
+      "title": "Importer declaration applies only to imported packages",
+      "explanation": "Rule 6(1)(a) requires the name and address of the importer only 'for any imported package'. A domestically manufactured package therefore has no importer declaration to make.",
+      "source_id": "SRC_PCR_2011",
+      "conditions": {
+        "product_categories": [],
+        "package_types": [],
+        "transaction_contexts": [],
+        "origin": "DOMESTIC"
+      },
+      "effective_from": "2011-04-01",
+      "effective_to": null
+    },
+    {
+      "exemption_id": "EX_R6_WHOLESALE_MRP",
+      "rule_ids": ["PCR_DECL_MRP", "PCR_MRP_FORM"],
+      "title": "Retail sale price declarations are directed at retail packages",
+      "explanation": "Rule 6 sits in Chapter II, 'Provisions applicable to packages intended for retail sale'. A wholesale package as defined in rule 2(r) is governed by Chapter III instead.",
+      "source_id": "SRC_PCR_2011",
+      "conditions": {
+        "product_categories": [],
+        "package_types": ["WHOLESALE"],
+        "transaction_contexts": [],
+        "origin": null
+      },
+      "effective_from": "2011-04-01",
       "effective_to": null
     }
   ]

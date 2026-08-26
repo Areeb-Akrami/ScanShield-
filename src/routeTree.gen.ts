@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as InspectorRouteImport } from './routes/inspector'
+import { Route as InspectorIndexRouteImport } from './routes/inspector.index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +23,38 @@ const InspectorRoute = InspectorRouteImport.update({
   path: '/inspector',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InspectorIndexRoute = InspectorIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => InspectorRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/inspector': typeof InspectorRoute
+  '/inspector': typeof InspectorRouteWithChildren
+  '/inspector/': typeof InspectorIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/inspector': typeof InspectorRoute
+  '/inspector': typeof InspectorIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/inspector': typeof InspectorRoute
+  '/inspector': typeof InspectorRouteWithChildren
+  '/inspector/': typeof InspectorIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/inspector'
+  fullPaths: '/' | '/inspector' | '/inspector/'
   fileRoutesByTo: FileRoutesByTo
   to: '/' | '/inspector'
-  id: '__root__' | '/' | '/inspector'
+  id: '__root__' | '/' | '/inspector' | '/inspector/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  InspectorRoute: typeof InspectorRoute
+  InspectorRoute: typeof InspectorRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +73,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InspectorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/inspector/': {
+      id: '/inspector/'
+      path: '/'
+      fullPath: '/inspector/'
+      preLoaderRoute: typeof InspectorIndexRouteImport
+      parentRoute: typeof InspectorRoute
+    }
   }
 }
 
+interface InspectorRouteChildren {
+  InspectorIndexRoute: typeof InspectorIndexRoute
+}
+
+const InspectorRouteChildren: InspectorRouteChildren = {
+  InspectorIndexRoute: InspectorIndexRoute,
+}
+
+const InspectorRouteWithChildren = InspectorRoute._addFileChildren(
+  InspectorRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  InspectorRoute: InspectorRoute,
+  InspectorRoute: InspectorRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

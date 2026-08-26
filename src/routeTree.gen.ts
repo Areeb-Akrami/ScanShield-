@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as InspectorRouteImport } from './routes/inspector'
 import { Route as InspectorIndexRouteImport } from './routes/inspector.index'
 import { Route as InspectorInspectionsRouteImport } from './routes/inspector.inspections'
+import { Route as InspectorProfileRouteImport } from './routes/inspector.profile'
 import { Route as InspectorReportsRouteImport } from './routes/inspector.reports'
 import { Route as InspectorScanRouteImport } from './routes/inspector.scan'
 import { Route as InspectorInspectionsIndexRouteImport } from './routes/inspector.inspections.index'
@@ -38,6 +39,11 @@ const InspectorIndexRoute = InspectorIndexRouteImport.update({
 const InspectorInspectionsRoute = InspectorInspectionsRouteImport.update({
   id: '/inspections',
   path: '/inspections',
+  getParentRoute: () => InspectorRoute,
+} as any)
+const InspectorProfileRoute = InspectorProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => InspectorRoute,
 } as any)
 const InspectorReportsRoute = InspectorReportsRouteImport.update({
@@ -76,6 +82,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/inspector': typeof InspectorRouteWithChildren
   '/inspector/inspections': typeof InspectorInspectionsRouteWithChildren
+  '/inspector/profile': typeof InspectorProfileRoute
   '/inspector/reports': typeof InspectorReportsRouteWithChildren
   '/inspector/scan': typeof InspectorScanRoute
   '/inspector/': typeof InspectorIndexRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/inspector/profile': typeof InspectorProfileRoute
   '/inspector/scan': typeof InspectorScanRoute
   '/inspector': typeof InspectorIndexRoute
   '/inspector/inspections/$id': typeof InspectorInspectionsIdRoute
@@ -98,6 +106,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/inspector': typeof InspectorRouteWithChildren
   '/inspector/inspections': typeof InspectorInspectionsRouteWithChildren
+  '/inspector/profile': typeof InspectorProfileRoute
   '/inspector/reports': typeof InspectorReportsRouteWithChildren
   '/inspector/scan': typeof InspectorScanRoute
   '/inspector/': typeof InspectorIndexRoute
@@ -112,6 +121,7 @@ export interface FileRouteTypes {
     | '/'
     | '/inspector'
     | '/inspector/inspections'
+    | '/inspector/profile'
     | '/inspector/reports'
     | '/inspector/scan'
     | '/inspector/'
@@ -122,6 +132,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/inspector/profile'
     | '/inspector/scan'
     | '/inspector'
     | '/inspector/inspections/$id'
@@ -133,6 +144,7 @@ export interface FileRouteTypes {
     | '/'
     | '/inspector'
     | '/inspector/inspections'
+    | '/inspector/profile'
     | '/inspector/reports'
     | '/inspector/scan'
     | '/inspector/'
@@ -175,6 +187,13 @@ declare module '@tanstack/react-router' {
       path: '/inspections'
       fullPath: '/inspector/inspections'
       preLoaderRoute: typeof InspectorInspectionsRouteImport
+      parentRoute: typeof InspectorRoute
+    }
+    '/inspector/profile': {
+      id: '/inspector/profile'
+      path: '/profile'
+      fullPath: '/inspector/profile'
+      preLoaderRoute: typeof InspectorProfileRouteImport
       parentRoute: typeof InspectorRoute
     }
     '/inspector/reports': {
@@ -250,6 +269,7 @@ const InspectorReportsRouteWithChildren =
 
 interface InspectorRouteChildren {
   InspectorInspectionsRoute: typeof InspectorInspectionsRouteWithChildren
+  InspectorProfileRoute: typeof InspectorProfileRoute
   InspectorReportsRoute: typeof InspectorReportsRouteWithChildren
   InspectorScanRoute: typeof InspectorScanRoute
   InspectorIndexRoute: typeof InspectorIndexRoute
@@ -257,6 +277,7 @@ interface InspectorRouteChildren {
 
 const InspectorRouteChildren: InspectorRouteChildren = {
   InspectorInspectionsRoute: InspectorInspectionsRouteWithChildren,
+  InspectorProfileRoute: InspectorProfileRoute,
   InspectorReportsRoute: InspectorReportsRouteWithChildren,
   InspectorScanRoute: InspectorScanRoute,
   InspectorIndexRoute: InspectorIndexRoute,

@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ConsumerRouteImport } from './routes/consumer'
 import { Route as InspectorRouteImport } from './routes/inspector'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ConsumerIndexRouteImport } from './routes/consumer.index'
 import { Route as ConsumerComplaintsRouteImport } from './routes/consumer.complaints'
 import { Route as ConsumerRightsRouteImport } from './routes/consumer.rights'
@@ -45,6 +46,11 @@ const InspectorRoute = InspectorRouteImport.update({
   id: '/inspector',
   path: '/inspector',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const ConsumerIndexRoute = ConsumerIndexRouteImport.update({
   id: '/',
@@ -110,7 +116,7 @@ const InspectorReportsIdRoute = InspectorReportsIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/consumer': typeof ConsumerRouteWithChildren
   '/inspector': typeof InspectorRouteWithChildren
   '/consumer/complaints': typeof ConsumerComplaintsRoute
@@ -119,6 +125,7 @@ export interface FileRoutesByFullPath {
   '/inspector/profile': typeof InspectorProfileRoute
   '/inspector/reports': typeof InspectorReportsRouteWithChildren
   '/inspector/scan': typeof InspectorScanRoute
+  '/admin/': typeof AdminIndexRoute
   '/consumer/': typeof ConsumerIndexRoute
   '/inspector/': typeof InspectorIndexRoute
   '/inspector/inspections/$id': typeof InspectorInspectionsIdRoute
@@ -128,11 +135,11 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
   '/consumer/complaints': typeof ConsumerComplaintsRoute
   '/consumer/rights': typeof ConsumerRightsRoute
   '/inspector/profile': typeof InspectorProfileRoute
   '/inspector/scan': typeof InspectorScanRoute
+  '/admin': typeof AdminIndexRoute
   '/consumer': typeof ConsumerIndexRoute
   '/inspector': typeof InspectorIndexRoute
   '/inspector/inspections/$id': typeof InspectorInspectionsIdRoute
@@ -143,7 +150,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/consumer': typeof ConsumerRouteWithChildren
   '/inspector': typeof InspectorRouteWithChildren
   '/consumer/complaints': typeof ConsumerComplaintsRoute
@@ -152,6 +159,7 @@ export interface FileRoutesById {
   '/inspector/profile': typeof InspectorProfileRoute
   '/inspector/reports': typeof InspectorReportsRouteWithChildren
   '/inspector/scan': typeof InspectorScanRoute
+  '/admin/': typeof AdminIndexRoute
   '/consumer/': typeof ConsumerIndexRoute
   '/inspector/': typeof InspectorIndexRoute
   '/inspector/inspections/$id': typeof InspectorInspectionsIdRoute
@@ -172,6 +180,7 @@ export interface FileRouteTypes {
     | '/inspector/profile'
     | '/inspector/reports'
     | '/inspector/scan'
+    | '/admin/'
     | '/consumer/'
     | '/inspector/'
     | '/inspector/inspections/$id'
@@ -181,11 +190,11 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/admin'
     | '/consumer/complaints'
     | '/consumer/rights'
     | '/inspector/profile'
     | '/inspector/scan'
+    | '/admin'
     | '/consumer'
     | '/inspector'
     | '/inspector/inspections/$id'
@@ -204,6 +213,7 @@ export interface FileRouteTypes {
     | '/inspector/profile'
     | '/inspector/reports'
     | '/inspector/scan'
+    | '/admin/'
     | '/consumer/'
     | '/inspector/'
     | '/inspector/inspections/$id'
@@ -214,7 +224,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
+  AdminRoute: typeof AdminRouteWithChildren
   ConsumerRoute: typeof ConsumerRouteWithChildren
   InspectorRoute: typeof InspectorRouteWithChildren
 }
@@ -248,6 +258,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/inspector'
       preLoaderRoute: typeof InspectorRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/consumer/': {
       id: '/consumer/'
@@ -336,6 +353,16 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 interface ConsumerRouteChildren {
   ConsumerComplaintsRoute: typeof ConsumerComplaintsRoute
   ConsumerRightsRoute: typeof ConsumerRightsRoute
@@ -400,7 +427,7 @@ const InspectorRouteWithChildren = InspectorRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
+  AdminRoute: AdminRouteWithChildren,
   ConsumerRoute: ConsumerRouteWithChildren,
   InspectorRoute: InspectorRouteWithChildren,
 }

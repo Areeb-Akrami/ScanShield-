@@ -6,10 +6,10 @@ import { audit, runPipeline, saveInspection, type GeoTag, type Inspection } from
 import { extractPackageFields } from "@/lib/vision.functions";
 import type {
   InspectionClassification,
-  OriginType,
-  PackageType,
+  OriginContextId,
+  PackageTypeId,
   ProductCategoryId,
-  TransactionContext,
+  TransactionContextId,
 } from "@/legal/types";
 import { SCENARIOS, scenarioById } from "@/pipeline/scenarios";
 import type { CapturedImage, ExtractedField, PanelKey } from "@/pipeline/types";
@@ -62,9 +62,9 @@ const FIELD_LABELS: Record<string, string> = {
 };
 
 const CATEGORIES: ProductCategoryId[] = ["FOOD", "EDIBLE_OIL_FAT", "ELECTRONICS", "GARMENT_HOSIERY", "MEDICAL_DEVICE", "AGRICULTURAL", "COSMETICS", "PAN_MASALA", "OTHER"];
-const PACKAGE_TYPES: PackageType[] = ["RETAIL", "GROUP", "COMBINATION", "MULTI_PIECE", "PROMOTIONAL", "GIFT", "WHOLESALE", "IMPORTED"];
-const CONTEXTS: TransactionContext[] = ["RETAIL", "WHOLESALE", "ECOMMERCE"];
-const ORIGINS: OriginType[] = ["DOMESTIC", "IMPORTED"];
+const PACKAGE_TYPES: PackageTypeId[] = ["RETAIL", "GROUP", "COMBINATION", "MULTI_PIECE", "PROMOTIONAL", "GIFT", "WHOLESALE", "IMPORTED"];
+const CONTEXTS: TransactionContextId[] = ["RETAIL", "WHOLESALE", "ECOMMERCE"];
+const ORIGINS: OriginContextId[] = ["DOMESTIC", "IMPORTED"];
 
 function ScanPage() {
   const session = useSession();
@@ -181,7 +181,7 @@ function ScanPage() {
           ? (result.classification.product_category as ProductCategoryId)
           : "OTHER",
         package_type: (PACKAGE_TYPES as string[]).includes(result.classification.package_type ?? "")
-          ? (result.classification.package_type as PackageType)
+          ? (result.classification.package_type as PackageTypeId)
           : "RETAIL",
         transaction_context: "RETAIL",
         origin: result.classification.origin === "IMPORTED" ? "IMPORTED" : "DOMESTIC",
@@ -516,17 +516,17 @@ function ScanPage() {
                 </select>
               </Field>
               <Field label="Package type">
-                <select className={inputClass()} value={classification.package_type} onChange={(e) => setClassification({ ...classification, package_type: e.target.value as PackageType })}>
+                <select className={inputClass()} value={classification.package_type} onChange={(e) => setClassification({ ...classification, package_type: e.target.value as PackageTypeId })}>
                   {PACKAGE_TYPES.map((c) => <option key={c} value={c}>{c.replaceAll("_", " ")}</option>)}
                 </select>
               </Field>
               <Field label="Transaction context">
-                <select className={inputClass()} value={classification.transaction_context} onChange={(e) => setClassification({ ...classification, transaction_context: e.target.value as TransactionContext })}>
+                <select className={inputClass()} value={classification.transaction_context} onChange={(e) => setClassification({ ...classification, transaction_context: e.target.value as TransactionContextId })}>
                   {CONTEXTS.map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
               </Field>
               <Field label="Origin">
-                <select className={inputClass()} value={classification.origin} onChange={(e) => setClassification({ ...classification, origin: e.target.value as OriginType })}>
+                <select className={inputClass()} value={classification.origin} onChange={(e) => setClassification({ ...classification, origin: e.target.value as OriginContextId })}>
                   {ORIGINS.map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
               </Field>

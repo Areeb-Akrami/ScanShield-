@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as InspectorRouteImport } from './routes/inspector'
 import { Route as InspectorIndexRouteImport } from './routes/inspector.index'
+import { Route as InspectorScanRouteImport } from './routes/inspector.scan'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,28 +29,36 @@ const InspectorIndexRoute = InspectorIndexRouteImport.update({
   path: '/',
   getParentRoute: () => InspectorRoute,
 } as any)
+const InspectorScanRoute = InspectorScanRouteImport.update({
+  id: '/scan',
+  path: '/scan',
+  getParentRoute: () => InspectorRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/inspector': typeof InspectorRouteWithChildren
+  '/inspector/scan': typeof InspectorScanRoute
   '/inspector/': typeof InspectorIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/inspector/scan': typeof InspectorScanRoute
   '/inspector': typeof InspectorIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/inspector': typeof InspectorRouteWithChildren
+  '/inspector/scan': typeof InspectorScanRoute
   '/inspector/': typeof InspectorIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/inspector' | '/inspector/'
+  fullPaths: '/' | '/inspector' | '/inspector/scan' | '/inspector/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/inspector'
-  id: '__root__' | '/' | '/inspector' | '/inspector/'
+  to: '/' | '/inspector/scan' | '/inspector'
+  id: '__root__' | '/' | '/inspector' | '/inspector/scan' | '/inspector/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -80,14 +89,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InspectorIndexRouteImport
       parentRoute: typeof InspectorRoute
     }
+    '/inspector/scan': {
+      id: '/inspector/scan'
+      path: '/scan'
+      fullPath: '/inspector/scan'
+      preLoaderRoute: typeof InspectorScanRouteImport
+      parentRoute: typeof InspectorRoute
+    }
   }
 }
 
 interface InspectorRouteChildren {
+  InspectorScanRoute: typeof InspectorScanRoute
   InspectorIndexRoute: typeof InspectorIndexRoute
 }
 
 const InspectorRouteChildren: InspectorRouteChildren = {
+  InspectorScanRoute: InspectorScanRoute,
   InspectorIndexRoute: InspectorIndexRoute,
 }
 

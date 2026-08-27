@@ -524,10 +524,22 @@ function ScanPage() {
               affected declarations will be reported as unverified rather than as violations.
             </p>
           ) : null}
+          {!online ? (
+            <p className="px-4 pb-2 text-xs text-review-foreground">
+              You are offline. The evidence and this inspection will be stored on the device and the OCR
+              read plus rule checks will run automatically the moment connectivity returns.
+            </p>
+          ) : null}
           <div className="flex flex-wrap gap-2 p-4">
             <Button variant="outline" onClick={() => setStep("capture")}>Back / recapture</Button>
             <Button disabled={busy} onClick={() => void runRealExtraction()}>
-              {busy ? "Reading label with OCR…" : "Read label and extract declarations"}
+              {busy
+                ? online
+                  ? "Reading label with OCR…"
+                  : "Queuing inspection…"
+                : online
+                  ? "Read label and extract declarations"
+                  : "Queue inspection for OCR when online"}
             </Button>
           </div>
         </Panel>

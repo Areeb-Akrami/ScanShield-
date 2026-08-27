@@ -1,5 +1,6 @@
 import { useSession } from "@/components/AppShell";
 import { CorpusBanner } from "@/components/CorpusBanner";
+import { RuleEvidence } from "@/components/RuleEvidence";
 import { Button, DemoBadge, Panel, PanelHeader, StatusPill, inputClass } from "@/components/ui";
 import { sourceTitle } from "@/legal/corpus";
 import type { RuleCheckResult } from "@/legal/types";
@@ -33,6 +34,7 @@ function InspectionDetail() {
   const [inspection, setInspection] = useState<Inspection | null>(null);
   const [note, setNote] = useState("");
   const [saved, setSaved] = useState<string | null>(null);
+  const [openRule, setOpenRule] = useState<string | null>(null);
 
   useEffect(() => {
     const found = getInspection(id) ?? null;
@@ -203,11 +205,24 @@ function InspectionDetail() {
             <ul className="divide-y divide-border">
               {list.map((r) => (
                 <li key={r.rule.rule_id} className="px-4 py-3">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setOpenRule(openRule === r.rule.rule_id ? null : r.rule.rule_id)}
+                    aria-expanded={openRule === r.rule.rule_id}
+                    className="flex w-full flex-wrap items-center justify-between gap-2 text-left"
+                  >
                     <span className="text-sm font-medium">{r.rule.title}</span>
-                    <StatusPill token={r.outcome} />
-                  </div>
+                    <span className="flex items-center gap-2">
+                      <StatusPill token={r.outcome} />
+                      <span className="text-[11px] text-accent underline underline-offset-2">
+                        {openRule === r.rule.rule_id ? "Hide evidence" : "View evidence"}
+                      </span>
+                    </span>
+                  </button>
                   <p className="mt-1 text-xs text-muted-foreground">{r.reason}</p>
+                  {openRule === r.rule.rule_id ? (
+                    <RuleEvidence result={r} images={inspection.images} fields={inspection.fields} />
+                  ) : null}
                   <dl className="mt-2 grid gap-1 text-[11px] text-muted-foreground sm:grid-cols-2">
                     <div>
                       <dt className="inline font-medium">Detected: </dt>

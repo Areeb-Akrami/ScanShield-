@@ -2,7 +2,8 @@ import { useSession } from "@/components/AppShell";
 import { CorpusBanner } from "@/components/CorpusBanner";
 import { Button, DemoBadge, Field, Panel, PanelHeader, StatusPill, inputClass } from "@/components/ui";
 import { PANEL_ORDER, fileToDataUrl, makeThumbnail, preprocessImage } from "@/lib/imaging";
-import { audit, runPipeline, saveInspection, type GeoTag, type Inspection } from "@/lib/store";
+import { audit, enqueueOcrJob, runPipeline, saveInspection, type GeoTag, type Inspection } from "@/lib/store";
+import { CATEGORIES, ORIGINS, PACKAGE_TYPES, mapVisionClassification, mapVisionFields } from "@/lib/ocr-mapping";
 import { extractPackageFields } from "@/lib/vision.functions";
 import type {
   InspectionClassification,

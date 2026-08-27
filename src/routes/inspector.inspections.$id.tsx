@@ -1,5 +1,6 @@
 import { useSession } from "@/components/AppShell";
 import { CorpusBanner } from "@/components/CorpusBanner";
+import { RuleEvidence } from "@/components/RuleEvidence";
 import { Button, DemoBadge, Panel, PanelHeader, StatusPill, inputClass } from "@/components/ui";
 import { sourceTitle } from "@/legal/corpus";
 import type { RuleCheckResult } from "@/legal/types";
@@ -33,6 +34,7 @@ function InspectionDetail() {
   const [inspection, setInspection] = useState<Inspection | null>(null);
   const [note, setNote] = useState("");
   const [saved, setSaved] = useState<string | null>(null);
+  const [openRule, setOpenRule] = useState<string | null>(null);
 
   useEffect(() => {
     const found = getInspection(id) ?? null;

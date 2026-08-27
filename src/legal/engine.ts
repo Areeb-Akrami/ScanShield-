@@ -217,6 +217,19 @@ function evaluateRule(
     };
   }
 
+  // Content validators: check the requirement against the extracted text
+  // itself. Ambiguity always routes to manual review, never auto-fail.
+  const validate = validatorFor(rule.rule_id);
+  if (validate) {
+    const verdict = validate(ev.value);
+    return {
+      ...base,
+      outcome: verdict.outcome,
+      requires_human: verdict.outcome === "MANUAL_REVIEW_REQUIRED" ? true : base.requires_human,
+      reason: verdict.reason,
+    };
+  }
+
   return {
     ...base,
     outcome: "PASS",

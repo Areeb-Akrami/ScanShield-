@@ -95,9 +95,45 @@ function InspectionDetail() {
     ["Passed", output.results.filter((r) => r.outcome === "PASS")],
   ];
 
+  if (inspection.extractionStatus === "PENDING_OCR" || inspection.extractionStatus === "OCR_FAILED") {
+    const failed = inspection.extractionStatus === "OCR_FAILED";
+    return (
+      <div className="space-y-4">
+        <Panel>
+          <PanelHeader
+            title={failed ? "Queued scan could not be read yet" : "Captured offline — awaiting extraction"}
+            subtitle="The evidence is stored safely on this device. No declarations or legal results are assumed until the label is actually read."
+          />
+          <div className="space-y-3 p-4 text-sm">
+            <p className="text-xs text-muted-foreground">
+              {inspection.seller} · {inspection.district} · {new Date(inspection.createdAt).toLocaleString()}
+            </p>
+            <p className="text-xs">
+              {failed
+                ? `Last attempt failed: ${inspection.extractionError ?? "unknown error"}. It stays queued and will be retried automatically.`
+                : "OCR and the rule checks will run automatically as soon as connectivity returns, then this page updates itself."}
+            </p>
+            <ul className="grid gap-2 sm:grid-cols-3">
+              {inspection.images.map((img, i) => (
+                <li key={i} className="rounded border border-border p-2">
+                  <img src={img.processed ?? img.original ?? ""} alt={`${img.label} evidence`} className="aspect-video w-full rounded object-cover" />
+                  <p className="mt-1 text-[11px] text-muted-foreground">{img.label}</p>
+                </li>
+              ))}
+            </ul>
+            <Link to="/inspector/inspections" className="inline-block text-xs text-accent underline underline-offset-2">
+              Back to inspection history
+            </Link>
+          </div>
+        </Panel>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <CorpusBanner compact />
+
 
       <Panel>
         <div className="flex flex-wrap items-start justify-between gap-3 p-4">

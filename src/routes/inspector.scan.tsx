@@ -38,31 +38,6 @@ const STEPS: Array<{ id: Step; label: string }> = [
   { id: "extract", label: "Extraction" },
 ];
 
-const FIELD_LABELS: Record<string, string> = {
-  product_name: "Product / generic name",
-  net_quantity: "Net quantity",
-  net_quantity_unit: "Net quantity unit",
-  mrp: "Maximum retail price",
-  unit_sale_price: "Unit sale price",
-  manufacturer_name: "Manufacturer / packer",
-  manufacturer_address: "Manufacturer address",
-  importer_name: "Importer",
-  country_of_origin: "Country of origin",
-  manufacturing_date: "Date of manufacture / packing",
-  best_before: "Best before / use by",
-  consumer_care_phone: "Consumer care",
-  character_height: "Character height",
-  readability: "Declaration legibility",
-  principal_display_panel: "Principal display panel",
-  mrp_sticker: "MRP sticker / overprint",
-  qr_code: "QR / barcode",
-  size: "Size declaration",
-  usable_sheets: "Usable sheets",
-  package_structure: "Package structure",
-};
-
-const CATEGORIES: ProductCategoryId[] = ["FOOD", "EDIBLE_OIL_FAT", "ELECTRONICS", "GARMENT_HOSIERY", "MEDICAL_DEVICE", "AGRICULTURAL", "COSMETICS", "PAN_MASALA", "OTHER"];
-const PACKAGE_TYPES: PackageTypeId[] = ["RETAIL", "GROUP", "COMBINATION", "MULTI_PIECE", "PROMOTIONAL", "GIFT", "WHOLESALE", "IMPORTED"];
 const CONTEXTS: TransactionContextId[] = ["RETAIL", "WHOLESALE", "ECOMMERCE"];
 const ORIGINS: OriginContextId[] = ["DOMESTIC", "IMPORTED"];
 

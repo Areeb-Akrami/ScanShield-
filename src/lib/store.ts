@@ -338,3 +338,45 @@ export function pendingWorkCount(): { ocr: number; sync: number } {
     sync: inspections.filter((i) => i.syncStatus !== "SYNCED").length,
   };
 }
+
+/* ------------------------------------------------------------------ */
+/* Enforcement override (admin panel)                                  */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Records an enforcement decision that supersedes the rule-engine outcome for
+ * reporting purposes. The original engine result is preserved in `systemStatus`
+ * and every change is written to the audit trail.
+ */
+export function overrideFinalStatus(
+  localId: string,
+  status: FinalStatus | null,
+  note: string,
+  user: string,
+): Inspection | undefined {
+  const insp = getInspection(localId);
+  if (!insp) return undefined;
+  const system = insp.systemStatus ?? insp.finalStatus;
+  const before = insp.finalStatus;
+  const updated: Inspection = {
+    ...insp,
+    systemStatus: system,
+    overrideStatus: status,
+    overrideNote: note,
+    overrideBy: status ? user : "",
+    overrideAt: status ? new Date().toISOString() : "",
+    finalStatus: status ?? system,
+    syncStatus: insp.syncStatus === "SYNCED" ? "PENDING_SYNC" : insp.syncStatus,
+    updatedAt: new Date().toISOString(),
+  };
+  saveInspection(updated);
+  audit({
+    user,
+    action: status ? "ENFORCEMENT_OVERRIDE" : "ENFORCEMENT_OVERRIDE_CLEARED",
+    entity: "Inspection",
+    entityId: localId,
+    before,
+    after: `${updated.finalStatus}${note ? ` — ${note}` : ""}`,
+  });
+  return updated;
+}

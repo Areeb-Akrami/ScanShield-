@@ -42,7 +42,12 @@ export interface Inspection {
   syncStatus: SyncStatus;
   retryCount: number;
   lastError: string | null;
+  /** Offline-first: OCR may still be queued when the record was created without connectivity. */
+  extractionStatus?: ExtractionStatus;
+  extractionError?: string | null;
 }
+
+export type ExtractionStatus = "COMPLETE" | "PENDING_OCR" | "OCR_FAILED";
 
 export interface AuditEntry {
   id: string;

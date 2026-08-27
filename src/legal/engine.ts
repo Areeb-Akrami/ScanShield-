@@ -1,4 +1,5 @@
 import { EXEMPTIONS, RULES, chainForRule } from "./corpus";
+import { validatorFor } from "./validators";
 import type {
   CheckOutcome,
   Exemption,

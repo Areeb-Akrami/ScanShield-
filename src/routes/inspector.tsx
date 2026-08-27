@@ -21,6 +21,7 @@ function InspectorLayout() {
         <TopBar title="Field inspector workspace" />
         <DesktopNav items={items} />
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-5">
+          <SyncBar />
           <Outlet />
         </main>
         <BottomNav items={items} />

@@ -40,6 +40,17 @@ function InspectionDetail() {
     setNote(found?.decisionNote ?? "");
   }, [id]);
 
+  // While OCR is still queued (captured offline), pick up the result as soon as it lands.
+  const pendingOcr = inspection?.extractionStatus === "PENDING_OCR";
+  useEffect(() => {
+    if (!pendingOcr) return;
+    const timer = window.setInterval(() => {
+      const latest = getInspection(id);
+      if (latest && latest.extractionStatus !== "PENDING_OCR") setInspection(latest);
+    }, 3000);
+    return () => window.clearInterval(timer);
+  }, [pendingOcr, id]);
+
   const output = useMemo(() => (inspection ? evaluateStored(inspection) : null), [inspection]);
 
   if (!inspection || !output) {

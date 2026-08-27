@@ -1,4 +1,5 @@
 import { BottomNav, DesktopNav, RequireRole, TopBar, type NavItem } from "@/components/AppShell";
+import { SyncBar } from "@/components/SyncBar";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/inspector")({

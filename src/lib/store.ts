@@ -45,6 +45,12 @@ export interface Inspection {
   /** Offline-first: OCR may still be queued when the record was created without connectivity. */
   extractionStatus?: ExtractionStatus;
   extractionError?: string | null;
+  /** Enforcement override recorded from the admin panel. */
+  systemStatus?: FinalStatus;
+  overrideStatus?: FinalStatus | null;
+  overrideNote?: string;
+  overrideBy?: string;
+  overrideAt?: string;
 }
 
 export type ExtractionStatus = "COMPLETE" | "PENDING_OCR" | "OCR_FAILED";

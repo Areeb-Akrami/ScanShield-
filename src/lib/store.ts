@@ -62,6 +62,7 @@ export interface AuditEntry {
 
 const INSPECTIONS_KEY = "scanshield.inspections";
 const AUDIT_KEY = "scanshield.audit";
+const OCR_QUEUE_KEY = "scanshield.ocrqueue";
 
 /* ------------------------------------------------------------------ */
 /* Persistence (local-first; the sync queue models the server hand-off) */

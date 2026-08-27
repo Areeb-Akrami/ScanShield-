@@ -42,7 +42,12 @@ export interface Inspection {
   syncStatus: SyncStatus;
   retryCount: number;
   lastError: string | null;
+  /** Offline-first: OCR may still be queued when the record was created without connectivity. */
+  extractionStatus?: ExtractionStatus;
+  extractionError?: string | null;
 }
+
+export type ExtractionStatus = "COMPLETE" | "PENDING_OCR" | "OCR_FAILED";
 
 export interface AuditEntry {
   id: string;
@@ -57,6 +62,7 @@ export interface AuditEntry {
 
 const INSPECTIONS_KEY = "scanshield.inspections";
 const AUDIT_KEY = "scanshield.audit";
+const OCR_QUEUE_KEY = "scanshield.ocrqueue";
 
 /* ------------------------------------------------------------------ */
 /* Persistence (local-first; the sync queue models the server hand-off) */
@@ -242,4 +248,87 @@ export function sellerProfiles(): SellerProfile[] {
       reasons,
     };
   });
+}
+
+/* ------------------------------------------------------------------ */
+/* Offline OCR queue                                                   */
+/* ------------------------------------------------------------------ */
+
+export interface OcrQueueImage {
+  key: string;
+  label: string;
+  dataUrl: string;
+}
+
+export interface OcrJob {
+  localId: string;
+  images: OcrQueueImage[];
+  queuedAt: string;
+  attempts: number;
+  lastError: string | null;
+}
+
+export function listOcrJobs(): OcrJob[] {
+  return read<OcrJob[]>(OCR_QUEUE_KEY, []);
+}
+
+export function enqueueOcrJob(localId: string, images: OcrQueueImage[]): void {
+  const all = listOcrJobs().filter((j) => j.localId !== localId);
+  all.push({ localId, images, queuedAt: new Date().toISOString(), attempts: 0, lastError: null });
+  write(OCR_QUEUE_KEY, all);
+}
+
+export function removeOcrJob(localId: string): void {
+  write(OCR_QUEUE_KEY, listOcrJobs().filter((j) => j.localId !== localId));
+}
+
+export function markOcrJobFailed(localId: string, message: string): void {
+  const all = listOcrJobs().map((j) =>
+    j.localId === localId ? { ...j, attempts: j.attempts + 1, lastError: message } : j,
+  );
+  write(OCR_QUEUE_KEY, all);
+  const insp = getInspection(localId);
+  if (insp) {
+    insp.extractionStatus = "OCR_FAILED";
+    insp.extractionError = message;
+    insp.updatedAt = new Date().toISOString();
+    saveInspection(insp);
+  }
+}
+
+/** Applies OCR output to a queued inspection, re-runs the rule engine and stores the result. */
+export function applyExtraction(
+  localId: string,
+  fields: ExtractedField[],
+  classification: InspectionClassification,
+  productName: string,
+): Inspection | undefined {
+  const insp = getInspection(localId);
+  if (!insp) return undefined;
+  const output = runPipeline(classification, fields, insp.images, null);
+  const updated: Inspection = {
+    ...insp,
+    classification,
+    fields,
+    productName,
+    findings: output.findings,
+    tally: output.tally,
+    finalStatus: output.finalStatus,
+    confidence: output.confidence,
+    readability: output.readability,
+    extractionStatus: "COMPLETE",
+    extractionError: null,
+    syncStatus: insp.syncStatus === "SYNCED" ? "PENDING_SYNC" : insp.syncStatus,
+    updatedAt: new Date().toISOString(),
+  };
+  saveInspection(updated);
+  return updated;
+}
+
+export function pendingWorkCount(): { ocr: number; sync: number } {
+  const inspections = listInspections();
+  return {
+    ocr: listOcrJobs().length,
+    sync: inspections.filter((i) => i.syncStatus !== "SYNCED").length,
+  };
 }

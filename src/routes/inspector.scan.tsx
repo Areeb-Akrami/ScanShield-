@@ -1,8 +1,9 @@
-import { useSession } from "@/components/AppShell";
+import { useOnline, useSession } from "@/components/AppShell";
 import { CorpusBanner } from "@/components/CorpusBanner";
 import { Button, DemoBadge, Field, Panel, PanelHeader, StatusPill, inputClass } from "@/components/ui";
 import { PANEL_ORDER, fileToDataUrl, makeThumbnail, preprocessImage } from "@/lib/imaging";
-import { audit, runPipeline, saveInspection, type GeoTag, type Inspection } from "@/lib/store";
+import { audit, enqueueOcrJob, runPipeline, saveInspection, type GeoTag, type Inspection } from "@/lib/store";
+import { CATEGORIES, ORIGINS, PACKAGE_TYPES, mapVisionClassification, mapVisionFields } from "@/lib/ocr-mapping";
 import { extractPackageFields } from "@/lib/vision.functions";
 import type {
   InspectionClassification,
@@ -38,36 +39,11 @@ const STEPS: Array<{ id: Step; label: string }> = [
   { id: "extract", label: "Extraction" },
 ];
 
-const FIELD_LABELS: Record<string, string> = {
-  product_name: "Product / generic name",
-  net_quantity: "Net quantity",
-  net_quantity_unit: "Net quantity unit",
-  mrp: "Maximum retail price",
-  unit_sale_price: "Unit sale price",
-  manufacturer_name: "Manufacturer / packer",
-  manufacturer_address: "Manufacturer address",
-  importer_name: "Importer",
-  country_of_origin: "Country of origin",
-  manufacturing_date: "Date of manufacture / packing",
-  best_before: "Best before / use by",
-  consumer_care_phone: "Consumer care",
-  character_height: "Character height",
-  readability: "Declaration legibility",
-  principal_display_panel: "Principal display panel",
-  mrp_sticker: "MRP sticker / overprint",
-  qr_code: "QR / barcode",
-  size: "Size declaration",
-  usable_sheets: "Usable sheets",
-  package_structure: "Package structure",
-};
-
-const CATEGORIES: ProductCategoryId[] = ["FOOD", "EDIBLE_OIL_FAT", "ELECTRONICS", "GARMENT_HOSIERY", "MEDICAL_DEVICE", "AGRICULTURAL", "COSMETICS", "PAN_MASALA", "OTHER"];
-const PACKAGE_TYPES: PackageTypeId[] = ["RETAIL", "GROUP", "COMBINATION", "MULTI_PIECE", "PROMOTIONAL", "GIFT", "WHOLESALE", "IMPORTED"];
 const CONTEXTS: TransactionContextId[] = ["RETAIL", "WHOLESALE", "ECOMMERCE"];
-const ORIGINS: OriginContextId[] = ["DOMESTIC", "IMPORTED"];
 
 function ScanPage() {
   const session = useSession();
+  const online = useOnline();
   const navigate = useNavigate();
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -151,6 +127,10 @@ function ScanPage() {
   }
 
   async function runRealExtraction() {
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      await queueOffline();
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -158,38 +138,89 @@ function ScanPage() {
       const result = await extractPackageFields({ data: { images: payload } });
 
       const panelKeys = new Set(captures.map((c) => c.key));
-      const extracted: ExtractedField[] = result.fields.map((f) => {
-        const src = f.source_panel && panelKeys.has(f.source_panel as PanelKey) ? (f.source_panel as PanelKey) : null;
-        return {
-          field: f.field,
-          label: FIELD_LABELS[f.field] ?? f.field,
-          value: f.value,
-          confidence: f.confidence,
-          sourceImage: src,
-          boundingBox: null,
-          ocrEngine: `${result.model} vision OCR`,
-          unreadable: Boolean(f.unreadable),
-          ...(f.note ? { note: f.note } : {}),
-        };
-      });
-
       setImages(captures);
-      setFields(extracted);
+      setFields(mapVisionFields(result, panelKeys));
       setObservations(result.observations);
-      setClassification({
-        product_category: (CATEGORIES as string[]).includes(result.classification.product_category ?? "")
-          ? (result.classification.product_category as ProductCategoryId)
-          : "OTHER",
-        package_type: (PACKAGE_TYPES as string[]).includes(result.classification.package_type ?? "")
-          ? (result.classification.package_type as PackageTypeId)
-          : "RETAIL",
-        transaction_context: "RETAIL",
-        origin: result.classification.origin === "IMPORTED" ? "IMPORTED" : "DOMESTIC",
-        inspection_date: new Date().toISOString().slice(0, 10),
-      });
+      setClassification(mapVisionClassification(result));
       setStep("extract");
     } catch (e) {
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        await queueOffline();
+        return;
+      }
       setError(e instanceof Error ? e.message : "Extraction failed. No values were recorded.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  /** Offline-first: store the inspection with its evidence and queue the OCR + rule run for reconnection. */
+  async function queueOffline() {
+    setBusy(true);
+    setError(null);
+    try {
+      const localId = `LOC-${Date.now()}`;
+      const queueImages = captures.map((c) => ({
+        key: c.key,
+        label: c.label,
+        dataUrl: c.processed ?? c.original!,
+      }));
+      const storedImages: CapturedImage[] = await Promise.all(
+        captures.map(async (img) => ({
+          ...img,
+          original: img.original ? await makeThumbnail(img.original) : null,
+          processed: img.processed ? await makeThumbnail(img.processed) : null,
+        })),
+      );
+      const classificationDraft: InspectionClassification = {
+        product_category: "OTHER",
+        package_type: "RETAIL",
+        transaction_context: "RETAIL",
+        origin: "DOMESTIC",
+        inspection_date: new Date().toISOString().slice(0, 10),
+      };
+      const inspection: Inspection = {
+        localId,
+        serverId: null,
+        scenarioId: null,
+        isDemo: false,
+        inspectorId: session?.email ?? "unknown",
+        inspectorName: session?.name ?? "Unknown",
+        seller: seller.trim() || "—",
+        district: district.trim() || "—",
+        productName: "Awaiting offline extraction",
+        classification: classificationDraft,
+        images: storedImages,
+        fields: [],
+        findings: [],
+        tally: { PASS: 0, FAIL: 0, MANUAL_REVIEW_REQUIRED: 0, RESCAN_REQUIRED: 0, INSUFFICIENT_EVIDENCE: 0, NOT_APPLICABLE: 0 },
+        finalStatus: "MANUAL_REVIEW_REQUIRED",
+        inspectorDecision: null,
+        decisionNote: "",
+        confidence: 0,
+        readability: "NOT_ASSESSED",
+        geo,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        syncStatus: "OFFLINE",
+        retryCount: 0,
+        lastError: null,
+        extractionStatus: "PENDING_OCR",
+        extractionError: null,
+      };
+      saveInspection(inspection);
+      enqueueOcrJob(localId, queueImages);
+      audit({
+        user: inspection.inspectorId,
+        action: "INSPECTION_QUEUED_OFFLINE",
+        entity: "Inspection",
+        entityId: localId,
+        before: null,
+        after: `${queueImages.length} panel(s) stored — OCR and rule checks queued until connectivity returns`,
+      });
+      navigate({ to: "/inspector/inspections/$id", params: { id: localId } });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "The inspection could not be queued on this device.");
     } finally {
       setBusy(false);
     }
@@ -271,6 +302,8 @@ function ScanPage() {
         syncStatus: typeof navigator !== "undefined" && navigator.onLine ? "PENDING_SYNC" : "OFFLINE",
         retryCount: 0,
         lastError: null,
+        extractionStatus: "COMPLETE",
+        extractionError: null,
       };
 
       saveInspection(inspection);
@@ -492,10 +525,22 @@ function ScanPage() {
               affected declarations will be reported as unverified rather than as violations.
             </p>
           ) : null}
+          {!online ? (
+            <p className="px-4 pb-2 text-xs text-review-foreground">
+              You are offline. The evidence and this inspection will be stored on the device and the OCR
+              read plus rule checks will run automatically the moment connectivity returns.
+            </p>
+          ) : null}
           <div className="flex flex-wrap gap-2 p-4">
             <Button variant="outline" onClick={() => setStep("capture")}>Back / recapture</Button>
             <Button disabled={busy} onClick={() => void runRealExtraction()}>
-              {busy ? "Reading label with OCR…" : "Read label and extract declarations"}
+              {busy
+                ? online
+                  ? "Reading label with OCR…"
+                  : "Queuing inspection…"
+                : online
+                  ? "Read label and extract declarations"
+                  : "Queue inspection for OCR when online"}
             </Button>
           </div>
         </Panel>

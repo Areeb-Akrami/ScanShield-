@@ -40,6 +40,17 @@ function InspectionDetail() {
     setNote(found?.decisionNote ?? "");
   }, [id]);
 
+  // While OCR is still queued (captured offline), pick up the result as soon as it lands.
+  const pendingOcr = inspection?.extractionStatus === "PENDING_OCR";
+  useEffect(() => {
+    if (!pendingOcr) return;
+    const timer = window.setInterval(() => {
+      const latest = getInspection(id);
+      if (latest && latest.extractionStatus !== "PENDING_OCR") setInspection(latest);
+    }, 3000);
+    return () => window.clearInterval(timer);
+  }, [pendingOcr, id]);
+
   const output = useMemo(() => (inspection ? evaluateStored(inspection) : null), [inspection]);
 
   if (!inspection || !output) {
@@ -82,12 +93,47 @@ function InspectionDetail() {
     ["Rescan required", output.results.filter((r) => r.outcome === "RESCAN_REQUIRED")],
     ["Insufficient evidence", output.results.filter((r) => r.outcome === "INSUFFICIENT_EVIDENCE")],
     ["Passed", output.results.filter((r) => r.outcome === "PASS")],
-    ["Not applicable", output.results.filter((r) => r.outcome === "NOT_APPLICABLE")],
   ];
+
+  if (inspection.extractionStatus === "PENDING_OCR" || inspection.extractionStatus === "OCR_FAILED") {
+    const failed = inspection.extractionStatus === "OCR_FAILED";
+    return (
+      <div className="space-y-4">
+        <Panel>
+          <PanelHeader
+            title={failed ? "Queued scan could not be read yet" : "Captured offline — awaiting extraction"}
+            subtitle="The evidence is stored safely on this device. No declarations or legal results are assumed until the label is actually read."
+          />
+          <div className="space-y-3 p-4 text-sm">
+            <p className="text-xs text-muted-foreground">
+              {inspection.seller} · {inspection.district} · {new Date(inspection.createdAt).toLocaleString()}
+            </p>
+            <p className="text-xs">
+              {failed
+                ? `Last attempt failed: ${inspection.extractionError ?? "unknown error"}. It stays queued and will be retried automatically.`
+                : "OCR and the rule checks will run automatically as soon as connectivity returns, then this page updates itself."}
+            </p>
+            <ul className="grid gap-2 sm:grid-cols-3">
+              {inspection.images.map((img, i) => (
+                <li key={i} className="rounded border border-border p-2">
+                  <img src={img.processed ?? img.original ?? ""} alt={`${img.label} evidence`} className="aspect-video w-full rounded object-cover" />
+                  <p className="mt-1 text-[11px] text-muted-foreground">{img.label}</p>
+                </li>
+              ))}
+            </ul>
+            <Link to="/inspector/inspections" className="inline-block text-xs text-accent underline underline-offset-2">
+              Back to inspection history
+            </Link>
+          </div>
+        </Panel>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
       <CorpusBanner compact />
+
 
       <Panel>
         <div className="flex flex-wrap items-start justify-between gap-3 p-4">
@@ -110,8 +156,8 @@ function InspectionDetail() {
             </p>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-px border-t border-border bg-border text-center sm:grid-cols-4">
-          {(["FAIL", "MANUAL_REVIEW_REQUIRED", "PASS", "NOT_APPLICABLE"] as const).map((k) => (
+        <div className="grid grid-cols-3 gap-px border-t border-border bg-border text-center">
+          {(["FAIL", "MANUAL_REVIEW_REQUIRED", "PASS"] as const).map((k) => (
             <div key={k} className="bg-card px-2 py-3">
               <p className="text-xl font-semibold tabular-nums">{output.tally[k]}</p>
               <p className="label-caps mt-0.5">{k.replaceAll("_", " ")}</p>

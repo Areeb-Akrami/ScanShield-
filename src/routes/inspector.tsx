@@ -1,4 +1,5 @@
 import { BottomNav, DesktopNav, RequireRole, TopBar, type NavItem } from "@/components/AppShell";
+import { SyncBar } from "@/components/SyncBar";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/inspector")({
@@ -20,6 +21,7 @@ function InspectorLayout() {
         <TopBar title="Field inspector workspace" />
         <DesktopNav items={items} />
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-5">
+          <SyncBar />
           <Outlet />
         </main>
         <BottomNav items={items} />

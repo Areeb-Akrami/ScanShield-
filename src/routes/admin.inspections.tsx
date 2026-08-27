@@ -177,9 +177,9 @@ function Detail({ inspection }: { inspection: Inspection }) {
         ) : (
           <ul className="mt-1 space-y-1.5 text-sm">
             {problems.map((r) => (
-              <li key={r.ruleId} className="rounded-md border border-border p-2">
+              <li key={r.rule.rule_id} className="rounded-md border border-border p-2">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-medium">{r.title}</span>
+                  <span className="font-medium">{r.rule.title}</span>
                   <StatusPill token={r.outcome} />
                 </div>
                 <p className="mt-0.5 text-xs text-muted-foreground">{r.reason}</p>

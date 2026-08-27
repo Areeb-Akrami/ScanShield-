@@ -126,6 +126,10 @@ function ScanPage() {
   }
 
   async function runRealExtraction() {
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      await queueOffline();
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -133,38 +137,89 @@ function ScanPage() {
       const result = await extractPackageFields({ data: { images: payload } });
 
       const panelKeys = new Set(captures.map((c) => c.key));
-      const extracted: ExtractedField[] = result.fields.map((f) => {
-        const src = f.source_panel && panelKeys.has(f.source_panel as PanelKey) ? (f.source_panel as PanelKey) : null;
-        return {
-          field: f.field,
-          label: FIELD_LABELS[f.field] ?? f.field,
-          value: f.value,
-          confidence: f.confidence,
-          sourceImage: src,
-          boundingBox: null,
-          ocrEngine: `${result.model} vision OCR`,
-          unreadable: Boolean(f.unreadable),
-          ...(f.note ? { note: f.note } : {}),
-        };
-      });
-
       setImages(captures);
-      setFields(extracted);
+      setFields(mapVisionFields(result, panelKeys));
       setObservations(result.observations);
-      setClassification({
-        product_category: (CATEGORIES as string[]).includes(result.classification.product_category ?? "")
-          ? (result.classification.product_category as ProductCategoryId)
-          : "OTHER",
-        package_type: (PACKAGE_TYPES as string[]).includes(result.classification.package_type ?? "")
-          ? (result.classification.package_type as PackageTypeId)
-          : "RETAIL",
-        transaction_context: "RETAIL",
-        origin: result.classification.origin === "IMPORTED" ? "IMPORTED" : "DOMESTIC",
-        inspection_date: new Date().toISOString().slice(0, 10),
-      });
+      setClassification(mapVisionClassification(result));
       setStep("extract");
     } catch (e) {
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        await queueOffline();
+        return;
+      }
       setError(e instanceof Error ? e.message : "Extraction failed. No values were recorded.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  /** Offline-first: store the inspection with its evidence and queue the OCR + rule run for reconnection. */
+  async function queueOffline() {
+    setBusy(true);
+    setError(null);
+    try {
+      const localId = `LOC-${Date.now()}`;
+      const queueImages = captures.map((c) => ({
+        key: c.key,
+        label: c.label,
+        dataUrl: c.processed ?? c.original!,
+      }));
+      const storedImages: CapturedImage[] = await Promise.all(
+        captures.map(async (img) => ({
+          ...img,
+          original: img.original ? await makeThumbnail(img.original) : null,
+          processed: img.processed ? await makeThumbnail(img.processed) : null,
+        })),
+      );
+      const classificationDraft: InspectionClassification = {
+        product_category: "OTHER",
+        package_type: "RETAIL",
+        transaction_context: "RETAIL",
+        origin: "DOMESTIC",
+        inspection_date: new Date().toISOString().slice(0, 10),
+      };
+      const inspection: Inspection = {
+        localId,
+        serverId: null,
+        scenarioId: null,
+        isDemo: false,
+        inspectorId: session?.email ?? "unknown",
+        inspectorName: session?.name ?? "Unknown",
+        seller: seller.trim() || "—",
+        district: district.trim() || "—",
+        productName: "Awaiting offline extraction",
+        classification: classificationDraft,
+        images: storedImages,
+        fields: [],
+        findings: [],
+        tally: { PASS: 0, FAIL: 0, MANUAL_REVIEW_REQUIRED: 0, RESCAN_REQUIRED: 0, INSUFFICIENT_EVIDENCE: 0, NOT_APPLICABLE: 0 },
+        finalStatus: "MANUAL_REVIEW_REQUIRED",
+        inspectorDecision: null,
+        decisionNote: "",
+        confidence: 0,
+        readability: "NOT_ASSESSED",
+        geo,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        syncStatus: "OFFLINE",
+        retryCount: 0,
+        lastError: null,
+        extractionStatus: "PENDING_OCR",
+        extractionError: null,
+      };
+      saveInspection(inspection);
+      enqueueOcrJob(localId, queueImages);
+      audit({
+        user: inspection.inspectorId,
+        action: "INSPECTION_QUEUED_OFFLINE",
+        entity: "Inspection",
+        entityId: localId,
+        before: null,
+        after: `${queueImages.length} panel(s) stored — OCR and rule checks queued until connectivity returns`,
+      });
+      navigate({ to: "/inspector/inspections/$id", params: { id: localId } });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "The inspection could not be queued on this device.");
     } finally {
       setBusy(false);
     }

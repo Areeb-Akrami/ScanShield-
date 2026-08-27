@@ -15,6 +15,7 @@ import { Route as ConsumerRouteImport } from './routes/consumer'
 import { Route as InspectorRouteImport } from './routes/inspector'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
+import { Route as AdminInspectionsRouteImport } from './routes/admin.inspections'
 import { Route as AdminRulesRouteImport } from './routes/admin.rules'
 import { Route as AdminSellersRouteImport } from './routes/admin.sellers'
 import { Route as ConsumerIndexRouteImport } from './routes/consumer.index'
@@ -58,6 +59,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const AdminAuditRoute = AdminAuditRouteImport.update({
   id: '/audit',
   path: '/audit',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminInspectionsRoute = AdminInspectionsRouteImport.update({
+  id: '/inspections',
+  path: '/inspections',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminRulesRoute = AdminRulesRouteImport.update({
@@ -138,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/consumer': typeof ConsumerRouteWithChildren
   '/inspector': typeof InspectorRouteWithChildren
   '/admin/audit': typeof AdminAuditRoute
+  '/admin/inspections': typeof AdminInspectionsRoute
   '/admin/rules': typeof AdminRulesRoute
   '/admin/sellers': typeof AdminSellersRoute
   '/consumer/complaints': typeof ConsumerComplaintsRoute
@@ -157,6 +164,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin/audit': typeof AdminAuditRoute
+  '/admin/inspections': typeof AdminInspectionsRoute
   '/admin/rules': typeof AdminRulesRoute
   '/admin/sellers': typeof AdminSellersRoute
   '/consumer/complaints': typeof ConsumerComplaintsRoute
@@ -178,6 +186,7 @@ export interface FileRoutesById {
   '/consumer': typeof ConsumerRouteWithChildren
   '/inspector': typeof InspectorRouteWithChildren
   '/admin/audit': typeof AdminAuditRoute
+  '/admin/inspections': typeof AdminInspectionsRoute
   '/admin/rules': typeof AdminRulesRoute
   '/admin/sellers': typeof AdminSellersRoute
   '/consumer/complaints': typeof ConsumerComplaintsRoute
@@ -202,6 +211,7 @@ export interface FileRouteTypes {
     | '/consumer'
     | '/inspector'
     | '/admin/audit'
+    | '/admin/inspections'
     | '/admin/rules'
     | '/admin/sellers'
     | '/consumer/complaints'
@@ -221,6 +231,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin/audit'
+    | '/admin/inspections'
     | '/admin/rules'
     | '/admin/sellers'
     | '/consumer/complaints'
@@ -241,6 +252,7 @@ export interface FileRouteTypes {
     | '/consumer'
     | '/inspector'
     | '/admin/audit'
+    | '/admin/inspections'
     | '/admin/rules'
     | '/admin/sellers'
     | '/consumer/complaints'
@@ -307,6 +319,13 @@ declare module '@tanstack/react-router' {
       path: '/audit'
       fullPath: '/admin/audit'
       preLoaderRoute: typeof AdminAuditRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/inspections': {
+      id: '/admin/inspections'
+      path: '/inspections'
+      fullPath: '/admin/inspections'
+      preLoaderRoute: typeof AdminInspectionsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/rules': {
@@ -412,6 +431,7 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminAuditRoute: typeof AdminAuditRoute
+  AdminInspectionsRoute: typeof AdminInspectionsRoute
   AdminRulesRoute: typeof AdminRulesRoute
   AdminSellersRoute: typeof AdminSellersRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -419,6 +439,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAuditRoute: AdminAuditRoute,
+  AdminInspectionsRoute: AdminInspectionsRoute,
   AdminRulesRoute: AdminRulesRoute,
   AdminSellersRoute: AdminSellersRoute,
   AdminIndexRoute: AdminIndexRoute,

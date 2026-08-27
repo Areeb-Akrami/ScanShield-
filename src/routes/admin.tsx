@@ -7,6 +7,7 @@ export const Route = createFileRoute("/admin")({
 
 const items: NavItem[] = [
   { to: "/admin", label: "Overview", icon: "◧" },
+  { to: "/admin/inspections", label: "Review", icon: "◎" },
   { to: "/admin/rules", label: "Rules", icon: "§" },
   { to: "/admin/sellers", label: "Sellers", icon: "◈" },
   { to: "/admin/audit", label: "Audit", icon: "▤" },

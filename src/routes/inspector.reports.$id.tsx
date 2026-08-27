@@ -90,8 +90,7 @@ function ReportPage() {
           <div className="mt-2 flex flex-wrap items-center gap-3">
             <StatusPill token={output.finalStatus} />
             <span className="text-xs text-muted-foreground">
-              {output.tally.FAIL} failed · {output.tally.MANUAL_REVIEW_REQUIRED} for review · {output.tally.PASS} passed ·{" "}
-              {output.tally.NOT_APPLICABLE} not applicable
+              {output.tally.FAIL} failed · {output.tally.MANUAL_REVIEW_REQUIRED} for review · {output.tally.PASS} passed
             </span>
           </div>
           <p className="mt-2 text-xs text-muted-foreground">

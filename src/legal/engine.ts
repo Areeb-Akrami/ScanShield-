@@ -1,4 +1,5 @@
 import { EXEMPTIONS, RULES, chainForRule } from "./corpus";
+import { validatorFor } from "./validators";
 import type {
   CheckOutcome,
   Exemption,
@@ -214,6 +215,19 @@ function evaluateRule(
       outcome: rule.machine_checkability === "PARTIALLY_MACHINE_CHECKABLE" ? "MANUAL_REVIEW_REQUIRED" : "FAIL",
       requires_human: rule.machine_checkability === "PARTIALLY_MACHINE_CHECKABLE",
       reason: ev.note,
+    };
+  }
+
+  // Content validators: check the requirement against the extracted text
+  // itself. Ambiguity always routes to manual review, never auto-fail.
+  const validate = validatorFor(rule.rule_id);
+  if (validate) {
+    const verdict = validate(ev.value);
+    return {
+      ...base,
+      outcome: verdict.outcome,
+      requires_human: verdict.outcome === "MANUAL_REVIEW_REQUIRED" ? true : base.requires_human,
+      reason: verdict.reason,
     };
   }
 

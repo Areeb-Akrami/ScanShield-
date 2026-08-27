@@ -40,7 +40,6 @@ const STEPS: Array<{ id: Step; label: string }> = [
 ];
 
 const CONTEXTS: TransactionContextId[] = ["RETAIL", "WHOLESALE", "ECOMMERCE"];
-const ORIGINS: OriginContextId[] = ["DOMESTIC", "IMPORTED"];
 
 function ScanPage() {
   const session = useSession();

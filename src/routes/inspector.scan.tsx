@@ -301,6 +301,8 @@ function ScanPage() {
         syncStatus: typeof navigator !== "undefined" && navigator.onLine ? "PENDING_SYNC" : "OFFLINE",
         retryCount: 0,
         lastError: null,
+        extractionStatus: "COMPLETE",
+        extractionError: null,
       };
 
       saveInspection(inspection);

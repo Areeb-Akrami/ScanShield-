@@ -120,8 +120,8 @@ function InspectionDetail() {
             </p>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-px border-t border-border bg-border text-center sm:grid-cols-4">
-          {(["FAIL", "MANUAL_REVIEW_REQUIRED", "PASS", "NOT_APPLICABLE"] as const).map((k) => (
+        <div className="grid grid-cols-3 gap-px border-t border-border bg-border text-center">
+          {(["FAIL", "MANUAL_REVIEW_REQUIRED", "PASS"] as const).map((k) => (
             <div key={k} className="bg-card px-2 py-3">
               <p className="text-xl font-semibold tabular-nums">{output.tally[k]}</p>
               <p className="label-caps mt-0.5">{k.replaceAll("_", " ")}</p>

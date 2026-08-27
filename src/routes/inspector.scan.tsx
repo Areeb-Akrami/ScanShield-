@@ -1,4 +1,4 @@
-import { useSession } from "@/components/AppShell";
+import { useOnline, useSession } from "@/components/AppShell";
 import { CorpusBanner } from "@/components/CorpusBanner";
 import { Button, DemoBadge, Field, Panel, PanelHeader, StatusPill, inputClass } from "@/components/ui";
 import { PANEL_ORDER, fileToDataUrl, makeThumbnail, preprocessImage } from "@/lib/imaging";
@@ -43,6 +43,7 @@ const CONTEXTS: TransactionContextId[] = ["RETAIL", "WHOLESALE", "ECOMMERCE"];
 
 function ScanPage() {
   const session = useSession();
+  const online = useOnline();
   const navigate = useNavigate();
   const fileRef = useRef<HTMLInputElement>(null);
 

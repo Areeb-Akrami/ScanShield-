@@ -93,7 +93,6 @@ function InspectionDetail() {
     ["Rescan required", output.results.filter((r) => r.outcome === "RESCAN_REQUIRED")],
     ["Insufficient evidence", output.results.filter((r) => r.outcome === "INSUFFICIENT_EVIDENCE")],
     ["Passed", output.results.filter((r) => r.outcome === "PASS")],
-    ["Not applicable", output.results.filter((r) => r.outcome === "NOT_APPLICABLE")],
   ];
 
   return (

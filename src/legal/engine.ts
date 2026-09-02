@@ -187,6 +187,61 @@ function evaluateRule(
 
   const ev = evidence[rule.field];
 
+  /* --- negative-evidence rules (sticker / alteration) ---------------- */
+  if (NEGATIVE_EVIDENCE_FIELDS.has(rule.field)) {
+    const conflicting = hasConflictingMrp(evidence);
+    const observed = ev?.value ?? null;
+    const nb = {
+      ...base,
+      detected: observed,
+      evidence: ev?.images ?? [],
+      confidence: ev?.confidence ?? null,
+    };
+
+    if (!observed) {
+      if (ev?.unreadable && !mrpEstablished(evidence)) {
+        return {
+          ...nb,
+          outcome: "MANUAL_REVIEW_REQUIRED",
+          requires_human: true,
+          reason:
+            "No sticker or overprint evidence was found, but the retail-price panel could not be read clearly enough to confirm the original declaration. Inspector confirmation required.",
+        };
+      }
+      if (conflicting) {
+        return {
+          ...nb,
+          outcome: "MANUAL_REVIEW_REQUIRED",
+          requires_human: true,
+          reason: `No sticker was directly observed, but conflicting retail-price values were read (${evidence["mrp"]?.value}). Manual verification of the printed price required.`,
+        };
+      }
+      return {
+        ...nb,
+        outcome: "PASS",
+        reason: mrpEstablished(evidence)
+          ? `No sticker, overprint or alteration evidence was found, and the retail sale price was extracted cleanly (${evidence["mrp"]?.value} at ${pct(evidence["mrp"]?.confidence)} confidence). Absence of sticker evidence is the compliant state — it is not a missing declaration.`
+          : "No sticker, overprint or alteration evidence was found on the captured panels. Absence of sticker evidence is the compliant state — it is not a missing declaration.",
+      };
+    }
+
+    if (conflicting) {
+      return {
+        ...nb,
+        outcome: "FAIL",
+        reason: `A sticker/overprint was observed over a printed declaration and conflicting retail-price values were read (${evidence["mrp"]?.value}). This indicates a declaration altered by sticker.`,
+      };
+    }
+    return {
+      ...nb,
+      outcome: "MANUAL_REVIEW_REQUIRED",
+      requires_human: true,
+      reason:
+        ev?.note ??
+        "A sticker or overprint appears to be present on the package. Whether it covers or alters a mandatory declaration cannot be established from imagery alone — inspector confirmation required.",
+    };
+  }
+
   if (!ev) {
     return {
       ...base,

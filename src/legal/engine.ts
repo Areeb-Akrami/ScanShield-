@@ -86,6 +86,34 @@ export type EvidenceMap = Record<string, FieldEvidence | undefined>;
 
 const CONFIDENCE_FLOOR = 0.7;
 
+/**
+ * Consistency threshold: an extracted declaration read at or above this
+ * confidence is treated as established for cross-rule consistency checks.
+ */
+const CONSISTENCY_FLOOR = 0.85;
+
+/**
+ * Fields whose observation is *negative evidence*: a null value means
+ * "no sticker / no alteration was seen", which is the compliant state.
+ * These must never be reported as a missing declaration.
+ */
+const NEGATIVE_EVIDENCE_FIELDS = new Set(["mrp_sticker", "mrp_alteration"]);
+
+/** True when several distinct monetary values were read for the retail price. */
+function hasConflictingMrp(evidence: EvidenceMap): boolean {
+  const raw = evidence["mrp"]?.value;
+  if (!raw) return false;
+  const nums = (raw.match(/\d+(?:[.,]\d{1,2})?/g) ?? []).map((n) => n.replace(",", "."));
+  return new Set(nums).size > 1;
+}
+
+/** True when MRP itself was extracted cleanly and confidently. */
+function mrpEstablished(evidence: EvidenceMap): boolean {
+  const ev = evidence["mrp"];
+  if (!ev || ev.unreadable || !ev.value) return false;
+  return (ev.confidence ?? 0) >= CONSISTENCY_FLOOR;
+}
+
 /* ------------------------------------------------------------------ */
 /* Rule evaluation                                                     */
 /* ------------------------------------------------------------------ */
@@ -158,6 +186,61 @@ function evaluateRule(
   }
 
   const ev = evidence[rule.field];
+
+  /* --- negative-evidence rules (sticker / alteration) ---------------- */
+  if (NEGATIVE_EVIDENCE_FIELDS.has(rule.field)) {
+    const conflicting = hasConflictingMrp(evidence);
+    const observed = ev?.value ?? null;
+    const nb = {
+      ...base,
+      detected: observed,
+      evidence: ev?.images ?? [],
+      confidence: ev?.confidence ?? null,
+    };
+
+    if (!observed) {
+      if (ev?.unreadable && !mrpEstablished(evidence)) {
+        return {
+          ...nb,
+          outcome: "MANUAL_REVIEW_REQUIRED",
+          requires_human: true,
+          reason:
+            "No sticker or overprint evidence was found, but the retail-price panel could not be read clearly enough to confirm the original declaration. Inspector confirmation required.",
+        };
+      }
+      if (conflicting) {
+        return {
+          ...nb,
+          outcome: "MANUAL_REVIEW_REQUIRED",
+          requires_human: true,
+          reason: `No sticker was directly observed, but conflicting retail-price values were read (${evidence["mrp"]?.value}). Manual verification of the printed price required.`,
+        };
+      }
+      return {
+        ...nb,
+        outcome: "PASS",
+        reason: mrpEstablished(evidence)
+          ? `No sticker, overprint or alteration evidence was found, and the retail sale price was extracted cleanly (${evidence["mrp"]?.value} at ${pct(evidence["mrp"]?.confidence)} confidence). Absence of sticker evidence is the compliant state — it is not a missing declaration.`
+          : "No sticker, overprint or alteration evidence was found on the captured panels. Absence of sticker evidence is the compliant state — it is not a missing declaration.",
+      };
+    }
+
+    if (conflicting) {
+      return {
+        ...nb,
+        outcome: "FAIL",
+        reason: `A sticker/overprint was observed over a printed declaration and conflicting retail-price values were read (${evidence["mrp"]?.value}). This indicates a declaration altered by sticker.`,
+      };
+    }
+    return {
+      ...nb,
+      outcome: "MANUAL_REVIEW_REQUIRED",
+      requires_human: true,
+      reason:
+        ev?.note ??
+        "A sticker or overprint appears to be present on the package. Whether it covers or alters a mandatory declaration cannot be established from imagery alone — inspector confirmation required.",
+    };
+  }
 
   if (!ev) {
     return {

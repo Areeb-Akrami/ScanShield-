@@ -86,6 +86,34 @@ export type EvidenceMap = Record<string, FieldEvidence | undefined>;
 
 const CONFIDENCE_FLOOR = 0.7;
 
+/**
+ * Consistency threshold: an extracted declaration read at or above this
+ * confidence is treated as established for cross-rule consistency checks.
+ */
+const CONSISTENCY_FLOOR = 0.85;
+
+/**
+ * Fields whose observation is *negative evidence*: a null value means
+ * "no sticker / no alteration was seen", which is the compliant state.
+ * These must never be reported as a missing declaration.
+ */
+const NEGATIVE_EVIDENCE_FIELDS = new Set(["mrp_sticker", "mrp_alteration"]);
+
+/** True when several distinct monetary values were read for the retail price. */
+function hasConflictingMrp(evidence: EvidenceMap): boolean {
+  const raw = evidence["mrp"]?.value;
+  if (!raw) return false;
+  const nums = (raw.match(/\d+(?:[.,]\d{1,2})?/g) ?? []).map((n) => n.replace(",", "."));
+  return new Set(nums).size > 1;
+}
+
+/** True when MRP itself was extracted cleanly and confidently. */
+function mrpEstablished(evidence: EvidenceMap): boolean {
+  const ev = evidence["mrp"];
+  if (!ev || ev.unreadable || !ev.value) return false;
+  return (ev.confidence ?? 0) >= CONSISTENCY_FLOOR;
+}
+
 /* ------------------------------------------------------------------ */
 /* Rule evaluation                                                     */
 /* ------------------------------------------------------------------ */

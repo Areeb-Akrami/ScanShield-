@@ -516,6 +516,15 @@ export async function associateSourceWithRule(ruleKey: string, sourceId: string)
   return { error: error?.message };
 }
 
+/** Corrects the metadata of a recorded source document. */
+export async function updateLegalDocument(
+  id: string,
+  patch: { title?: string; gazette_reference?: string | null; published_on?: string | null; ingested?: boolean },
+): Promise<{ error?: string | undefined }> {
+  const { error } = await supabase.from("legal_documents").update(patch).eq("id", id);
+  return { error: error?.message };
+}
+
 export interface DbSeller {
   id: string;
   name: string;

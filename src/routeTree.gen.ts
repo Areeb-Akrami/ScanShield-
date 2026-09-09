@@ -20,6 +20,7 @@ import { Route as AdminInspectionsRouteImport } from './routes/admin.inspections
 import { Route as AdminRulesRouteImport } from './routes/admin.rules'
 import { Route as AdminSellersRouteImport } from './routes/admin.sellers'
 import { Route as ConsumerIndexRouteImport } from './routes/consumer.index'
+import { Route as ConsumerChecksRouteImport } from './routes/consumer.checks'
 import { Route as ConsumerComplaintsRouteImport } from './routes/consumer.complaints'
 import { Route as ConsumerRightsRouteImport } from './routes/consumer.rights'
 import { Route as InspectorIndexRouteImport } from './routes/inspector.index'
@@ -27,6 +28,7 @@ import { Route as InspectorInspectionsRouteImport } from './routes/inspector.ins
 import { Route as InspectorProfileRouteImport } from './routes/inspector.profile'
 import { Route as InspectorReportsRouteImport } from './routes/inspector.reports'
 import { Route as InspectorScanRouteImport } from './routes/inspector.scan'
+import { Route as ConsumerCheckIdRouteImport } from './routes/consumer.check.$id'
 import { Route as InspectorInspectionsIndexRouteImport } from './routes/inspector.inspections.index'
 import { Route as InspectorInspectionsIdRouteImport } from './routes/inspector.inspections.$id'
 import { Route as InspectorReportsIndexRouteImport } from './routes/inspector.reports.index'
@@ -87,6 +89,11 @@ const ConsumerIndexRoute = ConsumerIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ConsumerRoute,
 } as any)
+const ConsumerChecksRoute = ConsumerChecksRouteImport.update({
+  id: '/checks',
+  path: '/checks',
+  getParentRoute: () => ConsumerRoute,
+} as any)
 const ConsumerComplaintsRoute = ConsumerComplaintsRouteImport.update({
   id: '/complaints',
   path: '/complaints',
@@ -122,6 +129,11 @@ const InspectorScanRoute = InspectorScanRouteImport.update({
   path: '/scan',
   getParentRoute: () => InspectorRoute,
 } as any)
+const ConsumerCheckIdRoute = ConsumerCheckIdRouteImport.update({
+  id: '/check/$id',
+  path: '/check/$id',
+  getParentRoute: () => ConsumerRoute,
+} as any)
 const InspectorInspectionsIndexRoute =
   InspectorInspectionsIndexRouteImport.update({
     id: '/',
@@ -154,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/admin/inspections': typeof AdminInspectionsRoute
   '/admin/rules': typeof AdminRulesRoute
   '/admin/sellers': typeof AdminSellersRoute
+  '/consumer/checks': typeof ConsumerChecksRoute
   '/consumer/complaints': typeof ConsumerComplaintsRoute
   '/consumer/rights': typeof ConsumerRightsRoute
   '/inspector/inspections': typeof InspectorInspectionsRouteWithChildren
@@ -163,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/consumer/': typeof ConsumerIndexRoute
   '/inspector/': typeof InspectorIndexRoute
+  '/consumer/check/$id': typeof ConsumerCheckIdRoute
   '/inspector/inspections/$id': typeof InspectorInspectionsIdRoute
   '/inspector/reports/$id': typeof InspectorReportsIdRoute
   '/inspector/inspections/': typeof InspectorInspectionsIndexRoute
@@ -175,6 +189,7 @@ export interface FileRoutesByTo {
   '/admin/inspections': typeof AdminInspectionsRoute
   '/admin/rules': typeof AdminRulesRoute
   '/admin/sellers': typeof AdminSellersRoute
+  '/consumer/checks': typeof ConsumerChecksRoute
   '/consumer/complaints': typeof ConsumerComplaintsRoute
   '/consumer/rights': typeof ConsumerRightsRoute
   '/inspector/profile': typeof InspectorProfileRoute
@@ -182,6 +197,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/consumer': typeof ConsumerIndexRoute
   '/inspector': typeof InspectorIndexRoute
+  '/consumer/check/$id': typeof ConsumerCheckIdRoute
   '/inspector/inspections/$id': typeof InspectorInspectionsIdRoute
   '/inspector/reports/$id': typeof InspectorReportsIdRoute
   '/inspector/inspections': typeof InspectorInspectionsIndexRoute
@@ -198,6 +214,7 @@ export interface FileRoutesById {
   '/admin/inspections': typeof AdminInspectionsRoute
   '/admin/rules': typeof AdminRulesRoute
   '/admin/sellers': typeof AdminSellersRoute
+  '/consumer/checks': typeof ConsumerChecksRoute
   '/consumer/complaints': typeof ConsumerComplaintsRoute
   '/consumer/rights': typeof ConsumerRightsRoute
   '/inspector/inspections': typeof InspectorInspectionsRouteWithChildren
@@ -207,6 +224,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/consumer/': typeof ConsumerIndexRoute
   '/inspector/': typeof InspectorIndexRoute
+  '/consumer/check/$id': typeof ConsumerCheckIdRoute
   '/inspector/inspections/$id': typeof InspectorInspectionsIdRoute
   '/inspector/reports/$id': typeof InspectorReportsIdRoute
   '/inspector/inspections/': typeof InspectorInspectionsIndexRoute
@@ -224,6 +242,7 @@ export interface FileRouteTypes {
     | '/admin/inspections'
     | '/admin/rules'
     | '/admin/sellers'
+    | '/consumer/checks'
     | '/consumer/complaints'
     | '/consumer/rights'
     | '/inspector/inspections'
@@ -233,6 +252,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/consumer/'
     | '/inspector/'
+    | '/consumer/check/$id'
     | '/inspector/inspections/$id'
     | '/inspector/reports/$id'
     | '/inspector/inspections/'
@@ -245,6 +265,7 @@ export interface FileRouteTypes {
     | '/admin/inspections'
     | '/admin/rules'
     | '/admin/sellers'
+    | '/consumer/checks'
     | '/consumer/complaints'
     | '/consumer/rights'
     | '/inspector/profile'
@@ -252,6 +273,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/consumer'
     | '/inspector'
+    | '/consumer/check/$id'
     | '/inspector/inspections/$id'
     | '/inspector/reports/$id'
     | '/inspector/inspections'
@@ -267,6 +289,7 @@ export interface FileRouteTypes {
     | '/admin/inspections'
     | '/admin/rules'
     | '/admin/sellers'
+    | '/consumer/checks'
     | '/consumer/complaints'
     | '/consumer/rights'
     | '/inspector/inspections'
@@ -276,6 +299,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/consumer/'
     | '/inspector/'
+    | '/consumer/check/$id'
     | '/inspector/inspections/$id'
     | '/inspector/reports/$id'
     | '/inspector/inspections/'
@@ -369,6 +393,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConsumerIndexRouteImport
       parentRoute: typeof ConsumerRoute
     }
+    '/consumer/checks': {
+      id: '/consumer/checks'
+      path: '/checks'
+      fullPath: '/consumer/checks'
+      preLoaderRoute: typeof ConsumerChecksRouteImport
+      parentRoute: typeof ConsumerRoute
+    }
     '/consumer/complaints': {
       id: '/consumer/complaints'
       path: '/complaints'
@@ -417,6 +448,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/inspector/scan'
       preLoaderRoute: typeof InspectorScanRouteImport
       parentRoute: typeof InspectorRoute
+    }
+    '/consumer/check/$id': {
+      id: '/consumer/check/$id'
+      path: '/check/$id'
+      fullPath: '/consumer/check/$id'
+      preLoaderRoute: typeof ConsumerCheckIdRouteImport
+      parentRoute: typeof ConsumerRoute
     }
     '/inspector/inspections/': {
       id: '/inspector/inspections/'
@@ -468,15 +506,19 @@ const AdminRouteChildren: AdminRouteChildren = {
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface ConsumerRouteChildren {
+  ConsumerChecksRoute: typeof ConsumerChecksRoute
   ConsumerComplaintsRoute: typeof ConsumerComplaintsRoute
   ConsumerRightsRoute: typeof ConsumerRightsRoute
   ConsumerIndexRoute: typeof ConsumerIndexRoute
+  ConsumerCheckIdRoute: typeof ConsumerCheckIdRoute
 }
 
 const ConsumerRouteChildren: ConsumerRouteChildren = {
+  ConsumerChecksRoute: ConsumerChecksRoute,
   ConsumerComplaintsRoute: ConsumerComplaintsRoute,
   ConsumerRightsRoute: ConsumerRightsRoute,
   ConsumerIndexRoute: ConsumerIndexRoute,
+  ConsumerCheckIdRoute: ConsumerCheckIdRoute,
 }
 
 const ConsumerRouteWithChildren = ConsumerRoute._addFileChildren(

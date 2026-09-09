@@ -295,34 +295,9 @@ export async function fetchAudit(): Promise<AuditEntry[]> {
 }
 
 /* ------------------------------------------------------------------ */
-/* Consumer self-checks                                                */
+/* Consumer self-checks live in src/lib/consumer.ts                    */
 /* ------------------------------------------------------------------ */
 
-export async function saveConsumerCheck(input: {
-  productName: string;
-  status: string;
-  confidence: number;
-  findings: unknown;
-}): Promise<void> {
-  const { data: auth } = await supabase.auth.getUser();
-  if (!auth.user) return;
-  await supabase.from("consumer_checks").insert({
-    consumer_id: auth.user.id,
-    product_name: input.productName,
-    status: input.status,
-    confidence: input.confidence,
-    findings: input.findings as never,
-  });
-}
-
-export async function listConsumerChecks() {
-  const { data } = await supabase
-    .from("consumer_checks")
-    .select("id, product_name, status, confidence, created_at")
-    .order("created_at", { ascending: false })
-    .limit(100);
-  return data ?? [];
-}
 
 /* ------------------------------------------------------------------ */
 /* Rules (admin management + engine overlay)                           */

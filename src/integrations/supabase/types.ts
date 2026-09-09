@@ -62,6 +62,53 @@ export type Database = {
           },
         ]
       }
+      complaints: {
+        Row: {
+          consumer_id: string
+          created_at: string
+          description: string
+          id: string
+          image_url: string | null
+          issue_type: string
+          product: string
+          seller: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          consumer_id: string
+          created_at?: string
+          description: string
+          id?: string
+          image_url?: string | null
+          issue_type: string
+          product: string
+          seller?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          consumer_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          image_url?: string | null
+          issue_type?: string
+          product?: string
+          seller?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "complaints_consumer_id_fkey"
+            columns: ["consumer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consumer_checks: {
         Row: {
           confidence: number | null

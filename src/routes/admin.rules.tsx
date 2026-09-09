@@ -718,19 +718,128 @@ function RulesPage() {
         </Panel>
       ) : null}
 
+      {correcting ? (
+        <Panel>
+          <PanelHeader
+            title={`Correct ${correcting.rule_key} v${correcting.version}`}
+            subtitle="Use this only for typing or attribution corrections. A change in the law must be published as a new version instead."
+          />
+          <form onSubmit={(e) => void saveCorrection(e)} className="grid gap-3 p-4 sm:grid-cols-2">
+            <Field label="Title">
+              <input required value={correcting.title} onChange={(e) => setCorrecting({ ...correcting, title: e.target.value })} className={inputClass()} />
+            </Field>
+            <Field label="Rule number">
+              <input required value={correcting.rule_number} onChange={(e) => setCorrecting({ ...correcting, rule_number: e.target.value })} className={inputClass()} />
+            </Field>
+            <Field label="Sub-rule">
+              <input value={correcting.sub_rule ?? ""} onChange={(e) => setCorrecting({ ...correcting, sub_rule: e.target.value })} className={inputClass()} />
+            </Field>
+            <Field label="Category">
+              <input value={correcting.category ?? ""} onChange={(e) => setCorrecting({ ...correcting, category: e.target.value })} className={inputClass()} />
+            </Field>
+            <Field label="Declaration field">
+              <input value={correcting.field ?? ""} onChange={(e) => setCorrecting({ ...correcting, field: e.target.value })} className={inputClass()} />
+            </Field>
+            <Field label="Severity">
+              <select value={correcting.severity ?? ""} onChange={(e) => setCorrecting({ ...correcting, severity: e.target.value })} className={inputClass()}>
+                <option value="">Unspecified</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </Field>
+            <Field label="Machine checkability">
+              <select
+                value={correcting.machine_checkability ?? ""}
+                onChange={(e) => setCorrecting({ ...correcting, machine_checkability: e.target.value })}
+                className={inputClass()}
+              >
+                <option value="">Unspecified</option>
+                <option value="full">Fully machine checkable</option>
+                <option value="partial">Partially machine checkable</option>
+                <option value="none">Manual inspection only</option>
+              </select>
+            </Field>
+            <Field label="Source document">
+              <select
+                value={correcting.source_document ?? ""}
+                onChange={(e) => setCorrecting({ ...correcting, source_document: e.target.value })}
+                className={inputClass()}
+              >
+                <option value="">Not attributed</option>
+                {docs.map((d) => (
+                  <option key={d.id} value={d.source_id}>
+                    {d.title}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Source URL">
+              <input value={correcting.source_url ?? ""} onChange={(e) => setCorrecting({ ...correcting, source_url: e.target.value })} className={inputClass()} />
+            </Field>
+            <Field label="Effective to">
+              <input
+                type="date"
+                value={correcting.effective_to ?? ""}
+                onChange={(e) => setCorrecting({ ...correcting, effective_to: e.target.value || null })}
+                className={inputClass()}
+              />
+            </Field>
+            <div className="sm:col-span-2">
+              <Field label="Working summary">
+                <textarea
+                  rows={2}
+                  value={correcting.description ?? ""}
+                  onChange={(e) => setCorrecting({ ...correcting, description: e.target.value })}
+                  className={inputClass()}
+                />
+              </Field>
+            </div>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={correcting.human_review_required}
+                onChange={(e) => setCorrecting({ ...correcting, human_review_required: e.target.checked })}
+              />
+              Human review required
+            </label>
+            <div className="flex gap-2 sm:col-span-2">
+              <Button type="submit" disabled={busy}>
+                {busy ? "Saving…" : "Save correction"}
+              </Button>
+              <Button type="button" variant="outline" onClick={() => setCorrecting(null)}>
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </Panel>
+      ) : null}
+
       <Panel>
-        <PanelHeader title="Exemptions" subtitle="An exemption resolves to NOT APPLICABLE — never to a pass." />
+        <PanelHeader
+          title={`Exemptions (${exemptions.length})`}
+          subtitle="Held in the database. An exemption resolves to NOT APPLICABLE — never to a pass."
+        />
         <ul className="divide-y divide-border">
-          {EXEMPTIONS.map((e) => (
-            <li key={e.exemption_id} className="px-4 py-3">
-              <p className="text-sm font-medium">{e.title}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{e.explanation}</p>
-              <p className="mt-1 font-mono text-[11px] text-muted-foreground">
-                {e.exemption_id} · from {e.effective_from}
-                {e.effective_to ? ` to ${e.effective_to}` : ""} · affects {e.rule_ids.length} rule(s)
-              </p>
-            </li>
-          ))}
+          {exemptions.map((e) => {
+            const ruleKeys = Array.isArray(e.rule_keys) ? (e.rule_keys as string[]) : [];
+            return (
+              <li key={e.id} className="px-4 py-3">
+                <p className="text-sm font-medium">{e.title}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{e.explanation}</p>
+                <p className="mt-1 font-mono text-[11px] text-muted-foreground">
+                  {e.exemption_key} · from {e.effective_from}
+                  {e.effective_to ? ` to ${e.effective_to}` : ""} · affects {ruleKeys.length} rule(s)
+                  {e.source_document ? ` · ${sourceTitle(e.source_document)}` : ""}
+                </p>
+                {ruleKeys.length ? <p className="mt-1 font-mono text-[11px] text-muted-foreground">{ruleKeys.join(", ")}</p> : null}
+                {e.conditions && Object.keys(e.conditions as object).length ? (
+                  <p className="mt-1 font-mono text-[11px] text-muted-foreground">Conditions: {JSON.stringify(e.conditions)}</p>
+                ) : null}
+              </li>
+            );
+          })}
+          {exemptions.length === 0 ? <li className="px-4 py-3 text-sm text-muted-foreground">No exemptions recorded.</li> : null}
         </ul>
       </Panel>
 

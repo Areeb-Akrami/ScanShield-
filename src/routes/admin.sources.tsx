@@ -128,6 +128,14 @@ function SourcesPage() {
       setMessage(error);
       return;
     }
+    audit({
+      user: session?.email ?? "unknown",
+      action: "LEGAL_SOURCE_ADDED",
+      entity: "LegalDocument",
+      entityId: sourceId || title,
+      before: "—",
+      after: path ? "record and file stored" : "record stored without a file",
+    });
     setMessage("The source document was recorded. Its provisions are not ingested until rules are entered against it.");
     setSourceId("");
     setTitle("");

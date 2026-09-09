@@ -72,7 +72,7 @@ function CustomersPage() {
         <div className="flex flex-wrap items-center gap-2 border-b border-border p-3">
           <input
             className={inputClass("max-w-xs")}
-            placeholder="Search name, email, phone…"
+            placeholder="Search name, email, phone, district…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -111,6 +111,7 @@ function CustomersPage() {
                     <td className="px-3 py-2 font-medium">{u.full_name ?? "—"}</td>
                     <td className="px-3 py-2">{u.phone ?? "—"}</td>
                     <td className="px-3 py-2">{u.email ?? "—"}</td>
+                    <td className="px-3 py-2">{u.district ?? "—"}</td>
                     <td className="px-3 py-2">{u.checks}</td>
                     <td className="px-3 py-2">{u.complaints}</td>
                     <td className="px-3 py-2"><StatusTag status={u.account_status} /></td>

@@ -160,6 +160,7 @@ export type Database = {
           classification: Json
           confidence: number | null
           created_at: string
+          district: string | null
           id: string
           inspection_date: string
           inspector_id: string | null
@@ -169,8 +170,11 @@ export type Database = {
           location_accuracy: number | null
           longitude: number | null
           package_image_url: string | null
+          payload: Json
           product_id: string | null
+          product_name: string | null
           seller_id: string | null
+          seller_name: string | null
           status: Database["public"]["Enums"]["inspection_status"]
           system_status: Database["public"]["Enums"]["inspection_status"] | null
           updated_at: string
@@ -179,6 +183,7 @@ export type Database = {
           classification?: Json
           confidence?: number | null
           created_at?: string
+          district?: string | null
           id?: string
           inspection_date?: string
           inspector_id?: string | null
@@ -188,8 +193,11 @@ export type Database = {
           location_accuracy?: number | null
           longitude?: number | null
           package_image_url?: string | null
+          payload?: Json
           product_id?: string | null
+          product_name?: string | null
           seller_id?: string | null
+          seller_name?: string | null
           status?: Database["public"]["Enums"]["inspection_status"]
           system_status?:
             | Database["public"]["Enums"]["inspection_status"]
@@ -200,6 +208,7 @@ export type Database = {
           classification?: Json
           confidence?: number | null
           created_at?: string
+          district?: string | null
           id?: string
           inspection_date?: string
           inspector_id?: string | null
@@ -209,8 +218,11 @@ export type Database = {
           location_accuracy?: number | null
           longitude?: number | null
           package_image_url?: string | null
+          payload?: Json
           product_id?: string | null
+          product_name?: string | null
           seller_id?: string | null
+          seller_name?: string | null
           status?: Database["public"]["Enums"]["inspection_status"]
           system_status?:
             | Database["public"]["Enums"]["inspection_status"]

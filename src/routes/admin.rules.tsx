@@ -194,6 +194,115 @@ function RulesPage() {
         </p>
       ) : null}
 
+      {isAdmin ? (
+        <Panel>
+          <PanelHeader
+            title="Add a new provision"
+            subtitle="Creates version 1 of a rule. Enter the wording exactly as it appears in the source document — never a paraphrase."
+            action={
+              <Button size="sm" variant="outline" onClick={() => setCreating((v) => !v)}>
+                {creating ? "Close" : "New rule"}
+              </Button>
+            }
+          />
+          {creating ? (
+            <form onSubmit={submitNewRule} className="grid gap-3 p-4 sm:grid-cols-2">
+              <Field label="Rule identifier">
+                <input
+                  required
+                  value={draft.rule_key}
+                  onChange={(e) => setDraft({ ...draft, rule_key: e.target.value })}
+                  placeholder="PCR_DECL_..."
+                  className={inputClass()}
+                />
+              </Field>
+              <Field label="Rule number">
+                <input
+                  required
+                  value={draft.rule_number}
+                  onChange={(e) => setDraft({ ...draft, rule_number: e.target.value })}
+                  placeholder="6(1)(a)"
+                  className={inputClass()}
+                />
+              </Field>
+              <Field label="Title">
+                <input required value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} className={inputClass()} />
+              </Field>
+              <Field label="Category">
+                <input value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value })} className={inputClass()} />
+              </Field>
+              <div className="sm:col-span-2">
+                <Field label="Legal requirement (verbatim)">
+                  <textarea
+                    rows={3}
+                    value={draft.legal_requirement}
+                    onChange={(e) => setDraft({ ...draft, legal_requirement: e.target.value })}
+                    className={inputClass()}
+                  />
+                </Field>
+              </div>
+              <div className="sm:col-span-2">
+                <Field label="Description">
+                  <textarea
+                    rows={2}
+                    value={draft.description}
+                    onChange={(e) => setDraft({ ...draft, description: e.target.value })}
+                    className={inputClass()}
+                  />
+                </Field>
+              </div>
+              <Field label="Effective from">
+                <input
+                  type="date"
+                  required
+                  value={draft.effective_from}
+                  onChange={(e) => setDraft({ ...draft, effective_from: e.target.value })}
+                  className={inputClass()}
+                />
+              </Field>
+              <Field label="Source document">
+                <select
+                  value={draft.source_document}
+                  onChange={(e) => setDraft({ ...draft, source_document: e.target.value })}
+                  className={inputClass()}
+                >
+                  <option value="">Not attributed</option>
+                  {docs.map((d) => (
+                    <option key={d.id} value={d.source_id}>
+                      {d.title}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Severity">
+                <select value={draft.severity} onChange={(e) => setDraft({ ...draft, severity: e.target.value })} className={inputClass()}>
+                  <option value="">Unspecified</option>
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+              </Field>
+              <Field label="Status on creation">
+                <select
+                  value={draft.status}
+                  onChange={(e) => setDraft({ ...draft, status: e.target.value as DbRule["status"] })}
+                  className={inputClass()}
+                >
+                  <option value="draft">Draft</option>
+                  <option value="in_force">In force</option>
+                  <option value="future">Not yet in force</option>
+                </select>
+              </Field>
+              <div className="sm:col-span-2">
+                <Button type="submit" disabled={busy}>
+                  {busy ? "Saving…" : "Create rule"}
+                </Button>
+              </div>
+            </form>
+          ) : null}
+        </Panel>
+      ) : null}
+
       <Panel>
         <PanelHeader title={`Rule records (${applicable.length})`} subtitle="Select a rule to see its full version history." />
         {rules.length === 0 ? (

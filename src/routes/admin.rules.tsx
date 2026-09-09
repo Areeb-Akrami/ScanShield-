@@ -345,7 +345,29 @@ function RulesPage() {
           </label>
           <label className="block">
             <span className="label-caps">Search</span>
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rule, category or id" className={inputClass("mt-1.5")} />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rule number, title or identifier" className={inputClass("mt-1.5")} />
+          </label>
+          <label className="block">
+            <span className="label-caps">Status</span>
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className={inputClass("mt-1.5")}>
+              <option value="all">All statuses</option>
+              <option value="draft">Draft</option>
+              <option value="in_force">In force</option>
+              <option value="future">Not yet in force</option>
+              <option value="superseded">Superseded</option>
+              <option value="archived">Archived</option>
+            </select>
+          </label>
+          <label className="block">
+            <span className="label-caps">Category</span>
+            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className={inputClass("mt-1.5")}>
+              <option value="all">All categories</option>
+              {categories.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
           </label>
         </div>
         <div className="grid grid-cols-3 gap-px border-t border-border bg-border text-center">

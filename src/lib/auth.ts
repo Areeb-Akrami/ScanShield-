@@ -258,9 +258,11 @@ export async function signOut(): Promise<void> {
 
 export function homeForRole(role: Role): string {
   if (role === "CONSUMER") return "/consumer";
-  if (role === "ADMIN" || role === "SUPERVISOR" || role === "ENFORCEMENT_OFFICER") return "/admin";
+  if (role === "ADMIN") return "/admin";
+  if (role === "SUPERVISOR" || role === "ENFORCEMENT_OFFICER") return "/officer";
   return "/inspector";
 }
+
 
 export function canAccessAdmin(role: Role): boolean {
   return role === "ADMIN" || role === "SUPERVISOR" || role === "ENFORCEMENT_OFFICER";

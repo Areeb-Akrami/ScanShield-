@@ -47,6 +47,53 @@ function RulesPage() {
   const [editing, setEditing] = useState<DbRule | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [draft, setDraft] = useState({
+    rule_key: "",
+    rule_number: "",
+    title: "",
+    category: "",
+    legal_requirement: "",
+    description: "",
+    effective_from: new Date().toISOString().slice(0, 10),
+    source_document: "",
+    severity: "",
+    status: "draft" as DbRule["status"],
+  });
+
+  async function submitNewRule(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setMessage(null);
+    const { error } = await createRule({
+      rule_key: draft.rule_key,
+      rule_number: draft.rule_number,
+      title: draft.title,
+      category: draft.category,
+      legal_requirement: draft.legal_requirement,
+      description: draft.description,
+      effective_from: draft.effective_from,
+      source_document: draft.source_document || null,
+      severity: draft.severity || null,
+      status: draft.status,
+    });
+    setBusy(false);
+    if (error) {
+      setMessage(error);
+      return;
+    }
+    audit({
+      user: session?.email ?? "unknown",
+      action: "RULE_CREATED",
+      entity: "Rule",
+      entityId: draft.rule_key,
+      after: `v1 effective ${draft.effective_from}`,
+    });
+    setMessage(`${draft.rule_key} was created as version 1.`);
+    setCreating(false);
+    setDraft({ ...draft, rule_key: "", rule_number: "", title: "", legal_requirement: "", description: "" });
+    load();
+  }
 
   const load = useCallback(() => {
     void listDbRules().then(setRules);

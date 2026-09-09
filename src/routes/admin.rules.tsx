@@ -619,11 +619,34 @@ function RulesPage() {
                           </li>
                         ))}
                       </ol>
+                      <dl className="mt-3 grid gap-1 text-[11px] text-muted-foreground sm:grid-cols-2">
+                        <div>Category: {r.category ?? "—"}</div>
+                        <div>Declaration field: {r.field ?? "—"}</div>
+                        <div>Machine checkability: {r.machine_checkability ?? "—"}</div>
+                        <div>Human review: {r.human_review_required ? "required" : "not required"}</div>
+                        <div>Provenance: {r.provenance ?? "—"}</div>
+                        <div>Last updated: {new Date(r.updated_at).toLocaleString()}</div>
+                        {r.source_url ? (
+                          <div className="sm:col-span-2">
+                            <a href={r.source_url} target="_blank" rel="noreferrer" className="underline">
+                              Open source document
+                            </a>
+                          </div>
+                        ) : null}
+                      </dl>
                       {isAdmin ? (
                         <div className="mt-3 flex flex-wrap gap-2">
                           <Button size="sm" variant="outline" onClick={() => setEditing({ ...c.latest, amendment_note: "" })}>
                             Publish amended version
                           </Button>
+                          <Button size="sm" variant="outline" onClick={() => setCorrecting({ ...c.latest })}>
+                            Correct this version
+                          </Button>
+                          {c.latest.status === "draft" || c.latest.status === "future" ? (
+                            <Button size="sm" variant="outline" disabled={busy} onClick={() => void publishRule(c.latest)}>
+                              Publish
+                            </Button>
+                          ) : null}
                           <Button size="sm" variant="outline" disabled={busy} onClick={() => void archive(c.latest)}>
                             {c.latest.status === "archived" ? "Restore" : "Archive"}
                           </Button>

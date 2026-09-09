@@ -59,6 +59,47 @@ function SourcesPage() {
 
   const ruleKeys = useMemo(() => [...new Set(rules.map((r) => r.rule_key))].sort(), [rules]);
 
+  /** How many distinct provisions are attributed to each source document. */
+  const linkedCounts = useMemo(() => {
+    const m = new Map<string, Set<string>>();
+    for (const r of rules) {
+      if (!r.source_document) continue;
+      const set = m.get(r.source_document) ?? new Set<string>();
+      set.add(r.rule_key);
+      m.set(r.source_document, set);
+    }
+    return m;
+  }, [rules]);
+
+  async function saveMetadata(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editing) return;
+    setBusy(true);
+    setMessage(null);
+    const { error } = await updateLegalDocument(editing.id, {
+      title: editing.title,
+      gazette_reference: editing.gazette_reference,
+      published_on: editing.published_on,
+      ingested: editing.ingested,
+    });
+    setBusy(false);
+    if (error) {
+      setMessage(error);
+      return;
+    }
+    audit({
+      user: session?.email ?? "unknown",
+      action: "LEGAL_SOURCE_UPDATED",
+      entity: "LegalDocument",
+      entityId: editing.source_id,
+      before: "previous metadata",
+      after: `${editing.title} · ${editing.ingested ? "ingested" : "not ingested"}`,
+    });
+    setMessage(`${editing.title} was updated.`);
+    setEditing(null);
+    load();
+  }
+
   async function upload(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);

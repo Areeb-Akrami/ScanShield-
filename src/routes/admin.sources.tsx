@@ -195,6 +195,11 @@ function SourcesPage() {
                       {d.source_id}
                       {d.gazette_reference ? ` · ${d.gazette_reference}` : ""}
                       {d.published_on ? ` · published ${d.published_on}` : ""}
+                      {d.created_at ? ` · recorded ${new Date(d.created_at).toLocaleDateString()}` : ""}
+                    </p>
+                    <p className="mt-0.5 text-[11px] text-muted-foreground">
+                      {linkedCounts.get(d.source_id)?.size ?? 0} provision(s) attributed ·{" "}
+                      {d.document_url ? "file held privately" : "no file held"}
                     </p>
                   </div>
                   <span className="flex items-center gap-2">
@@ -204,6 +209,9 @@ function SourcesPage() {
                         Open
                       </Button>
                     ) : null}
+                    <Button size="sm" variant="outline" onClick={() => setEditing({ ...d })}>
+                      Edit
+                    </Button>
                   </span>
                 </li>
               ))}

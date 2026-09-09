@@ -312,13 +312,19 @@ export interface DbRule {
   description: string | null;
   legal_requirement: string | null;
   source_document: string | null;
+  source_url: string | null;
   effective_from: string;
   effective_to: string | null;
   status: "draft" | "in_force" | "superseded" | "future" | "archived";
   version: number;
   category: string | null;
+  field: string | null;
   severity: string | null;
+  machine_checkability: string | null;
+  human_review_required: boolean;
+  provenance: string | null;
   amendment_note: string | null;
+  created_at: string;
   updated_at: string;
 }
 
@@ -326,7 +332,7 @@ export async function listDbRules(): Promise<DbRule[]> {
   const { data } = await supabase
     .from("rules")
     .select(
-      "id, rule_key, rule_number, sub_rule, title, description, legal_requirement, source_document, effective_from, effective_to, status, version, category, severity, amendment_note, updated_at",
+      "id, rule_key, rule_number, sub_rule, title, description, legal_requirement, source_document, source_url, effective_from, effective_to, status, version, category, field, severity, machine_checkability, human_review_required, provenance, amendment_note, created_at, updated_at",
     )
     .order("rule_key")
     .order("version", { ascending: false });

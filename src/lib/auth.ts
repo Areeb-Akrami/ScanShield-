@@ -141,6 +141,12 @@ async function refreshFromSupabase() {
   const expiresAt = new Date((s.expires_at ?? Date.now() / 1000 + 3600) * 1000).toISOString();
   try {
     const session = await loadProfile(s.user.id, s.user.email ?? "", expiresAt);
+    if (session.accountStatus && session.accountStatus !== "active") {
+      // Suspended or deactivated accounts are signed out on the next check.
+      await supabase.auth.signOut();
+      setState({ status: "ready", session: null });
+      return;
+    }
     setState({ status: "ready", session });
   } catch {
     setState({ status: "ready", session: state.session });

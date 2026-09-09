@@ -33,6 +33,8 @@ export const Route = createFileRoute("/admin/sources")({
 type Doc = Awaited<ReturnType<typeof listLegalDocuments>>[number];
 
 function SourcesPage() {
+  const session = useSession();
+  const [editing, setEditing] = useState<Doc | null>(null);
   const [docs, setDocs] = useState<Doc[]>([]);
   const [rules, setRules] = useState<DbRule[]>([]);
   const [exemptions, setExemptions] = useState<DbExemption[]>([]);

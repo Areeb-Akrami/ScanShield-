@@ -15,8 +15,10 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
-  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --color-navy: var(--navy);
+  --color-navy-foreground: var(--navy-foreground);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -55,28 +57,28 @@
 }
 
 :root {
-  --radius: 0.5rem;
-  --background: oklch(0.978 0.005 240);
+  --radius: 0.75rem;
+  --background: oklch(0.981 0.004 250);
   --foreground: oklch(0.22 0.035 252);
-  --surface: oklch(0.955 0.008 240);
+  --surface: oklch(0.958 0.009 250);
   --surface-foreground: oklch(0.3 0.03 252);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.22 0.035 252);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.22 0.035 252);
-  --primary: oklch(0.34 0.085 252);
+  --primary: oklch(0.52 0.17 256);
   --primary-foreground: oklch(0.985 0.005 240);
   --secondary: oklch(0.93 0.014 240);
   --secondary-foreground: oklch(0.3 0.04 252);
   --muted: oklch(0.945 0.008 240);
   --muted-foreground: oklch(0.52 0.02 250);
-  --accent: oklch(0.55 0.09 195);
-  --accent-foreground: oklch(0.99 0.005 200);
+  --accent: oklch(0.58 0.15 250);
+  --accent-foreground: oklch(0.99 0.004 250);
   --destructive: oklch(0.52 0.19 25);
   --destructive-foreground: oklch(0.99 0.005 40);
-  --border: oklch(0.89 0.01 245);
-  --input: oklch(0.89 0.01 245);
-  --ring: oklch(0.55 0.09 195);
+  --border: oklch(0.905 0.011 250);
+  --input: oklch(0.905 0.011 250);
+  --ring: oklch(0.58 0.15 250);
 
   --pass: oklch(0.52 0.12 155);
   --pass-foreground: oklch(0.99 0.01 155);
@@ -90,6 +92,8 @@
   --na-foreground: oklch(0.99 0.003 250);
   --demo: oklch(0.72 0.15 92);
   --demo-foreground: oklch(0.24 0.06 80);
+  --navy: oklch(0.24 0.055 258);
+  --navy-foreground: oklch(0.97 0.006 250);
 }
 
 .dark {
@@ -101,19 +105,19 @@
   --card-foreground: oklch(0.96 0.006 240);
   --popover: oklch(0.24 0.03 252);
   --popover-foreground: oklch(0.96 0.006 240);
-  --primary: oklch(0.75 0.09 200);
-  --primary-foreground: oklch(0.18 0.03 252);
+  --primary: oklch(0.68 0.15 256);
+  --primary-foreground: oklch(0.14 0.03 258);
   --secondary: oklch(0.3 0.03 252);
   --secondary-foreground: oklch(0.95 0.006 240);
   --muted: oklch(0.29 0.028 252);
   --muted-foreground: oklch(0.7 0.018 248);
-  --accent: oklch(0.68 0.1 195);
+  --accent: oklch(0.72 0.13 250);
   --accent-foreground: oklch(0.18 0.03 252);
   --destructive: oklch(0.62 0.19 25);
   --destructive-foreground: oklch(0.99 0.005 40);
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 16%);
-  --ring: oklch(0.68 0.1 195);
+  --ring: oklch(0.72 0.13 250);
 
   --pass: oklch(0.66 0.13 155);
   --pass-foreground: oklch(0.16 0.04 155);
@@ -127,6 +131,8 @@
   --na-foreground: oklch(0.15 0.01 250);
   --demo: oklch(0.78 0.15 92);
   --demo-foreground: oklch(0.22 0.06 80);
+  --navy: oklch(0.2 0.03 258);
+  --navy-foreground: oklch(0.97 0.006 250);
 }
 
 @layer base {
@@ -171,4 +177,44 @@
     oklch(0.55 0.12 150) 66.6%,
     oklch(0.55 0.12 150) 100%
   );
+}
+
+@utility panel-hover {
+  transition: box-shadow 160ms ease, transform 160ms ease, border-color 160ms ease;
+  &:hover {
+    box-shadow: var(--shadow-raised);
+    border-color: color-mix(in oklab, var(--color-accent) 35%, var(--color-border));
+  }
+}
+
+@utility chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 9999px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-muted-foreground);
+}
+
+@utility hero-navy {
+  background-image: radial-gradient(
+      110% 90% at 12% 0%,
+      color-mix(in oklab, var(--color-accent) 26%, transparent) 0%,
+      transparent 60%
+    ),
+    linear-gradient(160deg, var(--color-navy) 0%, oklch(0.18 0.04 258) 100%);
+  color: var(--color-navy-foreground);
+}
+
+@utility rise-in {
+  animation: rise-in 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
 }

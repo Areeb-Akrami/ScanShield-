@@ -15,6 +15,7 @@ import { Route as ConsumerRouteImport } from './routes/consumer'
 import { Route as InspectorRouteImport } from './routes/inspector'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AdminInspectionsRouteImport } from './routes/admin.inspections'
 import { Route as AdminRulesRouteImport } from './routes/admin.rules'
@@ -68,6 +69,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminAuditRoute = AdminAuditRouteImport.update({
@@ -199,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/consumer': typeof ConsumerRouteWithChildren
   '/inspector': typeof InspectorRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/inspections': typeof AdminInspectionsRoute
   '/admin/rules': typeof AdminRulesRoute
@@ -228,6 +235,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/inspections': typeof AdminInspectionsRoute
   '/admin/rules': typeof AdminRulesRoute
@@ -258,6 +266,7 @@ export interface FileRoutesById {
   '/consumer': typeof ConsumerRouteWithChildren
   '/inspector': typeof InspectorRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/inspections': typeof AdminInspectionsRoute
   '/admin/rules': typeof AdminRulesRoute
@@ -292,6 +301,7 @@ export interface FileRouteTypes {
     | '/consumer'
     | '/inspector'
     | '/reset-password'
+    | '/admin/analytics'
     | '/admin/audit'
     | '/admin/inspections'
     | '/admin/rules'
@@ -321,6 +331,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/reset-password'
+    | '/admin/analytics'
     | '/admin/audit'
     | '/admin/inspections'
     | '/admin/rules'
@@ -350,6 +361,7 @@ export interface FileRouteTypes {
     | '/consumer'
     | '/inspector'
     | '/reset-password'
+    | '/admin/analytics'
     | '/admin/audit'
     | '/admin/inspections'
     | '/admin/rules'
@@ -427,6 +439,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/audit': {
@@ -619,6 +638,7 @@ const AdminUsersRouteWithChildren = AdminUsersRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminAuditRoute: typeof AdminAuditRoute
   AdminInspectionsRoute: typeof AdminInspectionsRoute
   AdminRulesRoute: typeof AdminRulesRoute
@@ -628,6 +648,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminAuditRoute: AdminAuditRoute,
   AdminInspectionsRoute: AdminInspectionsRoute,
   AdminRulesRoute: AdminRulesRoute,

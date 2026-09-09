@@ -1,13 +1,16 @@
 import { CorpusBanner } from "@/components/CorpusBanner";
 import { useSession } from "@/components/AppShell";
 import { Button, Field, Panel, PanelHeader, StatusPill, inputClass } from "@/components/ui";
-import { EXEMPTIONS, sourceTitle } from "@/legal/corpus";
+import { sourceTitle } from "@/legal/corpus";
 import {
   createRule,
   createRuleVersion,
   listDbRules,
+  listExemptions,
   listLegalDocuments,
   setRuleStatus,
+  updateRule,
+  type DbExemption,
   type DbRule,
 } from "@/lib/db";
 import { audit } from "@/lib/store";
@@ -49,34 +52,85 @@ function RulesPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [draft, setDraft] = useState({
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [exemptions, setExemptions] = useState<DbExemption[]>([]);
+  const [correcting, setCorrecting] = useState<DbRule | null>(null);
+  const EMPTY_DRAFT = {
     rule_key: "",
     rule_number: "",
+    sub_rule: "",
     title: "",
     category: "",
+    field: "",
     legal_requirement: "",
     description: "",
     effective_from: new Date().toISOString().slice(0, 10),
+    effective_to: "",
     source_document: "",
+    source_url: "",
     severity: "",
+    machine_checkability: "",
+    human_review_required: false,
+    required_evidence: "",
+    applicability: "",
+    provenance: "",
+    amendment_note: "",
     status: "draft" as DbRule["status"],
-  });
+  };
+  const [draft, setDraft] = useState(EMPTY_DRAFT);
 
-  async function submitNewRule(e: React.FormEvent) {
+  /** Saves a brand-new provision. `publish` puts it straight into force. */
+  async function submitNewRule(e: React.FormEvent, publish = false) {
     e.preventDefault();
+    if (!draft.rule_key.trim() || !draft.rule_number.trim() || !draft.title.trim()) {
+      setMessage("Rule identifier, rule number and title are required.");
+      return;
+    }
+    if (draft.effective_to && draft.effective_to < draft.effective_from) {
+      setMessage("The end date cannot be earlier than the effective-from date.");
+      return;
+    }
+    let applicability: Record<string, unknown> = {};
+    if (draft.applicability.trim()) {
+      try {
+        applicability = JSON.parse(draft.applicability) as Record<string, unknown>;
+      } catch {
+        setMessage("Applicability must be valid JSON, for example {\"package_type\":\"retail\"}.");
+        return;
+      }
+    }
+    const status: DbRule["status"] = publish
+      ? draft.effective_from > new Date().toISOString().slice(0, 10)
+        ? "future"
+        : "in_force"
+      : draft.status;
     setBusy(true);
     setMessage(null);
     const { error } = await createRule({
       rule_key: draft.rule_key,
       rule_number: draft.rule_number,
+      sub_rule: draft.sub_rule || null,
       title: draft.title,
       category: draft.category,
+      field: draft.field || null,
       legal_requirement: draft.legal_requirement,
       description: draft.description,
       effective_from: draft.effective_from,
+      effective_to: draft.effective_to || null,
       source_document: draft.source_document || null,
+      source_url: draft.source_url || null,
       severity: draft.severity || null,
-      status: draft.status,
+      machine_checkability: draft.machine_checkability || null,
+      human_review_required: draft.human_review_required,
+      required_evidence: draft.required_evidence
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
+      applicability,
+      provenance: draft.provenance || null,
+      amendment_note: draft.amendment_note || null,
+      status,
     });
     setBusy(false);
     if (error) {
@@ -85,21 +139,84 @@ function RulesPage() {
     }
     audit({
       user: session?.email ?? "unknown",
-      action: "RULE_CREATED",
+      action: publish ? "RULE_PUBLISHED" : "RULE_CREATED",
       entity: "Rule",
       entityId: draft.rule_key,
       before: "—",
-      after: `v1 effective ${draft.effective_from}`,
+      after: `v1 ${status} effective ${draft.effective_from}`,
     });
-    setMessage(`${draft.rule_key} was created as version 1.`);
+    setMessage(`${draft.rule_key} was saved as version 1 (${status.replaceAll("_", " ")}).`);
     setCreating(false);
-    setDraft({ ...draft, rule_key: "", rule_number: "", title: "", legal_requirement: "", description: "" });
+    setDraft(EMPTY_DRAFT);
+    load();
+  }
+
+  /** In-place correction of the current version — never used for amendments. */
+  async function saveCorrection(e: React.FormEvent) {
+    e.preventDefault();
+    if (!correcting) return;
+    setBusy(true);
+    setMessage(null);
+    const { error } = await updateRule(correcting.id, {
+      title: correcting.title,
+      rule_number: correcting.rule_number,
+      sub_rule: correcting.sub_rule,
+      description: correcting.description,
+      source_document: correcting.source_document,
+      source_url: correcting.source_url,
+      category: correcting.category,
+      field: correcting.field,
+      severity: correcting.severity,
+      machine_checkability: correcting.machine_checkability,
+      human_review_required: correcting.human_review_required,
+      effective_to: correcting.effective_to,
+    });
+    setBusy(false);
+    if (error) {
+      setMessage(error);
+      return;
+    }
+    audit({
+      user: session?.email ?? "unknown",
+      action: "RULE_UPDATED",
+      entity: "Rule",
+      entityId: correcting.rule_key,
+      before: `v${correcting.version}`,
+      after: "corrected in place",
+    });
+    setMessage(`${correcting.rule_key} v${correcting.version} was corrected. Earlier versions are untouched.`);
+    setCorrecting(null);
+    load();
+  }
+
+  /** Moves a draft or scheduled provision into force. */
+  async function publishRule(rule: DbRule) {
+    if (!window.confirm(`Publish ${rule.rule_key} v${rule.version} into force?`)) return;
+    setBusy(true);
+    const target: DbRule["status"] =
+      rule.effective_from > new Date().toISOString().slice(0, 10) ? "future" : "in_force";
+    const { error } = await setRuleStatus(rule.id, target);
+    setBusy(false);
+    if (error) {
+      setMessage(error);
+      return;
+    }
+    audit({
+      user: session?.email ?? "unknown",
+      action: "RULE_PUBLISHED",
+      entity: "Rule",
+      entityId: rule.rule_key,
+      before: rule.status,
+      after: target,
+    });
+    setMessage(`${rule.rule_key} v${rule.version} is now ${target.replaceAll("_", " ")}.`);
     load();
   }
 
   const load = useCallback(() => {
     void listDbRules().then(setRules);
     void listLegalDocuments().then(setDocs);
+    void listExemptions().then(setExemptions);
   }, []);
   useEffect(load, [load]);
 
@@ -128,15 +245,24 @@ function RulesPage() {
             c.versions.find((v) => v.effective_from <= asOf && (!v.effective_to || v.effective_to >= asOf)) ?? null,
         }))
         .filter((c) => {
+          const shown = c.onDate ?? c.latest;
+          if (statusFilter !== "all" && shown.status !== statusFilter) return false;
+          if (categoryFilter !== "all" && (shown.category ?? "") !== categoryFilter) return false;
           const n = q.trim().toLowerCase();
           return (
             n === "" ||
             c.latest.title.toLowerCase().includes(n) ||
             c.key.toLowerCase().includes(n) ||
+            c.latest.rule_number.toLowerCase().includes(n) ||
             (c.latest.category ?? "").toLowerCase().includes(n)
           );
         }),
-    [chains, asOf, q],
+    [chains, asOf, q, statusFilter, categoryFilter],
+  );
+
+  const categories = useMemo(
+    () => [...new Set(rules.map((r) => r.category).filter(Boolean))].sort() as string[],
+    [rules],
   );
 
   const counts = useMemo(() => {
@@ -219,7 +345,29 @@ function RulesPage() {
           </label>
           <label className="block">
             <span className="label-caps">Search</span>
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rule, category or id" className={inputClass("mt-1.5")} />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rule number, title or identifier" className={inputClass("mt-1.5")} />
+          </label>
+          <label className="block">
+            <span className="label-caps">Status</span>
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className={inputClass("mt-1.5")}>
+              <option value="all">All statuses</option>
+              <option value="draft">Draft</option>
+              <option value="in_force">In force</option>
+              <option value="future">Not yet in force</option>
+              <option value="superseded">Superseded</option>
+              <option value="archived">Archived</option>
+            </select>
+          </label>
+          <label className="block">
+            <span className="label-caps">Category</span>
+            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className={inputClass("mt-1.5")}>
+              <option value="all">All categories</option>
+              {categories.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
           </label>
         </div>
         <div className="grid grid-cols-3 gap-px border-t border-border bg-border text-center">
@@ -255,7 +403,7 @@ function RulesPage() {
             }
           />
           {creating ? (
-            <form onSubmit={submitNewRule} className="grid gap-3 p-4 sm:grid-cols-2">
+            <form onSubmit={(e) => void submitNewRule(e)} className="grid gap-3 p-4 sm:grid-cols-2">
               <Field label="Rule identifier">
                 <input
                   required
@@ -277,8 +425,14 @@ function RulesPage() {
               <Field label="Title">
                 <input required value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} className={inputClass()} />
               </Field>
+              <Field label="Sub-rule">
+                <input value={draft.sub_rule} onChange={(e) => setDraft({ ...draft, sub_rule: e.target.value })} placeholder="(a)" className={inputClass()} />
+              </Field>
               <Field label="Category">
                 <input value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value })} className={inputClass()} />
+              </Field>
+              <Field label="Declaration field">
+                <input value={draft.field} onChange={(e) => setDraft({ ...draft, field: e.target.value })} placeholder="mrp, net_quantity…" className={inputClass()} />
               </Field>
               <div className="sm:col-span-2">
                 <Field label="Legal requirement (verbatim)">
@@ -331,20 +485,90 @@ function RulesPage() {
                   <option value="low">Low</option>
                 </select>
               </Field>
-              <Field label="Status on creation">
+              <Field label="Effective to (optional)">
+                <input
+                  type="date"
+                  value={draft.effective_to}
+                  onChange={(e) => setDraft({ ...draft, effective_to: e.target.value })}
+                  className={inputClass()}
+                />
+              </Field>
+              <Field label="Source URL">
+                <input
+                  type="url"
+                  value={draft.source_url}
+                  onChange={(e) => setDraft({ ...draft, source_url: e.target.value })}
+                  placeholder="https://…"
+                  className={inputClass()}
+                />
+              </Field>
+              <Field label="Machine checkability">
+                <select
+                  value={draft.machine_checkability}
+                  onChange={(e) => setDraft({ ...draft, machine_checkability: e.target.value })}
+                  className={inputClass()}
+                >
+                  <option value="">Unspecified</option>
+                  <option value="full">Fully machine checkable</option>
+                  <option value="partial">Partially machine checkable</option>
+                  <option value="none">Manual inspection only</option>
+                </select>
+              </Field>
+              <Field label="Required evidence (comma separated)">
+                <input
+                  value={draft.required_evidence}
+                  onChange={(e) => setDraft({ ...draft, required_evidence: e.target.value })}
+                  placeholder="front_label, principal_display_panel"
+                  className={inputClass()}
+                />
+              </Field>
+              <Field label="Applicability (JSON)">
+                <input
+                  value={draft.applicability}
+                  onChange={(e) => setDraft({ ...draft, applicability: e.target.value })}
+                  placeholder='{"package_type":"retail"}'
+                  className={inputClass()}
+                />
+              </Field>
+              <Field label="Provenance">
+                <input
+                  value={draft.provenance}
+                  onChange={(e) => setDraft({ ...draft, provenance: e.target.value })}
+                  placeholder="ENTERED_BY_ADMINISTRATOR"
+                  className={inputClass()}
+                />
+              </Field>
+              <Field label="Amendment note">
+                <input
+                  value={draft.amendment_note}
+                  onChange={(e) => setDraft({ ...draft, amendment_note: e.target.value })}
+                  className={inputClass()}
+                />
+              </Field>
+              <label className="flex items-center gap-2 self-end text-sm">
+                <input
+                  type="checkbox"
+                  checked={draft.human_review_required}
+                  onChange={(e) => setDraft({ ...draft, human_review_required: e.target.checked })}
+                />
+                Human review required
+              </label>
+              <Field label="Status when saved as draft">
                 <select
                   value={draft.status}
                   onChange={(e) => setDraft({ ...draft, status: e.target.value as DbRule["status"] })}
                   className={inputClass()}
                 >
                   <option value="draft">Draft</option>
-                  <option value="in_force">In force</option>
                   <option value="future">Not yet in force</option>
                 </select>
               </Field>
-              <div className="sm:col-span-2">
-                <Button type="submit" disabled={busy}>
-                  {busy ? "Saving…" : "Create rule"}
+              <div className="flex flex-wrap gap-2 sm:col-span-2">
+                <Button type="submit" variant="outline" disabled={busy}>
+                  {busy ? "Saving…" : "Save draft"}
+                </Button>
+                <Button type="button" disabled={busy} onClick={(e) => void submitNewRule(e as unknown as React.FormEvent, true)}>
+                  {busy ? "Saving…" : "Publish"}
                 </Button>
               </div>
             </form>
@@ -395,11 +619,34 @@ function RulesPage() {
                           </li>
                         ))}
                       </ol>
+                      <dl className="mt-3 grid gap-1 text-[11px] text-muted-foreground sm:grid-cols-2">
+                        <div>Category: {r.category ?? "—"}</div>
+                        <div>Declaration field: {r.field ?? "—"}</div>
+                        <div>Machine checkability: {r.machine_checkability ?? "—"}</div>
+                        <div>Human review: {r.human_review_required ? "required" : "not required"}</div>
+                        <div>Provenance: {r.provenance ?? "—"}</div>
+                        <div>Last updated: {new Date(r.updated_at).toLocaleString()}</div>
+                        {r.source_url ? (
+                          <div className="sm:col-span-2">
+                            <a href={r.source_url} target="_blank" rel="noreferrer" className="underline">
+                              Open source document
+                            </a>
+                          </div>
+                        ) : null}
+                      </dl>
                       {isAdmin ? (
                         <div className="mt-3 flex flex-wrap gap-2">
                           <Button size="sm" variant="outline" onClick={() => setEditing({ ...c.latest, amendment_note: "" })}>
                             Publish amended version
                           </Button>
+                          <Button size="sm" variant="outline" onClick={() => setCorrecting({ ...c.latest })}>
+                            Correct this version
+                          </Button>
+                          {c.latest.status === "draft" || c.latest.status === "future" ? (
+                            <Button size="sm" variant="outline" disabled={busy} onClick={() => void publishRule(c.latest)}>
+                              Publish
+                            </Button>
+                          ) : null}
                           <Button size="sm" variant="outline" disabled={busy} onClick={() => void archive(c.latest)}>
                             {c.latest.status === "archived" ? "Restore" : "Archive"}
                           </Button>
@@ -471,19 +718,128 @@ function RulesPage() {
         </Panel>
       ) : null}
 
+      {correcting ? (
+        <Panel>
+          <PanelHeader
+            title={`Correct ${correcting.rule_key} v${correcting.version}`}
+            subtitle="Use this only for typing or attribution corrections. A change in the law must be published as a new version instead."
+          />
+          <form onSubmit={(e) => void saveCorrection(e)} className="grid gap-3 p-4 sm:grid-cols-2">
+            <Field label="Title">
+              <input required value={correcting.title} onChange={(e) => setCorrecting({ ...correcting, title: e.target.value })} className={inputClass()} />
+            </Field>
+            <Field label="Rule number">
+              <input required value={correcting.rule_number} onChange={(e) => setCorrecting({ ...correcting, rule_number: e.target.value })} className={inputClass()} />
+            </Field>
+            <Field label="Sub-rule">
+              <input value={correcting.sub_rule ?? ""} onChange={(e) => setCorrecting({ ...correcting, sub_rule: e.target.value })} className={inputClass()} />
+            </Field>
+            <Field label="Category">
+              <input value={correcting.category ?? ""} onChange={(e) => setCorrecting({ ...correcting, category: e.target.value })} className={inputClass()} />
+            </Field>
+            <Field label="Declaration field">
+              <input value={correcting.field ?? ""} onChange={(e) => setCorrecting({ ...correcting, field: e.target.value })} className={inputClass()} />
+            </Field>
+            <Field label="Severity">
+              <select value={correcting.severity ?? ""} onChange={(e) => setCorrecting({ ...correcting, severity: e.target.value })} className={inputClass()}>
+                <option value="">Unspecified</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </Field>
+            <Field label="Machine checkability">
+              <select
+                value={correcting.machine_checkability ?? ""}
+                onChange={(e) => setCorrecting({ ...correcting, machine_checkability: e.target.value })}
+                className={inputClass()}
+              >
+                <option value="">Unspecified</option>
+                <option value="full">Fully machine checkable</option>
+                <option value="partial">Partially machine checkable</option>
+                <option value="none">Manual inspection only</option>
+              </select>
+            </Field>
+            <Field label="Source document">
+              <select
+                value={correcting.source_document ?? ""}
+                onChange={(e) => setCorrecting({ ...correcting, source_document: e.target.value })}
+                className={inputClass()}
+              >
+                <option value="">Not attributed</option>
+                {docs.map((d) => (
+                  <option key={d.id} value={d.source_id}>
+                    {d.title}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Source URL">
+              <input value={correcting.source_url ?? ""} onChange={(e) => setCorrecting({ ...correcting, source_url: e.target.value })} className={inputClass()} />
+            </Field>
+            <Field label="Effective to">
+              <input
+                type="date"
+                value={correcting.effective_to ?? ""}
+                onChange={(e) => setCorrecting({ ...correcting, effective_to: e.target.value || null })}
+                className={inputClass()}
+              />
+            </Field>
+            <div className="sm:col-span-2">
+              <Field label="Working summary">
+                <textarea
+                  rows={2}
+                  value={correcting.description ?? ""}
+                  onChange={(e) => setCorrecting({ ...correcting, description: e.target.value })}
+                  className={inputClass()}
+                />
+              </Field>
+            </div>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={correcting.human_review_required}
+                onChange={(e) => setCorrecting({ ...correcting, human_review_required: e.target.checked })}
+              />
+              Human review required
+            </label>
+            <div className="flex gap-2 sm:col-span-2">
+              <Button type="submit" disabled={busy}>
+                {busy ? "Saving…" : "Save correction"}
+              </Button>
+              <Button type="button" variant="outline" onClick={() => setCorrecting(null)}>
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </Panel>
+      ) : null}
+
       <Panel>
-        <PanelHeader title="Exemptions" subtitle="An exemption resolves to NOT APPLICABLE — never to a pass." />
+        <PanelHeader
+          title={`Exemptions (${exemptions.length})`}
+          subtitle="Held in the database. An exemption resolves to NOT APPLICABLE — never to a pass."
+        />
         <ul className="divide-y divide-border">
-          {EXEMPTIONS.map((e) => (
-            <li key={e.exemption_id} className="px-4 py-3">
-              <p className="text-sm font-medium">{e.title}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{e.explanation}</p>
-              <p className="mt-1 font-mono text-[11px] text-muted-foreground">
-                {e.exemption_id} · from {e.effective_from}
-                {e.effective_to ? ` to ${e.effective_to}` : ""} · affects {e.rule_ids.length} rule(s)
-              </p>
-            </li>
-          ))}
+          {exemptions.map((e) => {
+            const ruleKeys = Array.isArray(e.rule_keys) ? (e.rule_keys as string[]) : [];
+            return (
+              <li key={e.id} className="px-4 py-3">
+                <p className="text-sm font-medium">{e.title}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{e.explanation}</p>
+                <p className="mt-1 font-mono text-[11px] text-muted-foreground">
+                  {e.exemption_key} · from {e.effective_from}
+                  {e.effective_to ? ` to ${e.effective_to}` : ""} · affects {ruleKeys.length} rule(s)
+                  {e.source_document ? ` · ${sourceTitle(e.source_document)}` : ""}
+                </p>
+                {ruleKeys.length ? <p className="mt-1 font-mono text-[11px] text-muted-foreground">{ruleKeys.join(", ")}</p> : null}
+                {e.conditions && Object.keys(e.conditions as object).length ? (
+                  <p className="mt-1 font-mono text-[11px] text-muted-foreground">Conditions: {JSON.stringify(e.conditions)}</p>
+                ) : null}
+              </li>
+            );
+          })}
+          {exemptions.length === 0 ? <li className="px-4 py-3 text-sm text-muted-foreground">No exemptions recorded.</li> : null}
         </ul>
       </Panel>
 

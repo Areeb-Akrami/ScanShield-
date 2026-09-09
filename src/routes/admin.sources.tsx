@@ -1,4 +1,4 @@
-import { RequireRole } from "@/components/AppShell";
+import { RequireRole, useSession } from "@/components/AppShell";
 import { Button, Field, Panel, PanelHeader, StatusPill, inputClass } from "@/components/ui";
 import {
   addLegalDocument,
@@ -7,10 +7,12 @@ import {
   listExemptions,
   listLegalDocuments,
   signedUrl,
+  updateLegalDocument,
   uploadLegalDocumentFile,
   type DbExemption,
   type DbRule,
 } from "@/lib/db";
+import { audit } from "@/lib/store";
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -31,6 +33,8 @@ export const Route = createFileRoute("/admin/sources")({
 type Doc = Awaited<ReturnType<typeof listLegalDocuments>>[number];
 
 function SourcesPage() {
+  const session = useSession();
+  const [editing, setEditing] = useState<Doc | null>(null);
   const [docs, setDocs] = useState<Doc[]>([]);
   const [rules, setRules] = useState<DbRule[]>([]);
   const [exemptions, setExemptions] = useState<DbExemption[]>([]);
@@ -54,6 +58,47 @@ function SourcesPage() {
   useEffect(load, [load]);
 
   const ruleKeys = useMemo(() => [...new Set(rules.map((r) => r.rule_key))].sort(), [rules]);
+
+  /** How many distinct provisions are attributed to each source document. */
+  const linkedCounts = useMemo(() => {
+    const m = new Map<string, Set<string>>();
+    for (const r of rules) {
+      if (!r.source_document) continue;
+      const set = m.get(r.source_document) ?? new Set<string>();
+      set.add(r.rule_key);
+      m.set(r.source_document, set);
+    }
+    return m;
+  }, [rules]);
+
+  async function saveMetadata(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editing) return;
+    setBusy(true);
+    setMessage(null);
+    const { error } = await updateLegalDocument(editing.id, {
+      title: editing.title,
+      gazette_reference: editing.gazette_reference,
+      published_on: editing.published_on,
+      ingested: editing.ingested,
+    });
+    setBusy(false);
+    if (error) {
+      setMessage(error);
+      return;
+    }
+    audit({
+      user: session?.email ?? "unknown",
+      action: "LEGAL_SOURCE_UPDATED",
+      entity: "LegalDocument",
+      entityId: editing.source_id,
+      before: "previous metadata",
+      after: `${editing.title} · ${editing.ingested ? "ingested" : "not ingested"}`,
+    });
+    setMessage(`${editing.title} was updated.`);
+    setEditing(null);
+    load();
+  }
 
   async function upload(e: React.FormEvent) {
     e.preventDefault();
@@ -83,6 +128,14 @@ function SourcesPage() {
       setMessage(error);
       return;
     }
+    audit({
+      user: session?.email ?? "unknown",
+      action: "LEGAL_SOURCE_ADDED",
+      entity: "LegalDocument",
+      entityId: sourceId || title,
+      before: "—",
+      after: path ? "record and file stored" : "record stored without a file",
+    });
     setMessage("The source document was recorded. Its provisions are not ingested until rules are entered against it.");
     setSourceId("");
     setTitle("");
@@ -98,6 +151,16 @@ function SourcesPage() {
     setBusy(true);
     const { error } = await associateSourceWithRule(assocRule, assocSource);
     setBusy(false);
+    if (!error) {
+      audit({
+        user: session?.email ?? "unknown",
+        action: "LEGAL_SOURCE_ASSOCIATED",
+        entity: "Rule",
+        entityId: assocRule,
+        before: "—",
+        after: `attributed to ${assocSource}`,
+      });
+    }
     setMessage(error ?? `${assocRule} is now attributed to ${assocSource}.`);
     load();
   }
@@ -132,6 +195,11 @@ function SourcesPage() {
                       {d.source_id}
                       {d.gazette_reference ? ` · ${d.gazette_reference}` : ""}
                       {d.published_on ? ` · published ${d.published_on}` : ""}
+                      {d.created_at ? ` · recorded ${new Date(d.created_at).toLocaleDateString()}` : ""}
+                    </p>
+                    <p className="mt-0.5 text-[11px] text-muted-foreground">
+                      {linkedCounts.get(d.source_id)?.size ?? 0} provision(s) attributed ·{" "}
+                      {d.document_url ? "file held privately" : "no file held"}
                     </p>
                   </div>
                   <span className="flex items-center gap-2">
@@ -141,12 +209,56 @@ function SourcesPage() {
                         Open
                       </Button>
                     ) : null}
+                    <Button size="sm" variant="outline" onClick={() => setEditing({ ...d })}>
+                      Edit
+                    </Button>
                   </span>
                 </li>
               ))}
             </ul>
           )}
         </Panel>
+
+        {editing ? (
+          <Panel>
+            <PanelHeader
+              title={`Edit ${editing.source_id}`}
+              subtitle="Corrects the record's metadata. Mark a document ingested only once its provisions are entered in the rule catalogue."
+            />
+            <form onSubmit={(e) => void saveMetadata(e)} className="space-y-3 p-4">
+              <Field label="Title">
+                <input required value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })} className={inputClass()} />
+              </Field>
+              <Field label="Gazette reference">
+                <input
+                  value={editing.gazette_reference ?? ""}
+                  onChange={(e) => setEditing({ ...editing, gazette_reference: e.target.value })}
+                  className={inputClass()}
+                />
+              </Field>
+              <Field label="Published on">
+                <input
+                  type="date"
+                  value={editing.published_on ?? ""}
+                  onChange={(e) => setEditing({ ...editing, published_on: e.target.value || null })}
+                  className={inputClass()}
+                />
+              </Field>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={editing.ingested} onChange={(e) => setEditing({ ...editing, ingested: e.target.checked })} />
+                Provisions ingested into the rule catalogue
+              </label>
+              <div className="flex gap-2">
+                <Button type="submit" disabled={busy}>
+                  {busy ? "Saving…" : "Save changes"}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setEditing(null)}>
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </Panel>
+        ) : null}
 
         <Panel>
           <PanelHeader title="Upload a source document" subtitle="The file is stored privately; only the record is listed here." />

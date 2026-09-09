@@ -312,13 +312,19 @@ export interface DbRule {
   description: string | null;
   legal_requirement: string | null;
   source_document: string | null;
+  source_url: string | null;
   effective_from: string;
   effective_to: string | null;
   status: "draft" | "in_force" | "superseded" | "future" | "archived";
   version: number;
   category: string | null;
+  field: string | null;
   severity: string | null;
+  machine_checkability: string | null;
+  human_review_required: boolean;
+  provenance: string | null;
   amendment_note: string | null;
+  created_at: string;
   updated_at: string;
 }
 
@@ -326,7 +332,7 @@ export async function listDbRules(): Promise<DbRule[]> {
   const { data } = await supabase
     .from("rules")
     .select(
-      "id, rule_key, rule_number, sub_rule, title, description, legal_requirement, source_document, effective_from, effective_to, status, version, category, severity, amendment_note, updated_at",
+      "id, rule_key, rule_number, sub_rule, title, description, legal_requirement, source_document, source_url, effective_from, effective_to, status, version, category, field, severity, machine_checkability, human_review_required, provenance, amendment_note, created_at, updated_at",
     )
     .order("rule_key")
     .order("version", { ascending: false });
@@ -365,7 +371,7 @@ export async function setRuleStatus(id: string, status: DbRule["status"]): Promi
 export async function listLegalDocuments() {
   const { data } = await supabase
     .from("legal_documents")
-    .select("id, source_id, title, gazette_reference, published_on, ingested, document_url")
+    .select("id, source_id, title, gazette_reference, published_on, ingested, document_url, created_at")
     .order("published_on", { ascending: false });
   return data ?? [];
 }
@@ -383,9 +389,18 @@ export async function createRule(input: {
   description?: string | null;
   legal_requirement?: string | null;
   source_document?: string | null;
+  source_url?: string | null;
   effective_from: string;
+  effective_to?: string | null;
   category?: string | null;
+  field?: string | null;
   severity?: string | null;
+  machine_checkability?: string | null;
+  human_review_required?: boolean;
+  required_evidence?: string[];
+  applicability?: Record<string, unknown>;
+  provenance?: string | null;
+  amendment_note?: string | null;
   status?: DbRule["status"];
 }): Promise<{ error?: string | undefined }> {
   const { data: auth } = await supabase.auth.getUser();
@@ -397,12 +412,20 @@ export async function createRule(input: {
     description: input.description?.trim() || null,
     legal_requirement: input.legal_requirement?.trim() || null,
     source_document: input.source_document || null,
+    source_url: input.source_url?.trim() || null,
     effective_from: input.effective_from,
+    effective_to: input.effective_to || null,
     status: input.status ?? "draft",
     version: 1,
     category: input.category?.trim() || null,
+    field: input.field?.trim() || null,
     severity: input.severity || null,
-    provenance: "ENTERED_BY_ADMINISTRATOR",
+    machine_checkability: input.machine_checkability || null,
+    human_review_required: input.human_review_required ?? false,
+    required_evidence: (input.required_evidence ?? []) as never,
+    applicability: (input.applicability ?? {}) as never,
+    provenance: input.provenance?.trim() || "ENTERED_BY_ADMINISTRATOR",
+    amendment_note: input.amendment_note?.trim() || null,
     created_by: auth.user?.id ?? null,
   });
   return { error: error?.message };
@@ -411,7 +434,25 @@ export async function createRule(input: {
 /** Edits the current version in place — used for corrections, not amendments. */
 export async function updateRule(
   id: string,
-  patch: Partial<Pick<DbRule, "title" | "rule_number" | "sub_rule" | "description" | "legal_requirement" | "source_document" | "category" | "severity" | "effective_from" | "effective_to">>,
+  patch: Partial<
+    Pick<
+      DbRule,
+      | "title"
+      | "rule_number"
+      | "sub_rule"
+      | "description"
+      | "legal_requirement"
+      | "source_document"
+      | "source_url"
+      | "category"
+      | "field"
+      | "severity"
+      | "machine_checkability"
+      | "human_review_required"
+      | "effective_from"
+      | "effective_to"
+    >
+  >,
 ): Promise<{ error?: string | undefined }> {
   const { error } = await supabase.from("rules").update(patch).eq("id", id);
   return { error: error?.message };
@@ -472,6 +513,15 @@ export async function addLegalDocument(input: {
 /** Points every version of one rule at a source document. */
 export async function associateSourceWithRule(ruleKey: string, sourceId: string): Promise<{ error?: string | undefined }> {
   const { error } = await supabase.from("rules").update({ source_document: sourceId }).eq("rule_key", ruleKey);
+  return { error: error?.message };
+}
+
+/** Corrects the metadata of a recorded source document. */
+export async function updateLegalDocument(
+  id: string,
+  patch: { title?: string; gazette_reference?: string | null; published_on?: string | null; ingested?: boolean },
+): Promise<{ error?: string | undefined }> {
+  const { error } = await supabase.from("legal_documents").update(patch).eq("id", id);
   return { error: error?.message };
 }
 

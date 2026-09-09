@@ -57,7 +57,7 @@ function ResetPasswordPage() {
             </p>
 
           ) : (
-            <form onSubmit={submit} className="mt-4 space-y-3">
+            <form onSubmit={submit} className="space-y-3">
               <Field label="New password">
                 <input
                   type="password"

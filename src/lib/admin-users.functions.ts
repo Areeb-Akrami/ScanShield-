@@ -54,18 +54,35 @@ export const createStaffAccount = createServerFn({ method: "POST" })
       .maybeSingle();
     if (existing?.id) return { error: "An account already exists for this email address." };
 
-    const password = temporaryPassword();
-    const { data: created, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: { full_name: data.fullName.trim() },
-    });
-    if (authError || !created.user) {
-      return { error: authError?.message ?? "The authentication account could not be created." };
-    }
+    const meta = { full_name: data.fullName.trim(), role: data.role };
 
-    const userId = created.user.id;
+    // Preferred path: an invitation email that lets the staff member set their
+    // own password. Falls back to a server-side account when email delivery is
+    // not configured — no password is ever revealed either way.
+    let userId: string | null = null;
+    let invited = false;
+    let inviteError: string | null = null;
+
+    const { data: invite, error: inviteErr } = await supabaseAdmin.auth.admin.inviteUserByEmail(
+      email,
+      { data: meta, ...(data.redirectTo ? { redirectTo: data.redirectTo } : {}) },
+    );
+    if (invite?.user && !inviteErr) {
+      userId = invite.user.id;
+      invited = true;
+    } else {
+      inviteError = inviteErr?.message ?? "Invitation email could not be sent.";
+      const { data: created, error: authError } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password: unrevealedPassword(),
+        email_confirm: true,
+        user_metadata: meta,
+      });
+      if (authError || !created.user) {
+        return { error: authError?.message ?? "The authentication account could not be created." };
+      }
+      userId = created.user.id;
+    }
     // The profile trigger mirrors this role into user_roles, which is what RLS reads.
     const { error: profileError } = await supabaseAdmin.from("profiles").upsert(
       {

@@ -108,8 +108,21 @@ export const createStaffAccount = createServerFn({ method: "POST" })
       action: "staff_created",
       entity_type: "profiles",
       entity_id: userId,
-      metadata: { email, role: data.role, employee_id: data.employeeId, district: data.district },
+      metadata: {
+        email,
+        role: data.role,
+        employee_id: data.employeeId,
+        district: data.district,
+        invitation_sent: invited,
+      },
     });
 
-    return { userId, temporaryPassword: password };
+    return {
+      userId,
+      email,
+      role: data.role,
+      invited,
+      status: invited ? ("pending_setup" as const) : ("active" as const),
+      ...(invited ? {} : { inviteIssue: inviteError }),
+    };
   });

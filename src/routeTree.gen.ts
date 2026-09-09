@@ -19,6 +19,7 @@ import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AdminInspectionsRouteImport } from './routes/admin.inspections'
 import { Route as AdminRulesRouteImport } from './routes/admin.rules'
 import { Route as AdminSellersRouteImport } from './routes/admin.sellers'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as ConsumerIndexRouteImport } from './routes/consumer.index'
 import { Route as ConsumerAccountRouteImport } from './routes/consumer.account'
 import { Route as ConsumerChecksRouteImport } from './routes/consumer.checks'
@@ -29,6 +30,7 @@ import { Route as InspectorInspectionsRouteImport } from './routes/inspector.ins
 import { Route as InspectorProfileRouteImport } from './routes/inspector.profile'
 import { Route as InspectorReportsRouteImport } from './routes/inspector.reports'
 import { Route as InspectorScanRouteImport } from './routes/inspector.scan'
+import { Route as AdminUsersIndexRouteImport } from './routes/admin.users.index'
 import { Route as ConsumerCheckIdRouteImport } from './routes/consumer.check.$id'
 import { Route as InspectorInspectionsIndexRouteImport } from './routes/inspector.inspections.index'
 import { Route as InspectorInspectionsIdRouteImport } from './routes/inspector.inspections.$id'
@@ -85,6 +87,11 @@ const AdminSellersRoute = AdminSellersRouteImport.update({
   path: '/sellers',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
 const ConsumerIndexRoute = ConsumerIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -135,6 +142,11 @@ const InspectorScanRoute = InspectorScanRouteImport.update({
   path: '/scan',
   getParentRoute: () => InspectorRoute,
 } as any)
+const AdminUsersIndexRoute = AdminUsersIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminUsersRoute,
+} as any)
 const ConsumerCheckIdRoute = ConsumerCheckIdRouteImport.update({
   id: '/check/$id',
   path: '/check/$id',
@@ -172,6 +184,7 @@ export interface FileRoutesByFullPath {
   '/admin/inspections': typeof AdminInspectionsRoute
   '/admin/rules': typeof AdminRulesRoute
   '/admin/sellers': typeof AdminSellersRoute
+  '/admin/users': typeof AdminUsersRouteWithChildren
   '/consumer/account': typeof ConsumerAccountRoute
   '/consumer/checks': typeof ConsumerChecksRoute
   '/consumer/complaints': typeof ConsumerComplaintsRoute
@@ -186,6 +199,7 @@ export interface FileRoutesByFullPath {
   '/consumer/check/$id': typeof ConsumerCheckIdRoute
   '/inspector/inspections/$id': typeof InspectorInspectionsIdRoute
   '/inspector/reports/$id': typeof InspectorReportsIdRoute
+  '/admin/users/': typeof AdminUsersIndexRoute
   '/inspector/inspections/': typeof InspectorInspectionsIndexRoute
   '/inspector/reports/': typeof InspectorReportsIndexRoute
 }
@@ -208,6 +222,7 @@ export interface FileRoutesByTo {
   '/consumer/check/$id': typeof ConsumerCheckIdRoute
   '/inspector/inspections/$id': typeof InspectorInspectionsIdRoute
   '/inspector/reports/$id': typeof InspectorReportsIdRoute
+  '/admin/users': typeof AdminUsersIndexRoute
   '/inspector/inspections': typeof InspectorInspectionsIndexRoute
   '/inspector/reports': typeof InspectorReportsIndexRoute
 }
@@ -222,6 +237,7 @@ export interface FileRoutesById {
   '/admin/inspections': typeof AdminInspectionsRoute
   '/admin/rules': typeof AdminRulesRoute
   '/admin/sellers': typeof AdminSellersRoute
+  '/admin/users': typeof AdminUsersRouteWithChildren
   '/consumer/account': typeof ConsumerAccountRoute
   '/consumer/checks': typeof ConsumerChecksRoute
   '/consumer/complaints': typeof ConsumerComplaintsRoute
@@ -236,6 +252,7 @@ export interface FileRoutesById {
   '/consumer/check/$id': typeof ConsumerCheckIdRoute
   '/inspector/inspections/$id': typeof InspectorInspectionsIdRoute
   '/inspector/reports/$id': typeof InspectorReportsIdRoute
+  '/admin/users/': typeof AdminUsersIndexRoute
   '/inspector/inspections/': typeof InspectorInspectionsIndexRoute
   '/inspector/reports/': typeof InspectorReportsIndexRoute
 }
@@ -251,6 +268,7 @@ export interface FileRouteTypes {
     | '/admin/inspections'
     | '/admin/rules'
     | '/admin/sellers'
+    | '/admin/users'
     | '/consumer/account'
     | '/consumer/checks'
     | '/consumer/complaints'
@@ -265,6 +283,7 @@ export interface FileRouteTypes {
     | '/consumer/check/$id'
     | '/inspector/inspections/$id'
     | '/inspector/reports/$id'
+    | '/admin/users/'
     | '/inspector/inspections/'
     | '/inspector/reports/'
   fileRoutesByTo: FileRoutesByTo
@@ -287,6 +306,7 @@ export interface FileRouteTypes {
     | '/consumer/check/$id'
     | '/inspector/inspections/$id'
     | '/inspector/reports/$id'
+    | '/admin/users'
     | '/inspector/inspections'
     | '/inspector/reports'
   id:
@@ -300,6 +320,7 @@ export interface FileRouteTypes {
     | '/admin/inspections'
     | '/admin/rules'
     | '/admin/sellers'
+    | '/admin/users'
     | '/consumer/account'
     | '/consumer/checks'
     | '/consumer/complaints'
@@ -314,6 +335,7 @@ export interface FileRouteTypes {
     | '/consumer/check/$id'
     | '/inspector/inspections/$id'
     | '/inspector/reports/$id'
+    | '/admin/users/'
     | '/inspector/inspections/'
     | '/inspector/reports/'
   fileRoutesById: FileRoutesById
@@ -398,6 +420,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSellersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/consumer/': {
       id: '/consumer/'
       path: '/'
@@ -468,6 +497,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InspectorScanRouteImport
       parentRoute: typeof InspectorRoute
     }
+    '/admin/users/': {
+      id: '/admin/users/'
+      path: '/'
+      fullPath: '/admin/users/'
+      preLoaderRoute: typeof AdminUsersIndexRouteImport
+      parentRoute: typeof AdminUsersRoute
+    }
     '/consumer/check/$id': {
       id: '/consumer/check/$id'
       path: '/check/$id'
@@ -506,11 +542,24 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminUsersRouteChildren {
+  AdminUsersIndexRoute: typeof AdminUsersIndexRoute
+}
+
+const AdminUsersRouteChildren: AdminUsersRouteChildren = {
+  AdminUsersIndexRoute: AdminUsersIndexRoute,
+}
+
+const AdminUsersRouteWithChildren = AdminUsersRoute._addFileChildren(
+  AdminUsersRouteChildren,
+)
+
 interface AdminRouteChildren {
   AdminAuditRoute: typeof AdminAuditRoute
   AdminInspectionsRoute: typeof AdminInspectionsRoute
   AdminRulesRoute: typeof AdminRulesRoute
   AdminSellersRoute: typeof AdminSellersRoute
+  AdminUsersRoute: typeof AdminUsersRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -519,6 +568,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminInspectionsRoute: AdminInspectionsRoute,
   AdminRulesRoute: AdminRulesRoute,
   AdminSellersRoute: AdminSellersRoute,
+  AdminUsersRoute: AdminUsersRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,
 }
 

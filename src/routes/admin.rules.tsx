@@ -1,13 +1,16 @@
 import { CorpusBanner } from "@/components/CorpusBanner";
 import { useSession } from "@/components/AppShell";
 import { Button, Field, Panel, PanelHeader, StatusPill, inputClass } from "@/components/ui";
-import { EXEMPTIONS, sourceTitle } from "@/legal/corpus";
+import { sourceTitle } from "@/legal/corpus";
 import {
   createRule,
   createRuleVersion,
   listDbRules,
+  listExemptions,
   listLegalDocuments,
   setRuleStatus,
+  updateRule,
+  type DbExemption,
   type DbRule,
 } from "@/lib/db";
 import { audit } from "@/lib/store";

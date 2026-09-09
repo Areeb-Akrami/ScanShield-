@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ConsumerRouteImport } from './routes/consumer'
 import { Route as InspectorRouteImport } from './routes/inspector'
+import { Route as OfficerRouteImport } from './routes/officer'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
@@ -34,6 +35,13 @@ import { Route as InspectorInspectionsRouteImport } from './routes/inspector.ins
 import { Route as InspectorProfileRouteImport } from './routes/inspector.profile'
 import { Route as InspectorReportsRouteImport } from './routes/inspector.reports'
 import { Route as InspectorScanRouteImport } from './routes/inspector.scan'
+import { Route as OfficerIndexRouteImport } from './routes/officer.index'
+import { Route as OfficerAnalyticsRouteImport } from './routes/officer.analytics'
+import { Route as OfficerNotificationsRouteImport } from './routes/officer.notifications'
+import { Route as OfficerProfileRouteImport } from './routes/officer.profile'
+import { Route as OfficerReportsRouteImport } from './routes/officer.reports'
+import { Route as OfficerReviewRouteImport } from './routes/officer.review'
+import { Route as OfficerSellersRouteImport } from './routes/officer.sellers'
 import { Route as AdminUsersIndexRouteImport } from './routes/admin.users.index'
 import { Route as AdminUsersStaffRouteImport } from './routes/admin.users.staff'
 import { Route as ConsumerCheckIdRouteImport } from './routes/consumer.check.$id'
@@ -41,6 +49,7 @@ import { Route as InspectorInspectionsIndexRouteImport } from './routes/inspecto
 import { Route as InspectorInspectionsIdRouteImport } from './routes/inspector.inspections.$id'
 import { Route as InspectorReportsIndexRouteImport } from './routes/inspector.reports.index'
 import { Route as InspectorReportsIdRouteImport } from './routes/inspector.reports.$id'
+import { Route as OfficerCasesIdRouteImport } from './routes/officer.cases.$id'
 import { Route as AdminUsersCustomersIndexRouteImport } from './routes/admin.users.customers.index'
 import { Route as AdminUsersCustomersIdRouteImport } from './routes/admin.users.customers.$id'
 
@@ -62,6 +71,11 @@ const ConsumerRoute = ConsumerRouteImport.update({
 const InspectorRoute = InspectorRouteImport.update({
   id: '/inspector',
   path: '/inspector',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OfficerRoute = OfficerRouteImport.update({
+  id: '/officer',
+  path: '/officer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -169,6 +183,41 @@ const InspectorScanRoute = InspectorScanRouteImport.update({
   path: '/scan',
   getParentRoute: () => InspectorRoute,
 } as any)
+const OfficerIndexRoute = OfficerIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => OfficerRoute,
+} as any)
+const OfficerAnalyticsRoute = OfficerAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => OfficerRoute,
+} as any)
+const OfficerNotificationsRoute = OfficerNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => OfficerRoute,
+} as any)
+const OfficerProfileRoute = OfficerProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => OfficerRoute,
+} as any)
+const OfficerReportsRoute = OfficerReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => OfficerRoute,
+} as any)
+const OfficerReviewRoute = OfficerReviewRouteImport.update({
+  id: '/review',
+  path: '/review',
+  getParentRoute: () => OfficerRoute,
+} as any)
+const OfficerSellersRoute = OfficerSellersRouteImport.update({
+  id: '/sellers',
+  path: '/sellers',
+  getParentRoute: () => OfficerRoute,
+} as any)
 const AdminUsersIndexRoute = AdminUsersIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -205,6 +254,11 @@ const InspectorReportsIdRoute = InspectorReportsIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => InspectorReportsRoute,
 } as any)
+const OfficerCasesIdRoute = OfficerCasesIdRouteImport.update({
+  id: '/cases/$id',
+  path: '/cases/$id',
+  getParentRoute: () => OfficerRoute,
+} as any)
 const AdminUsersCustomersIndexRoute =
   AdminUsersCustomersIndexRouteImport.update({
     id: '/customers/',
@@ -222,6 +276,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/consumer': typeof ConsumerRouteWithChildren
   '/inspector': typeof InspectorRouteWithChildren
+  '/officer': typeof OfficerRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit': typeof AdminAuditRoute
@@ -240,13 +295,21 @@ export interface FileRoutesByFullPath {
   '/inspector/profile': typeof InspectorProfileRoute
   '/inspector/reports': typeof InspectorReportsRouteWithChildren
   '/inspector/scan': typeof InspectorScanRoute
+  '/officer/analytics': typeof OfficerAnalyticsRoute
+  '/officer/notifications': typeof OfficerNotificationsRoute
+  '/officer/profile': typeof OfficerProfileRoute
+  '/officer/reports': typeof OfficerReportsRoute
+  '/officer/review': typeof OfficerReviewRoute
+  '/officer/sellers': typeof OfficerSellersRoute
   '/admin/': typeof AdminIndexRoute
   '/consumer/': typeof ConsumerIndexRoute
   '/inspector/': typeof InspectorIndexRoute
+  '/officer/': typeof OfficerIndexRoute
   '/admin/users/staff': typeof AdminUsersStaffRoute
   '/consumer/check/$id': typeof ConsumerCheckIdRoute
   '/inspector/inspections/$id': typeof InspectorInspectionsIdRoute
   '/inspector/reports/$id': typeof InspectorReportsIdRoute
+  '/officer/cases/$id': typeof OfficerCasesIdRoute
   '/admin/users/': typeof AdminUsersIndexRoute
   '/inspector/inspections/': typeof InspectorInspectionsIndexRoute
   '/inspector/reports/': typeof InspectorReportsIndexRoute
@@ -270,13 +333,21 @@ export interface FileRoutesByTo {
   '/consumer/rights': typeof ConsumerRightsRoute
   '/inspector/profile': typeof InspectorProfileRoute
   '/inspector/scan': typeof InspectorScanRoute
+  '/officer/analytics': typeof OfficerAnalyticsRoute
+  '/officer/notifications': typeof OfficerNotificationsRoute
+  '/officer/profile': typeof OfficerProfileRoute
+  '/officer/reports': typeof OfficerReportsRoute
+  '/officer/review': typeof OfficerReviewRoute
+  '/officer/sellers': typeof OfficerSellersRoute
   '/admin': typeof AdminIndexRoute
   '/consumer': typeof ConsumerIndexRoute
   '/inspector': typeof InspectorIndexRoute
+  '/officer': typeof OfficerIndexRoute
   '/admin/users/staff': typeof AdminUsersStaffRoute
   '/consumer/check/$id': typeof ConsumerCheckIdRoute
   '/inspector/inspections/$id': typeof InspectorInspectionsIdRoute
   '/inspector/reports/$id': typeof InspectorReportsIdRoute
+  '/officer/cases/$id': typeof OfficerCasesIdRoute
   '/admin/users': typeof AdminUsersIndexRoute
   '/inspector/inspections': typeof InspectorInspectionsIndexRoute
   '/inspector/reports': typeof InspectorReportsIndexRoute
@@ -289,6 +360,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/consumer': typeof ConsumerRouteWithChildren
   '/inspector': typeof InspectorRouteWithChildren
+  '/officer': typeof OfficerRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit': typeof AdminAuditRoute
@@ -307,13 +379,21 @@ export interface FileRoutesById {
   '/inspector/profile': typeof InspectorProfileRoute
   '/inspector/reports': typeof InspectorReportsRouteWithChildren
   '/inspector/scan': typeof InspectorScanRoute
+  '/officer/analytics': typeof OfficerAnalyticsRoute
+  '/officer/notifications': typeof OfficerNotificationsRoute
+  '/officer/profile': typeof OfficerProfileRoute
+  '/officer/reports': typeof OfficerReportsRoute
+  '/officer/review': typeof OfficerReviewRoute
+  '/officer/sellers': typeof OfficerSellersRoute
   '/admin/': typeof AdminIndexRoute
   '/consumer/': typeof ConsumerIndexRoute
   '/inspector/': typeof InspectorIndexRoute
+  '/officer/': typeof OfficerIndexRoute
   '/admin/users/staff': typeof AdminUsersStaffRoute
   '/consumer/check/$id': typeof ConsumerCheckIdRoute
   '/inspector/inspections/$id': typeof InspectorInspectionsIdRoute
   '/inspector/reports/$id': typeof InspectorReportsIdRoute
+  '/officer/cases/$id': typeof OfficerCasesIdRoute
   '/admin/users/': typeof AdminUsersIndexRoute
   '/inspector/inspections/': typeof InspectorInspectionsIndexRoute
   '/inspector/reports/': typeof InspectorReportsIndexRoute
@@ -327,6 +407,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/consumer'
     | '/inspector'
+    | '/officer'
     | '/reset-password'
     | '/admin/analytics'
     | '/admin/audit'
@@ -345,13 +426,21 @@ export interface FileRouteTypes {
     | '/inspector/profile'
     | '/inspector/reports'
     | '/inspector/scan'
+    | '/officer/analytics'
+    | '/officer/notifications'
+    | '/officer/profile'
+    | '/officer/reports'
+    | '/officer/review'
+    | '/officer/sellers'
     | '/admin/'
     | '/consumer/'
     | '/inspector/'
+    | '/officer/'
     | '/admin/users/staff'
     | '/consumer/check/$id'
     | '/inspector/inspections/$id'
     | '/inspector/reports/$id'
+    | '/officer/cases/$id'
     | '/admin/users/'
     | '/inspector/inspections/'
     | '/inspector/reports/'
@@ -375,13 +464,21 @@ export interface FileRouteTypes {
     | '/consumer/rights'
     | '/inspector/profile'
     | '/inspector/scan'
+    | '/officer/analytics'
+    | '/officer/notifications'
+    | '/officer/profile'
+    | '/officer/reports'
+    | '/officer/review'
+    | '/officer/sellers'
     | '/admin'
     | '/consumer'
     | '/inspector'
+    | '/officer'
     | '/admin/users/staff'
     | '/consumer/check/$id'
     | '/inspector/inspections/$id'
     | '/inspector/reports/$id'
+    | '/officer/cases/$id'
     | '/admin/users'
     | '/inspector/inspections'
     | '/inspector/reports'
@@ -393,6 +490,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/consumer'
     | '/inspector'
+    | '/officer'
     | '/reset-password'
     | '/admin/analytics'
     | '/admin/audit'
@@ -411,13 +509,21 @@ export interface FileRouteTypes {
     | '/inspector/profile'
     | '/inspector/reports'
     | '/inspector/scan'
+    | '/officer/analytics'
+    | '/officer/notifications'
+    | '/officer/profile'
+    | '/officer/reports'
+    | '/officer/review'
+    | '/officer/sellers'
     | '/admin/'
     | '/consumer/'
     | '/inspector/'
+    | '/officer/'
     | '/admin/users/staff'
     | '/consumer/check/$id'
     | '/inspector/inspections/$id'
     | '/inspector/reports/$id'
+    | '/officer/cases/$id'
     | '/admin/users/'
     | '/inspector/inspections/'
     | '/inspector/reports/'
@@ -430,6 +536,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   ConsumerRoute: typeof ConsumerRouteWithChildren
   InspectorRoute: typeof InspectorRouteWithChildren
+  OfficerRoute: typeof OfficerRouteWithChildren
   ResetPasswordRoute: typeof ResetPasswordRoute
 }
 
@@ -461,6 +568,13 @@ declare module '@tanstack/react-router' {
       path: '/inspector'
       fullPath: '/inspector'
       preLoaderRoute: typeof InspectorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/officer': {
+      id: '/officer'
+      path: '/officer'
+      fullPath: '/officer'
+      preLoaderRoute: typeof OfficerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -610,6 +724,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InspectorScanRouteImport
       parentRoute: typeof InspectorRoute
     }
+    '/officer/': {
+      id: '/officer/'
+      path: '/'
+      fullPath: '/officer/'
+      preLoaderRoute: typeof OfficerIndexRouteImport
+      parentRoute: typeof OfficerRoute
+    }
+    '/officer/analytics': {
+      id: '/officer/analytics'
+      path: '/analytics'
+      fullPath: '/officer/analytics'
+      preLoaderRoute: typeof OfficerAnalyticsRouteImport
+      parentRoute: typeof OfficerRoute
+    }
+    '/officer/notifications': {
+      id: '/officer/notifications'
+      path: '/notifications'
+      fullPath: '/officer/notifications'
+      preLoaderRoute: typeof OfficerNotificationsRouteImport
+      parentRoute: typeof OfficerRoute
+    }
+    '/officer/profile': {
+      id: '/officer/profile'
+      path: '/profile'
+      fullPath: '/officer/profile'
+      preLoaderRoute: typeof OfficerProfileRouteImport
+      parentRoute: typeof OfficerRoute
+    }
+    '/officer/reports': {
+      id: '/officer/reports'
+      path: '/reports'
+      fullPath: '/officer/reports'
+      preLoaderRoute: typeof OfficerReportsRouteImport
+      parentRoute: typeof OfficerRoute
+    }
+    '/officer/review': {
+      id: '/officer/review'
+      path: '/review'
+      fullPath: '/officer/review'
+      preLoaderRoute: typeof OfficerReviewRouteImport
+      parentRoute: typeof OfficerRoute
+    }
+    '/officer/sellers': {
+      id: '/officer/sellers'
+      path: '/sellers'
+      fullPath: '/officer/sellers'
+      preLoaderRoute: typeof OfficerSellersRouteImport
+      parentRoute: typeof OfficerRoute
+    }
     '/admin/users/': {
       id: '/admin/users/'
       path: '/'
@@ -658,6 +821,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/inspector/reports/$id'
       preLoaderRoute: typeof InspectorReportsIdRouteImport
       parentRoute: typeof InspectorReportsRoute
+    }
+    '/officer/cases/$id': {
+      id: '/officer/cases/$id'
+      path: '/cases/$id'
+      fullPath: '/officer/cases/$id'
+      preLoaderRoute: typeof OfficerCasesIdRouteImport
+      parentRoute: typeof OfficerRoute
     }
     '/admin/users/customers/': {
       id: '/admin/users/customers/'
@@ -790,11 +960,37 @@ const InspectorRouteWithChildren = InspectorRoute._addFileChildren(
   InspectorRouteChildren,
 )
 
+interface OfficerRouteChildren {
+  OfficerAnalyticsRoute: typeof OfficerAnalyticsRoute
+  OfficerNotificationsRoute: typeof OfficerNotificationsRoute
+  OfficerProfileRoute: typeof OfficerProfileRoute
+  OfficerReportsRoute: typeof OfficerReportsRoute
+  OfficerReviewRoute: typeof OfficerReviewRoute
+  OfficerSellersRoute: typeof OfficerSellersRoute
+  OfficerIndexRoute: typeof OfficerIndexRoute
+  OfficerCasesIdRoute: typeof OfficerCasesIdRoute
+}
+
+const OfficerRouteChildren: OfficerRouteChildren = {
+  OfficerAnalyticsRoute: OfficerAnalyticsRoute,
+  OfficerNotificationsRoute: OfficerNotificationsRoute,
+  OfficerProfileRoute: OfficerProfileRoute,
+  OfficerReportsRoute: OfficerReportsRoute,
+  OfficerReviewRoute: OfficerReviewRoute,
+  OfficerSellersRoute: OfficerSellersRoute,
+  OfficerIndexRoute: OfficerIndexRoute,
+  OfficerCasesIdRoute: OfficerCasesIdRoute,
+}
+
+const OfficerRouteWithChildren =
+  OfficerRoute._addFileChildren(OfficerRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   ConsumerRoute: ConsumerRouteWithChildren,
   InspectorRoute: InspectorRouteWithChildren,
+  OfficerRoute: OfficerRouteWithChildren,
   ResetPasswordRoute: ResetPasswordRoute,
 }
 export const routeTree = rootRouteImport

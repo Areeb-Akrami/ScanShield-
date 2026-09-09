@@ -20,6 +20,7 @@ import { Route as AdminInspectionsRouteImport } from './routes/admin.inspections
 import { Route as AdminRulesRouteImport } from './routes/admin.rules'
 import { Route as AdminSellersRouteImport } from './routes/admin.sellers'
 import { Route as ConsumerIndexRouteImport } from './routes/consumer.index'
+import { Route as ConsumerAccountRouteImport } from './routes/consumer.account'
 import { Route as ConsumerChecksRouteImport } from './routes/consumer.checks'
 import { Route as ConsumerComplaintsRouteImport } from './routes/consumer.complaints'
 import { Route as ConsumerRightsRouteImport } from './routes/consumer.rights'
@@ -87,6 +88,11 @@ const AdminSellersRoute = AdminSellersRouteImport.update({
 const ConsumerIndexRoute = ConsumerIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => ConsumerRoute,
+} as any)
+const ConsumerAccountRoute = ConsumerAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
   getParentRoute: () => ConsumerRoute,
 } as any)
 const ConsumerChecksRoute = ConsumerChecksRouteImport.update({
@@ -166,6 +172,7 @@ export interface FileRoutesByFullPath {
   '/admin/inspections': typeof AdminInspectionsRoute
   '/admin/rules': typeof AdminRulesRoute
   '/admin/sellers': typeof AdminSellersRoute
+  '/consumer/account': typeof ConsumerAccountRoute
   '/consumer/checks': typeof ConsumerChecksRoute
   '/consumer/complaints': typeof ConsumerComplaintsRoute
   '/consumer/rights': typeof ConsumerRightsRoute
@@ -189,6 +196,7 @@ export interface FileRoutesByTo {
   '/admin/inspections': typeof AdminInspectionsRoute
   '/admin/rules': typeof AdminRulesRoute
   '/admin/sellers': typeof AdminSellersRoute
+  '/consumer/account': typeof ConsumerAccountRoute
   '/consumer/checks': typeof ConsumerChecksRoute
   '/consumer/complaints': typeof ConsumerComplaintsRoute
   '/consumer/rights': typeof ConsumerRightsRoute
@@ -214,6 +222,7 @@ export interface FileRoutesById {
   '/admin/inspections': typeof AdminInspectionsRoute
   '/admin/rules': typeof AdminRulesRoute
   '/admin/sellers': typeof AdminSellersRoute
+  '/consumer/account': typeof ConsumerAccountRoute
   '/consumer/checks': typeof ConsumerChecksRoute
   '/consumer/complaints': typeof ConsumerComplaintsRoute
   '/consumer/rights': typeof ConsumerRightsRoute
@@ -242,6 +251,7 @@ export interface FileRouteTypes {
     | '/admin/inspections'
     | '/admin/rules'
     | '/admin/sellers'
+    | '/consumer/account'
     | '/consumer/checks'
     | '/consumer/complaints'
     | '/consumer/rights'
@@ -265,6 +275,7 @@ export interface FileRouteTypes {
     | '/admin/inspections'
     | '/admin/rules'
     | '/admin/sellers'
+    | '/consumer/account'
     | '/consumer/checks'
     | '/consumer/complaints'
     | '/consumer/rights'
@@ -289,6 +300,7 @@ export interface FileRouteTypes {
     | '/admin/inspections'
     | '/admin/rules'
     | '/admin/sellers'
+    | '/consumer/account'
     | '/consumer/checks'
     | '/consumer/complaints'
     | '/consumer/rights'
@@ -391,6 +403,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/consumer/'
       preLoaderRoute: typeof ConsumerIndexRouteImport
+      parentRoute: typeof ConsumerRoute
+    }
+    '/consumer/account': {
+      id: '/consumer/account'
+      path: '/account'
+      fullPath: '/consumer/account'
+      preLoaderRoute: typeof ConsumerAccountRouteImport
       parentRoute: typeof ConsumerRoute
     }
     '/consumer/checks': {
@@ -506,6 +525,7 @@ const AdminRouteChildren: AdminRouteChildren = {
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface ConsumerRouteChildren {
+  ConsumerAccountRoute: typeof ConsumerAccountRoute
   ConsumerChecksRoute: typeof ConsumerChecksRoute
   ConsumerComplaintsRoute: typeof ConsumerComplaintsRoute
   ConsumerRightsRoute: typeof ConsumerRightsRoute
@@ -514,6 +534,7 @@ interface ConsumerRouteChildren {
 }
 
 const ConsumerRouteChildren: ConsumerRouteChildren = {
+  ConsumerAccountRoute: ConsumerAccountRoute,
   ConsumerChecksRoute: ConsumerChecksRoute,
   ConsumerComplaintsRoute: ConsumerComplaintsRoute,
   ConsumerRightsRoute: ConsumerRightsRoute,

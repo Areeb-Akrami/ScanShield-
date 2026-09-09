@@ -44,7 +44,7 @@ export async function drainOfflineQueues(user: string): Promise<{ ocr: number; s
     }
   }
 
-  const synced = processSyncQueue(user);
+  const synced = await processSyncQueue(user);
   return { ocr, synced, failed };
 }
 

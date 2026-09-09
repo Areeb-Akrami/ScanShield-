@@ -63,10 +63,10 @@ function dbStatus(status: string): DbStatus {
 function dataUrlToBlob(dataUrl: string): Blob | null {
   const match = /^data:([^;]+);base64,(.*)$/.exec(dataUrl);
   if (!match) return null;
-  const bytes = atob(match[2]);
+  const bytes = atob(match[2] ?? "");
   const arr = new Uint8Array(bytes.length);
   for (let i = 0; i < bytes.length; i += 1) arr[i] = bytes.charCodeAt(i);
-  return new Blob([arr], { type: match[1] });
+  return new Blob([arr], { type: match[1] ?? "image/jpeg" });
 }
 
 export async function uploadDataUrl(bucket: string, path: string, dataUrl: string): Promise<string | null> {
@@ -110,8 +110,8 @@ async function productId(name: string, insp: Inspection): Promise<string | null>
     .from("products")
     .insert({
       product_name: name,
-      category: insp.classification?.category ?? null,
-      package_type: insp.classification?.packageType ?? null,
+      category: insp.classification?.product_category ?? null,
+      package_type: insp.classification?.package_type ?? null,
     })
     .select("id")
     .maybeSingle();
@@ -133,17 +133,15 @@ export async function pushInspection(insp: Inspection): Promise<string | null> {
 
   // Upload each captured panel once, then keep only the storage path in the
   // stored record so the row stays small.
-  const images = [] as Inspection["images"];
+  const images: Array<Inspection["images"][number] & { storagePath?: string | null }> = [];
   for (const img of insp.images) {
-    let storagePath = (img as { storagePath?: string }).storagePath ?? null;
-    if (!storagePath && img.processedDataUrl) {
-      storagePath = await uploadDataUrl(
-        "package-images",
-        `${uid}/${insp.localId}/${img.key}.jpg`,
-        img.processedDataUrl,
-      );
+    const current = img as Inspection["images"][number] & { storagePath?: string | null };
+    let storagePath = current.storagePath ?? null;
+    const source = img.processed ?? img.original;
+    if (!storagePath && source?.startsWith("data:")) {
+      storagePath = await uploadDataUrl("package-images", `${uid}/${insp.localId}/${img.key}.jpg`, source);
     }
-    images.push({ ...img, storagePath } as Inspection["images"][number]);
+    images.push({ ...current, storagePath });
   }
 
   const [seller_id, product_id] = await Promise.all([
@@ -151,9 +149,10 @@ export async function pushInspection(insp: Inspection): Promise<string | null> {
     productId(insp.productName, insp),
   ]);
 
+  // Image bytes live in storage, not in the row: keep only the reference.
   const payload = {
     ...insp,
-    images: images.map((i) => ({ ...i, dataUrl: undefined, processedDataUrl: undefined })),
+    images: images.map((i) => ({ ...i, original: null, processed: null })),
   };
 
   const { data: row, error } = await supabase
@@ -174,10 +173,10 @@ export async function pushInspection(insp: Inspection): Promise<string | null> {
         longitude: insp.geo.longitude,
         location_accuracy: insp.geo.accuracy,
         package_image_url: images[0]?.storagePath ?? null,
-        classification: insp.classification as unknown as Record<string, unknown>,
+        classification: insp.classification as never,
         is_demo: insp.isDemo,
         inspection_date: insp.createdAt,
-        payload: payload as unknown as Record<string, unknown>,
+        payload: payload as never,
       },
       { onConflict: "local_id" },
     )
@@ -193,11 +192,11 @@ export async function pushInspection(insp: Inspection): Promise<string | null> {
     await supabase.from("ocr_results").insert(
       insp.fields.map((f) => ({
         inspection_id: inspectionId,
-        field_name: f.key,
-        detected_value: f.value ?? null,
+        field_name: f.field,
+        detected_value: f.inspectorValue ?? f.value ?? null,
         confidence: f.confidence ?? null,
-        bounding_box: (f as { boundingBox?: unknown }).boundingBox ?? null,
-        status: f.status ?? null,
+        bounding_box: f.boundingBox as never,
+        status: f.unreadable ? "unreadable" : f.value ? "detected" : "not_detected",
       })),
     );
   }
@@ -208,12 +207,12 @@ export async function pushInspection(insp: Inspection): Promise<string | null> {
     await supabase.from("rule_checks").delete().eq("inspection_id", inspectionId);
     const rows = evaluation.results.map((r) => ({
       inspection_id: inspectionId,
-      rule_key: r.ruleId,
+      rule_key: r.rule.rule_id,
       rule_version: 1,
       result: (OUTCOME_TO_DB[r.outcome as CheckOutcome] ?? "manual_review") as never,
       reason: r.reason ?? null,
       confidence: r.confidence ?? null,
-      evidence: r.evidence ? JSON.stringify(r.evidence).slice(0, 4000) : null,
+      evidence: r.evidence?.length ? r.evidence.join(" | ").slice(0, 4000) : null,
     }));
     if (rows.length > 0) await supabase.from("rule_checks").insert(rows);
   } catch {
@@ -284,12 +283,12 @@ export async function fetchAudit(): Promise<AuditEntry[]> {
     const prof = r.profiles as { full_name?: string; email?: string } | null;
     return {
       id: r.id,
-      user: prof?.email ?? m.actor ?? "—",
+      user: prof?.email ?? m['actor'] ?? "—",
       action: r.action,
-      entity: r.entity_type,
-      entityId: m.entity_id ?? "—",
-      before: m.before ?? null,
-      after: m.after ?? null,
+      entity: r.entity_type ?? "—",
+      entityId: m['entity_id'] ?? "—",
+      before: m['before'] ?? null,
+      after: m['after'] ?? null,
       timestamp: r.created_at,
     };
   });
@@ -369,21 +368,21 @@ export async function createRuleVersion(input: {
   effective_from: string;
   source_document: string | null;
   amendment_note: string | null;
-}): Promise<{ error?: string }> {
+}): Promise<{ error?: string | undefined }> {
   const { error } = await supabase.rpc("create_rule_version", {
     _rule_key: input.rule_key,
     _title: input.title,
     _rule_number: input.rule_number,
-    _legal_requirement: input.legal_requirement,
-    _description: input.description,
+    _legal_requirement: input.legal_requirement ?? "",
+    _description: input.description ?? "",
     _effective_from: input.effective_from,
-    _source_document: input.source_document,
-    _amendment_note: input.amendment_note,
+    _source_document: input.source_document ?? "",
+    _amendment_note: input.amendment_note ?? "",
   });
   return { error: error?.message };
 }
 
-export async function setRuleStatus(id: string, status: DbRule["status"]): Promise<{ error?: string }> {
+export async function setRuleStatus(id: string, status: DbRule["status"]): Promise<{ error?: string | undefined }> {
   const { error } = await supabase.from("rules").update({ status }).eq("id", id);
   return { error: error?.message };
 }

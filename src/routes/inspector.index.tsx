@@ -2,6 +2,7 @@ import { useSession } from "@/components/AppShell";
 import { CorpusBanner } from "@/components/CorpusBanner";
 import { Button, Panel, PanelHeader, Stat, StatusPill } from "@/components/ui";
 import { listInspections, processSyncQueue, sellerProfiles, type Inspection } from "@/lib/store";
+import { hydrateInspections } from "@/lib/store";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
@@ -23,7 +24,7 @@ function InspectorHome() {
   const [inspections, setInspections] = useState<Inspection[]>([]);
   const [syncMsg, setSyncMsg] = useState<string | null>(null);
 
-  useEffect(() => setInspections(listInspections()), []);
+  useEffect(() => { void hydrateInspections().then(setInspections); }, []);
 
   const today = new Date().toISOString().slice(0, 10);
   const todays = inspections.filter((i) => i.createdAt.slice(0, 10) === today);
@@ -66,8 +67,8 @@ function InspectorHome() {
             <Button
               size="sm"
               variant="outline"
-              onClick={() => {
-                const moved = processSyncQueue(session?.email ?? "unknown");
+              onClick={async () => {
+                const moved = await processSyncQueue(session?.email ?? "unknown");
                 setInspections(listInspections());
                 setSyncMsg(
                   moved > 0

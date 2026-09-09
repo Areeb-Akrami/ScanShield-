@@ -104,7 +104,7 @@ async function loadProfile(userId: string, email: string, expiresAt: string): Pr
   if (!profile) {
     // First sign-in after registration: create the profile row. A database
     // trigger forces the role to `consumer` unless an administrator creates it.
-    await supabase.from("profiles").insert({ id: userId, email, full_name: email.split("@")[0] });
+    await supabase.from("profiles").insert({ id: userId, email, full_name: email.split("@")[0] ?? email });
   }
 
   const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", userId);
@@ -114,7 +114,7 @@ async function loadProfile(userId: string, email: string, expiresAt: string): Pr
 
   return {
     userId,
-    name: profile?.full_name || email.split("@")[0],
+    name: profile?.full_name || email.split("@")[0] || email,
     email: profile?.email || email,
     role: toAppRole(dbRole),
     district: profile?.district ?? "—",
@@ -222,7 +222,7 @@ export async function signInWithGoogle(): Promise<{ error: string } | void> {
   await refreshFromSupabase();
 }
 
-export async function resetPassword(email: string): Promise<{ error?: string }> {
+export async function resetPassword(email: string): Promise<{ error?: string | undefined }> {
   const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
     redirectTo: `${window.location.origin}/reset-password`,
   });

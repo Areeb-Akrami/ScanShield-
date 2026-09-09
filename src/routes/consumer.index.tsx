@@ -1,9 +1,10 @@
 import { CorpusBanner } from "@/components/CorpusBanner";
 import { Button, DemoBadge, Field, Panel, PanelHeader, StatusPill, inputClass } from "@/components/ui";
+import { listConsumerChecks, saveConsumerCheck } from "@/lib/db";
 import { runPipeline, type PipelineOutput } from "@/lib/store";
 import { SCENARIOS, scenarioById } from "@/pipeline/scenarios";
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/consumer/")({
   head: () => ({
@@ -20,10 +21,26 @@ export const Route = createFileRoute("/consumer/")({
 function ConsumerCheck() {
   const [scenarioId, setScenarioId] = useState(SCENARIOS[0]!.id);
   const [output, setOutput] = useState<PipelineOutput | null>(null);
+  const [history, setHistory] = useState<Awaited<ReturnType<typeof listConsumerChecks>>>([]);
   const scenario = scenarioById(scenarioId)!;
 
+  useEffect(() => {
+    void listConsumerChecks().then(setHistory);
+  }, []);
+
   function run() {
-    setOutput(runPipeline(scenario.classification, scenario.fields, scenario.images, scenario.reference));
+    const result = runPipeline(scenario.classification, scenario.fields, scenario.images, scenario.reference);
+    setOutput(result);
+    // Kept privately against the signed-in shopper's own account.
+    void saveConsumerCheck({
+      productName: scenario.title,
+      status: result.finalStatus,
+      confidence: result.confidence,
+      findings: result.findings,
+    })
+      .then(() => listConsumerChecks())
+      .then(setHistory)
+      .catch(() => undefined);
   }
 
   return (
@@ -94,6 +111,23 @@ function ConsumerCheck() {
             </ul>
           </Panel>
         </>
+      ) : null}
+
+      {history.length > 0 ? (
+        <Panel>
+          <PanelHeader title="Your past checks" subtitle="Only you can see these. They are stored against your account." />
+          <ul className="divide-y divide-border">
+            {history.map((h) => (
+              <li key={h.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 text-sm">
+                <span>{h.product_name}</span>
+                <span className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">{new Date(h.created_at).toLocaleString()}</span>
+                  <StatusPill token={(h.status ?? "MANUAL_REVIEW_REQUIRED") as never} />
+                </span>
+              </li>
+            ))}
+          </ul>
+        </Panel>
       ) : null}
     </div>
   );

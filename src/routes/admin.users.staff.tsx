@@ -97,8 +97,10 @@ function StaffPage() {
     setBusy(true);
     setMessage(null);
     const redirectTo =
-      typeof window === "undefined" ? undefined : `${window.location.origin}/reset-password`;
-    const result = await createStaff({ data: { ...form, role, redirectTo } });
+      typeof window === "undefined" ? "" : `${window.location.origin}/reset-password`;
+    const result = await createStaff({
+      data: { ...form, role, ...(redirectTo ? { redirectTo } : {}) },
+    });
     setBusy(false);
     if ("error" in result && result.error) {
       setMessage({ kind: "error", text: result.error });

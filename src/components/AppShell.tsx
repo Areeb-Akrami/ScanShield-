@@ -116,7 +116,10 @@ export function BottomNav({ items }: { items: NavItem[] }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
     <nav className="sticky bottom-0 z-20 border-t border-border bg-card lg:hidden">
-      <ul className="mx-auto grid max-w-6xl grid-cols-5">
+      <ul
+        className="mx-auto grid max-w-6xl"
+        style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
+      >
         {items.map((item) => {
           const active = pathname === item.to || (item.to !== "/" && pathname.startsWith(`${item.to}/`));
           return (

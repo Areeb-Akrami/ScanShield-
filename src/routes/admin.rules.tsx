@@ -88,6 +88,7 @@ function RulesPage() {
       action: "RULE_CREATED",
       entity: "Rule",
       entityId: draft.rule_key,
+      before: "—",
       after: `v1 effective ${draft.effective_from}`,
     });
     setMessage(`${draft.rule_key} was created as version 1.`);

@@ -1,6 +1,7 @@
 import { useSession } from "@/components/AppShell";
 import {
   changeMyPassword,
+  deactivateMyAccount,
   deleteNotification,
   getMyProfile,
   listMyNotifications,
@@ -165,6 +166,17 @@ function AccountPage() {
         className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-border bg-card text-sm font-semibold"
       >
         <LogOut className="h-4 w-4" /> Sign out
+      </button>
+      <button
+        onClick={() => {
+          if (!window.confirm("Deactivate your account? You will be signed out and will need an administrator to restore it.")) return;
+          void deactivateMyAccount()
+            .then(() => signOut())
+            .then(() => navigate({ to: "/", replace: true }));
+        }}
+        className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-border bg-card text-sm font-semibold text-fail"
+      >
+        Deactivate my account
       </button>
       <p className="text-center text-[11px] text-muted-foreground/70">Hackathon demo environment</p>
     </div>

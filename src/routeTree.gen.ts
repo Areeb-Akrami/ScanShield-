@@ -21,6 +21,7 @@ import { Route as AdminInspectionsRouteImport } from './routes/admin.inspections
 import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
 import { Route as AdminRulesRouteImport } from './routes/admin.rules'
 import { Route as AdminSellersRouteImport } from './routes/admin.sellers'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminSourcesRouteImport } from './routes/admin.sources'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as ConsumerIndexRouteImport } from './routes/consumer.index'
@@ -101,6 +102,11 @@ const AdminRulesRoute = AdminRulesRouteImport.update({
 const AdminSellersRoute = AdminSellersRouteImport.update({
   id: '/sellers',
   path: '/sellers',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminSourcesRoute = AdminSourcesRouteImport.update({
@@ -223,6 +229,7 @@ export interface FileRoutesByFullPath {
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/rules': typeof AdminRulesRoute
   '/admin/sellers': typeof AdminSellersRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/admin/sources': typeof AdminSourcesRoute
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/consumer/account': typeof ConsumerAccountRoute
@@ -255,6 +262,7 @@ export interface FileRoutesByTo {
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/rules': typeof AdminRulesRoute
   '/admin/sellers': typeof AdminSellersRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/admin/sources': typeof AdminSourcesRoute
   '/consumer/account': typeof ConsumerAccountRoute
   '/consumer/checks': typeof ConsumerChecksRoute
@@ -288,6 +296,7 @@ export interface FileRoutesById {
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/rules': typeof AdminRulesRoute
   '/admin/sellers': typeof AdminSellersRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/admin/sources': typeof AdminSourcesRoute
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/consumer/account': typeof ConsumerAccountRoute
@@ -325,6 +334,7 @@ export interface FileRouteTypes {
     | '/admin/notifications'
     | '/admin/rules'
     | '/admin/sellers'
+    | '/admin/settings'
     | '/admin/sources'
     | '/admin/users'
     | '/consumer/account'
@@ -357,6 +367,7 @@ export interface FileRouteTypes {
     | '/admin/notifications'
     | '/admin/rules'
     | '/admin/sellers'
+    | '/admin/settings'
     | '/admin/sources'
     | '/consumer/account'
     | '/consumer/checks'
@@ -389,6 +400,7 @@ export interface FileRouteTypes {
     | '/admin/notifications'
     | '/admin/rules'
     | '/admin/sellers'
+    | '/admin/settings'
     | '/admin/sources'
     | '/admin/users'
     | '/consumer/account'
@@ -505,6 +517,13 @@ declare module '@tanstack/react-router' {
       path: '/sellers'
       fullPath: '/admin/sellers'
       preLoaderRoute: typeof AdminSellersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/sources': {
@@ -682,6 +701,7 @@ interface AdminRouteChildren {
   AdminNotificationsRoute: typeof AdminNotificationsRoute
   AdminRulesRoute: typeof AdminRulesRoute
   AdminSellersRoute: typeof AdminSellersRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
   AdminSourcesRoute: typeof AdminSourcesRoute
   AdminUsersRoute: typeof AdminUsersRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
@@ -694,6 +714,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminNotificationsRoute: AdminNotificationsRoute,
   AdminRulesRoute: AdminRulesRoute,
   AdminSellersRoute: AdminSellersRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
   AdminSourcesRoute: AdminSourcesRoute,
   AdminUsersRoute: AdminUsersRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,

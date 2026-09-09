@@ -97,7 +97,7 @@ export function getSession(): Session | null {
 async function loadProfile(userId: string, email: string, expiresAt: string): Promise<Session> {
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, email, district, employee_id, department, role")
+    .select("full_name, email, district, employee_id, department, role, account_status")
     .eq("id", userId)
     .maybeSingle();
 
@@ -120,6 +120,7 @@ async function loadProfile(userId: string, email: string, expiresAt: string): Pr
     district: profile?.district ?? "—",
     employeeId: profile?.employee_id ?? null,
     department: profile?.department ?? null,
+    accountStatus: (profile?.account_status as Session["accountStatus"]) ?? "active",
     issuedAt: new Date().toISOString(),
     expiresAt,
   };

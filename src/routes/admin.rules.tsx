@@ -485,20 +485,90 @@ function RulesPage() {
                   <option value="low">Low</option>
                 </select>
               </Field>
-              <Field label="Status on creation">
+              <Field label="Effective to (optional)">
+                <input
+                  type="date"
+                  value={draft.effective_to}
+                  onChange={(e) => setDraft({ ...draft, effective_to: e.target.value })}
+                  className={inputClass()}
+                />
+              </Field>
+              <Field label="Source URL">
+                <input
+                  type="url"
+                  value={draft.source_url}
+                  onChange={(e) => setDraft({ ...draft, source_url: e.target.value })}
+                  placeholder="https://…"
+                  className={inputClass()}
+                />
+              </Field>
+              <Field label="Machine checkability">
+                <select
+                  value={draft.machine_checkability}
+                  onChange={(e) => setDraft({ ...draft, machine_checkability: e.target.value })}
+                  className={inputClass()}
+                >
+                  <option value="">Unspecified</option>
+                  <option value="full">Fully machine checkable</option>
+                  <option value="partial">Partially machine checkable</option>
+                  <option value="none">Manual inspection only</option>
+                </select>
+              </Field>
+              <Field label="Required evidence (comma separated)">
+                <input
+                  value={draft.required_evidence}
+                  onChange={(e) => setDraft({ ...draft, required_evidence: e.target.value })}
+                  placeholder="front_label, principal_display_panel"
+                  className={inputClass()}
+                />
+              </Field>
+              <Field label="Applicability (JSON)">
+                <input
+                  value={draft.applicability}
+                  onChange={(e) => setDraft({ ...draft, applicability: e.target.value })}
+                  placeholder='{"package_type":"retail"}'
+                  className={inputClass()}
+                />
+              </Field>
+              <Field label="Provenance">
+                <input
+                  value={draft.provenance}
+                  onChange={(e) => setDraft({ ...draft, provenance: e.target.value })}
+                  placeholder="ENTERED_BY_ADMINISTRATOR"
+                  className={inputClass()}
+                />
+              </Field>
+              <Field label="Amendment note">
+                <input
+                  value={draft.amendment_note}
+                  onChange={(e) => setDraft({ ...draft, amendment_note: e.target.value })}
+                  className={inputClass()}
+                />
+              </Field>
+              <label className="flex items-center gap-2 self-end text-sm">
+                <input
+                  type="checkbox"
+                  checked={draft.human_review_required}
+                  onChange={(e) => setDraft({ ...draft, human_review_required: e.target.checked })}
+                />
+                Human review required
+              </label>
+              <Field label="Status when saved as draft">
                 <select
                   value={draft.status}
                   onChange={(e) => setDraft({ ...draft, status: e.target.value as DbRule["status"] })}
                   className={inputClass()}
                 >
                   <option value="draft">Draft</option>
-                  <option value="in_force">In force</option>
                   <option value="future">Not yet in force</option>
                 </select>
               </Field>
-              <div className="sm:col-span-2">
-                <Button type="submit" disabled={busy}>
-                  {busy ? "Saving…" : "Create rule"}
+              <div className="flex flex-wrap gap-2 sm:col-span-2">
+                <Button type="submit" variant="outline" disabled={busy}>
+                  {busy ? "Saving…" : "Save draft"}
+                </Button>
+                <Button type="button" disabled={busy} onClick={(e) => void submitNewRule(e as unknown as React.FormEvent, true)}>
+                  {busy ? "Saving…" : "Publish"}
                 </Button>
               </div>
             </form>

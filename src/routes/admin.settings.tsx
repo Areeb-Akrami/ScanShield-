@@ -1,8 +1,9 @@
 import { RequireRole, useSession } from "@/components/AppShell";
 import { Button, Field, Panel, PanelHeader, inputClass } from "@/components/ui";
-import { CORPUS_STATS } from "@/legal/corpus";
+import { EXEMPTIONS, RULES } from "@/legal/corpus";
 import { updateUserProfile } from "@/lib/admin-users";
-import { signOut, updatePassword } from "@/lib/auth";
+import { signOut } from "@/lib/auth";
+import { changeMyPassword } from "@/lib/consumer";
 import { listDbRules, listExemptions, listLegalDocuments } from "@/lib/db";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -35,8 +36,9 @@ function SettingsPage() {
 
   useEffect(() => {
     if (!session) return;
-    setFullName(session.fullName ?? "");
-    setDistrict(session.district ?? "");
+    setFullName(session.name ?? "");
+    setDistrict(session.district === "—" ? "" : session.district);
+    setDepartment(session.department ?? "");
   }, [session]);
 
   useEffect(() => {
@@ -62,7 +64,7 @@ function SettingsPage() {
   async function savePassword(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
-    const res = await updatePassword(password);
+    const res = await changeMyPassword(password);
     setBusy(false);
     setPassword("");
     setStatus(res.error ?? "Your password was changed.");
@@ -90,7 +92,7 @@ function SettingsPage() {
             </div>
           </dl>
           <p className="border-t border-border px-4 py-3 text-xs text-muted-foreground">
-            Bundled corpus used by the checking engine: {CORPUS_STATS.rules} provisions, {CORPUS_STATS.exemptions} exemptions.
+            Bundled corpus used by the checking engine: {RULES.length} provisions, {EXEMPTIONS.length} exemptions.
           </p>
         </Panel>
 

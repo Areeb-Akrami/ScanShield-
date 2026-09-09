@@ -80,21 +80,57 @@ function RulesPage() {
   };
   const [draft, setDraft] = useState(EMPTY_DRAFT);
 
-  async function submitNewRule(e: React.FormEvent) {
+  /** Saves a brand-new provision. `publish` puts it straight into force. */
+  async function submitNewRule(e: React.FormEvent, publish = false) {
     e.preventDefault();
+    if (!draft.rule_key.trim() || !draft.rule_number.trim() || !draft.title.trim()) {
+      setMessage("Rule identifier, rule number and title are required.");
+      return;
+    }
+    if (draft.effective_to && draft.effective_to < draft.effective_from) {
+      setMessage("The end date cannot be earlier than the effective-from date.");
+      return;
+    }
+    let applicability: Record<string, unknown> = {};
+    if (draft.applicability.trim()) {
+      try {
+        applicability = JSON.parse(draft.applicability) as Record<string, unknown>;
+      } catch {
+        setMessage("Applicability must be valid JSON, for example {\"package_type\":\"retail\"}.");
+        return;
+      }
+    }
+    const status: DbRule["status"] = publish
+      ? draft.effective_from > new Date().toISOString().slice(0, 10)
+        ? "future"
+        : "in_force"
+      : draft.status;
     setBusy(true);
     setMessage(null);
     const { error } = await createRule({
       rule_key: draft.rule_key,
       rule_number: draft.rule_number,
+      sub_rule: draft.sub_rule || null,
       title: draft.title,
       category: draft.category,
+      field: draft.field || null,
       legal_requirement: draft.legal_requirement,
       description: draft.description,
       effective_from: draft.effective_from,
+      effective_to: draft.effective_to || null,
       source_document: draft.source_document || null,
+      source_url: draft.source_url || null,
       severity: draft.severity || null,
-      status: draft.status,
+      machine_checkability: draft.machine_checkability || null,
+      human_review_required: draft.human_review_required,
+      required_evidence: draft.required_evidence
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
+      applicability,
+      provenance: draft.provenance || null,
+      amendment_note: draft.amendment_note || null,
+      status,
     });
     setBusy(false);
     if (error) {
@@ -103,21 +139,84 @@ function RulesPage() {
     }
     audit({
       user: session?.email ?? "unknown",
-      action: "RULE_CREATED",
+      action: publish ? "RULE_PUBLISHED" : "RULE_CREATED",
       entity: "Rule",
       entityId: draft.rule_key,
       before: "—",
-      after: `v1 effective ${draft.effective_from}`,
+      after: `v1 ${status} effective ${draft.effective_from}`,
     });
-    setMessage(`${draft.rule_key} was created as version 1.`);
+    setMessage(`${draft.rule_key} was saved as version 1 (${status.replaceAll("_", " ")}).`);
     setCreating(false);
-    setDraft({ ...draft, rule_key: "", rule_number: "", title: "", legal_requirement: "", description: "" });
+    setDraft(EMPTY_DRAFT);
+    load();
+  }
+
+  /** In-place correction of the current version — never used for amendments. */
+  async function saveCorrection(e: React.FormEvent) {
+    e.preventDefault();
+    if (!correcting) return;
+    setBusy(true);
+    setMessage(null);
+    const { error } = await updateRule(correcting.id, {
+      title: correcting.title,
+      rule_number: correcting.rule_number,
+      sub_rule: correcting.sub_rule,
+      description: correcting.description,
+      source_document: correcting.source_document,
+      source_url: correcting.source_url,
+      category: correcting.category,
+      field: correcting.field,
+      severity: correcting.severity,
+      machine_checkability: correcting.machine_checkability,
+      human_review_required: correcting.human_review_required,
+      effective_to: correcting.effective_to,
+    });
+    setBusy(false);
+    if (error) {
+      setMessage(error);
+      return;
+    }
+    audit({
+      user: session?.email ?? "unknown",
+      action: "RULE_UPDATED",
+      entity: "Rule",
+      entityId: correcting.rule_key,
+      before: `v${correcting.version}`,
+      after: "corrected in place",
+    });
+    setMessage(`${correcting.rule_key} v${correcting.version} was corrected. Earlier versions are untouched.`);
+    setCorrecting(null);
+    load();
+  }
+
+  /** Moves a draft or scheduled provision into force. */
+  async function publishRule(rule: DbRule) {
+    if (!window.confirm(`Publish ${rule.rule_key} v${rule.version} into force?`)) return;
+    setBusy(true);
+    const target: DbRule["status"] =
+      rule.effective_from > new Date().toISOString().slice(0, 10) ? "future" : "in_force";
+    const { error } = await setRuleStatus(rule.id, target);
+    setBusy(false);
+    if (error) {
+      setMessage(error);
+      return;
+    }
+    audit({
+      user: session?.email ?? "unknown",
+      action: "RULE_PUBLISHED",
+      entity: "Rule",
+      entityId: rule.rule_key,
+      before: rule.status,
+      after: target,
+    });
+    setMessage(`${rule.rule_key} v${rule.version} is now ${target.replaceAll("_", " ")}.`);
     load();
   }
 
   const load = useCallback(() => {
     void listDbRules().then(setRules);
     void listLegalDocuments().then(setDocs);
+    void listExemptions().then(setExemptions);
   }, []);
   useEffect(load, [load]);
 

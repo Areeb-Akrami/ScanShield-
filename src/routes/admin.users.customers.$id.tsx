@@ -123,12 +123,28 @@ function CustomerDetail() {
         ) : (
           <ul className="divide-y divide-border">
             {checks.map((c) => (
-              <li key={c.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 text-sm">
-                <span>{c.product_name ?? "—"}</span>
-                <span className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleString()}</span>
-                  <StatusPill token={(c.status ?? "MANUAL_REVIEW_REQUIRED") as never} />
-                </span>
+              <li key={c.id} className="px-4 py-2.5 text-sm">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span>{c.product_name ?? "—"}</span>
+                  <span className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleString()}</span>
+                    <StatusPill token={(c.status ?? "MANUAL_REVIEW_REQUIRED") as never} />
+                    <button
+                      className="text-xs underline underline-offset-2"
+                      onClick={() => setOpenCheck(openCheck === c.id ? null : c.id)}
+                    >
+                      {openCheck === c.id ? "Hide result" : "View result"}
+                    </button>
+                  </span>
+                </div>
+                {openCheck === c.id ? (
+                  <div className="mt-2 rounded border border-border bg-surface p-3">
+                    <p className="mb-2 text-xs text-muted-foreground">
+                      Confidence {c.confidence == null ? "—" : `${Math.round(Number(c.confidence) * 100)}%`}
+                    </p>
+                    <CheckFindings findings={(c as { findings?: unknown }).findings} />
+                  </div>
+                ) : null}
               </li>
             ))}
           </ul>

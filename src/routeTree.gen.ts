@@ -38,6 +38,7 @@ import { Route as InspectorScanRouteImport } from './routes/inspector.scan'
 import { Route as OfficerIndexRouteImport } from './routes/officer.index'
 import { Route as OfficerAnalyticsRouteImport } from './routes/officer.analytics'
 import { Route as OfficerNotificationsRouteImport } from './routes/officer.notifications'
+import { Route as OfficerProfileRouteImport } from './routes/officer.profile'
 import { Route as OfficerReportsRouteImport } from './routes/officer.reports'
 import { Route as OfficerReviewRouteImport } from './routes/officer.review'
 import { Route as OfficerSellersRouteImport } from './routes/officer.sellers'
@@ -197,6 +198,11 @@ const OfficerNotificationsRoute = OfficerNotificationsRouteImport.update({
   path: '/notifications',
   getParentRoute: () => OfficerRoute,
 } as any)
+const OfficerProfileRoute = OfficerProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => OfficerRoute,
+} as any)
 const OfficerReportsRoute = OfficerReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
@@ -291,6 +297,7 @@ export interface FileRoutesByFullPath {
   '/inspector/scan': typeof InspectorScanRoute
   '/officer/analytics': typeof OfficerAnalyticsRoute
   '/officer/notifications': typeof OfficerNotificationsRoute
+  '/officer/profile': typeof OfficerProfileRoute
   '/officer/reports': typeof OfficerReportsRoute
   '/officer/review': typeof OfficerReviewRoute
   '/officer/sellers': typeof OfficerSellersRoute
@@ -328,6 +335,7 @@ export interface FileRoutesByTo {
   '/inspector/scan': typeof InspectorScanRoute
   '/officer/analytics': typeof OfficerAnalyticsRoute
   '/officer/notifications': typeof OfficerNotificationsRoute
+  '/officer/profile': typeof OfficerProfileRoute
   '/officer/reports': typeof OfficerReportsRoute
   '/officer/review': typeof OfficerReviewRoute
   '/officer/sellers': typeof OfficerSellersRoute
@@ -373,6 +381,7 @@ export interface FileRoutesById {
   '/inspector/scan': typeof InspectorScanRoute
   '/officer/analytics': typeof OfficerAnalyticsRoute
   '/officer/notifications': typeof OfficerNotificationsRoute
+  '/officer/profile': typeof OfficerProfileRoute
   '/officer/reports': typeof OfficerReportsRoute
   '/officer/review': typeof OfficerReviewRoute
   '/officer/sellers': typeof OfficerSellersRoute
@@ -419,6 +428,7 @@ export interface FileRouteTypes {
     | '/inspector/scan'
     | '/officer/analytics'
     | '/officer/notifications'
+    | '/officer/profile'
     | '/officer/reports'
     | '/officer/review'
     | '/officer/sellers'
@@ -456,6 +466,7 @@ export interface FileRouteTypes {
     | '/inspector/scan'
     | '/officer/analytics'
     | '/officer/notifications'
+    | '/officer/profile'
     | '/officer/reports'
     | '/officer/review'
     | '/officer/sellers'
@@ -500,6 +511,7 @@ export interface FileRouteTypes {
     | '/inspector/scan'
     | '/officer/analytics'
     | '/officer/notifications'
+    | '/officer/profile'
     | '/officer/reports'
     | '/officer/review'
     | '/officer/sellers'
@@ -733,6 +745,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OfficerNotificationsRouteImport
       parentRoute: typeof OfficerRoute
     }
+    '/officer/profile': {
+      id: '/officer/profile'
+      path: '/profile'
+      fullPath: '/officer/profile'
+      preLoaderRoute: typeof OfficerProfileRouteImport
+      parentRoute: typeof OfficerRoute
+    }
     '/officer/reports': {
       id: '/officer/reports'
       path: '/reports'
@@ -944,6 +963,7 @@ const InspectorRouteWithChildren = InspectorRoute._addFileChildren(
 interface OfficerRouteChildren {
   OfficerAnalyticsRoute: typeof OfficerAnalyticsRoute
   OfficerNotificationsRoute: typeof OfficerNotificationsRoute
+  OfficerProfileRoute: typeof OfficerProfileRoute
   OfficerReportsRoute: typeof OfficerReportsRoute
   OfficerReviewRoute: typeof OfficerReviewRoute
   OfficerSellersRoute: typeof OfficerSellersRoute
@@ -954,6 +974,7 @@ interface OfficerRouteChildren {
 const OfficerRouteChildren: OfficerRouteChildren = {
   OfficerAnalyticsRoute: OfficerAnalyticsRoute,
   OfficerNotificationsRoute: OfficerNotificationsRoute,
+  OfficerProfileRoute: OfficerProfileRoute,
   OfficerReportsRoute: OfficerReportsRoute,
   OfficerReviewRoute: OfficerReviewRoute,
   OfficerSellersRoute: OfficerSellersRoute,

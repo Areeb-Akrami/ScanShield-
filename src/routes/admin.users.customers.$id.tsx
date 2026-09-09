@@ -11,8 +11,46 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 
 export const Route = createFileRoute("/admin/users/customers/$id")({
+  head: () => ({
+    meta: [
+      { title: "Customer account — ScanShield admin" },
+      {
+        name: "description",
+        content:
+          "Customer profile, package check history, complaints and account status administration in ScanShield.",
+      },
+      { property: "og:title", content: "Customer account — ScanShield admin" },
+      { property: "og:description", content: "Customer account administration for ScanShield." },
+    ],
+  }),
   component: CustomerDetail,
 });
+
+/** Compact, read-only summary of a stored consumer check result. */
+function CheckFindings({ findings }: { findings: unknown }) {
+  const list = Array.isArray(findings) ? findings : [];
+  if (list.length === 0)
+    return <p className="text-xs text-muted-foreground">No stored declaration findings for this check.</p>;
+  return (
+    <ul className="space-y-1 text-xs">
+      {list.slice(0, 40).map((f, i) => {
+        const row = (f ?? {}) as Record<string, unknown>;
+        const label = String(row["title"] ?? row["ruleKey"] ?? row["rule_key"] ?? row["field"] ?? "Finding");
+        const result = String(row["result"] ?? row["status"] ?? "—").replaceAll("_", " ").toLowerCase();
+        const reason = row["reason"] ?? row["detail"];
+        return (
+          <li key={i} className="flex flex-wrap justify-between gap-2">
+            <span>{label}</span>
+            <span className="text-muted-foreground">
+              {result}
+              {reason ? ` — ${String(reason)}` : ""}
+            </span>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
 
 function CustomerDetail() {
   const { id } = Route.useParams();
@@ -22,6 +60,8 @@ function CustomerDetail() {
   const [activity, setActivity] = useState<Awaited<ReturnType<typeof userActivity>>>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
+  const [openCheck, setOpenCheck] = useState<string | null>(null);
+  const [openComplaint, setOpenComplaint] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -83,12 +123,28 @@ function CustomerDetail() {
         ) : (
           <ul className="divide-y divide-border">
             {checks.map((c) => (
-              <li key={c.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 text-sm">
-                <span>{c.product_name ?? "—"}</span>
-                <span className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleString()}</span>
-                  <StatusPill token={(c.status ?? "MANUAL_REVIEW_REQUIRED") as never} />
-                </span>
+              <li key={c.id} className="px-4 py-2.5 text-sm">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span>{c.product_name ?? "—"}</span>
+                  <span className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleString()}</span>
+                    <StatusPill token={(c.status ?? "MANUAL_REVIEW_REQUIRED") as never} />
+                    <button
+                      className="text-xs underline underline-offset-2"
+                      onClick={() => setOpenCheck(openCheck === c.id ? null : c.id)}
+                    >
+                      {openCheck === c.id ? "Hide result" : "View result"}
+                    </button>
+                  </span>
+                </div>
+                {openCheck === c.id ? (
+                  <div className="mt-2 rounded border border-border bg-surface p-3">
+                    <p className="mb-2 text-xs text-muted-foreground">
+                      Confidence {c.confidence == null ? "—" : `${Math.round(Number(c.confidence) * 100)}%`}
+                    </p>
+                    <CheckFindings findings={(c as { findings?: unknown }).findings} />
+                  </div>
+                ) : null}
               </li>
             ))}
           </ul>
@@ -102,16 +158,31 @@ function CustomerDetail() {
         ) : (
           <ul className="divide-y divide-border">
             {complaints.map((c) => (
-              <li key={c.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 text-sm">
-                <span>
-                  <span className="font-medium">{c.product}</span>
-                  <span className="ml-2 text-xs text-muted-foreground">{c.issue_type}</span>
-                </span>
-                <span className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span>Ref {c.id.slice(0, 8).toUpperCase()}</span>
-                  <span>{c.status}</span>
-                  <span>{new Date(c.created_at).toLocaleDateString()}</span>
-                </span>
+              <li key={c.id} className="px-4 py-2.5 text-sm">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span>
+                    <span className="font-medium">{c.product}</span>
+                    <span className="ml-2 text-xs text-muted-foreground">{c.issue_type}</span>
+                  </span>
+                  <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>Ref {c.id.slice(0, 8).toUpperCase()}</span>
+                    <span>{c.status}</span>
+                    <span>{new Date(c.created_at).toLocaleDateString()}</span>
+                    <button
+                      className="underline underline-offset-2"
+                      onClick={() => setOpenComplaint(openComplaint === c.id ? null : c.id)}
+                    >
+                      {openComplaint === c.id ? "Hide" : "View complaint"}
+                    </button>
+                  </span>
+                </div>
+                {openComplaint === c.id ? (
+                  <div className="mt-2 space-y-1 rounded border border-border bg-surface p-3 text-xs">
+                    <p><span className="text-muted-foreground">Seller:</span> {(c as { seller?: string | null }).seller ?? "—"}</p>
+                    <p><span className="text-muted-foreground">Submitted:</span> {new Date(c.created_at).toLocaleString()}</p>
+                    <p className="whitespace-pre-wrap">{(c as { description?: string | null }).description ?? "—"}</p>
+                  </div>
+                ) : null}
               </li>
             ))}
           </ul>

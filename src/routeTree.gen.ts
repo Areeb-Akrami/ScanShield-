@@ -37,6 +37,8 @@ import { Route as InspectorInspectionsIndexRouteImport } from './routes/inspecto
 import { Route as InspectorInspectionsIdRouteImport } from './routes/inspector.inspections.$id'
 import { Route as InspectorReportsIndexRouteImport } from './routes/inspector.reports.index'
 import { Route as InspectorReportsIdRouteImport } from './routes/inspector.reports.$id'
+import { Route as AdminUsersCustomersIndexRouteImport } from './routes/admin.users.customers.index'
+import { Route as AdminUsersCustomersIdRouteImport } from './routes/admin.users.customers.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -179,6 +181,17 @@ const InspectorReportsIdRoute = InspectorReportsIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => InspectorReportsRoute,
 } as any)
+const AdminUsersCustomersIndexRoute =
+  AdminUsersCustomersIndexRouteImport.update({
+    id: '/customers/',
+    path: '/customers/',
+    getParentRoute: () => AdminUsersRoute,
+  } as any)
+const AdminUsersCustomersIdRoute = AdminUsersCustomersIdRouteImport.update({
+  id: '/customers/$id',
+  path: '/customers/$id',
+  getParentRoute: () => AdminUsersRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -209,6 +222,8 @@ export interface FileRoutesByFullPath {
   '/admin/users/': typeof AdminUsersIndexRoute
   '/inspector/inspections/': typeof InspectorInspectionsIndexRoute
   '/inspector/reports/': typeof InspectorReportsIndexRoute
+  '/admin/users/customers/$id': typeof AdminUsersCustomersIdRoute
+  '/admin/users/customers/': typeof AdminUsersCustomersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -233,6 +248,8 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AdminUsersIndexRoute
   '/inspector/inspections': typeof InspectorInspectionsIndexRoute
   '/inspector/reports': typeof InspectorReportsIndexRoute
+  '/admin/users/customers/$id': typeof AdminUsersCustomersIdRoute
+  '/admin/users/customers': typeof AdminUsersCustomersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -264,6 +281,8 @@ export interface FileRoutesById {
   '/admin/users/': typeof AdminUsersIndexRoute
   '/inspector/inspections/': typeof InspectorInspectionsIndexRoute
   '/inspector/reports/': typeof InspectorReportsIndexRoute
+  '/admin/users/customers/$id': typeof AdminUsersCustomersIdRoute
+  '/admin/users/customers/': typeof AdminUsersCustomersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -296,6 +315,8 @@ export interface FileRouteTypes {
     | '/admin/users/'
     | '/inspector/inspections/'
     | '/inspector/reports/'
+    | '/admin/users/customers/$id'
+    | '/admin/users/customers/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -320,6 +341,8 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/inspector/inspections'
     | '/inspector/reports'
+    | '/admin/users/customers/$id'
+    | '/admin/users/customers'
   id:
     | '__root__'
     | '/'
@@ -350,6 +373,8 @@ export interface FileRouteTypes {
     | '/admin/users/'
     | '/inspector/inspections/'
     | '/inspector/reports/'
+    | '/admin/users/customers/$id'
+    | '/admin/users/customers/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -558,17 +583,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InspectorReportsIdRouteImport
       parentRoute: typeof InspectorReportsRoute
     }
+    '/admin/users/customers/': {
+      id: '/admin/users/customers/'
+      path: '/customers'
+      fullPath: '/admin/users/customers/'
+      preLoaderRoute: typeof AdminUsersCustomersIndexRouteImport
+      parentRoute: typeof AdminUsersRoute
+    }
+    '/admin/users/customers/$id': {
+      id: '/admin/users/customers/$id'
+      path: '/customers/$id'
+      fullPath: '/admin/users/customers/$id'
+      preLoaderRoute: typeof AdminUsersCustomersIdRouteImport
+      parentRoute: typeof AdminUsersRoute
+    }
   }
 }
 
 interface AdminUsersRouteChildren {
   AdminUsersStaffRoute: typeof AdminUsersStaffRoute
   AdminUsersIndexRoute: typeof AdminUsersIndexRoute
+  AdminUsersCustomersIdRoute: typeof AdminUsersCustomersIdRoute
+  AdminUsersCustomersIndexRoute: typeof AdminUsersCustomersIndexRoute
 }
 
 const AdminUsersRouteChildren: AdminUsersRouteChildren = {
   AdminUsersStaffRoute: AdminUsersStaffRoute,
   AdminUsersIndexRoute: AdminUsersIndexRoute,
+  AdminUsersCustomersIdRoute: AdminUsersCustomersIdRoute,
+  AdminUsersCustomersIndexRoute: AdminUsersCustomersIndexRoute,
 }
 
 const AdminUsersRouteWithChildren = AdminUsersRoute._addFileChildren(

@@ -36,22 +36,26 @@ function ResetPasswordPage() {
       return;
     }
     setDone(true);
-    setTimeout(() => navigate({ to: "/", replace: true }), 1200);
+    setTimeout(() => navigate({ to: "/auth", replace: true }), 1200);
   }
 
   return (
     <div className="min-h-screen bg-background">
       <GovStripe />
-      <main className="mx-auto max-w-md px-5 py-16">
+      <main className="mx-auto max-w-md px-5 py-16 rise-in">
         <div className="text-primary">
           <ScanShieldMark />
         </div>
-        <Panel className="mt-6 p-5">
-          <h1 className="text-sm font-semibold">Set a new password</h1>
+        <h1 className="mt-6 text-2xl font-semibold tracking-tight">Set a new password</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
+          Choose a password of at least 8 characters to finish resetting your account.
+        </p>
+        <Panel className="mt-5 p-5">
           {done ? (
-            <p className="mt-3 rounded-md bg-pass/10 px-3 py-2 text-xs text-pass">
+            <p className="rounded-md bg-pass/10 px-3 py-2 text-xs text-pass">
               Password updated. Taking you to sign in…
             </p>
+
           ) : (
             <form onSubmit={submit} className="mt-4 space-y-3">
               <Field label="New password">

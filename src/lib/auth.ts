@@ -11,6 +11,7 @@ export interface Session {
   district: string;
   employeeId?: string | null;
   department?: string | null;
+  accountStatus?: "active" | "suspended" | "deactivated";
   issuedAt: string;
   expiresAt: string;
 }
@@ -178,6 +179,16 @@ export async function signIn(email: string, password: string): Promise<Session |
   }
   const expiresAt = new Date((data.session.expires_at ?? Date.now() / 1000 + 3600) * 1000).toISOString();
   const session = await loadProfile(data.session.user.id, data.session.user.email ?? email, expiresAt);
+  if (session.accountStatus && session.accountStatus !== "active") {
+    await supabase.auth.signOut();
+    setState({ status: "ready", session: null });
+    return {
+      error:
+        session.accountStatus === "suspended"
+          ? "This account has been suspended by an administrator."
+          : "This account has been deactivated.",
+    };
+  }
   setState({ status: "ready", session });
   return session;
 }

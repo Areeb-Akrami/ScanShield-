@@ -389,9 +389,18 @@ export async function createRule(input: {
   description?: string | null;
   legal_requirement?: string | null;
   source_document?: string | null;
+  source_url?: string | null;
   effective_from: string;
+  effective_to?: string | null;
   category?: string | null;
+  field?: string | null;
   severity?: string | null;
+  machine_checkability?: string | null;
+  human_review_required?: boolean;
+  required_evidence?: string[];
+  applicability?: Record<string, unknown>;
+  provenance?: string | null;
+  amendment_note?: string | null;
   status?: DbRule["status"];
 }): Promise<{ error?: string | undefined }> {
   const { data: auth } = await supabase.auth.getUser();
@@ -403,12 +412,20 @@ export async function createRule(input: {
     description: input.description?.trim() || null,
     legal_requirement: input.legal_requirement?.trim() || null,
     source_document: input.source_document || null,
+    source_url: input.source_url?.trim() || null,
     effective_from: input.effective_from,
+    effective_to: input.effective_to || null,
     status: input.status ?? "draft",
     version: 1,
     category: input.category?.trim() || null,
+    field: input.field?.trim() || null,
     severity: input.severity || null,
-    provenance: "ENTERED_BY_ADMINISTRATOR",
+    machine_checkability: input.machine_checkability || null,
+    human_review_required: input.human_review_required ?? false,
+    required_evidence: (input.required_evidence ?? []) as never,
+    applicability: (input.applicability ?? {}) as never,
+    provenance: input.provenance?.trim() || "ENTERED_BY_ADMINISTRATOR",
+    amendment_note: input.amendment_note?.trim() || null,
     created_by: auth.user?.id ?? null,
   });
   return { error: error?.message };
@@ -417,7 +434,25 @@ export async function createRule(input: {
 /** Edits the current version in place — used for corrections, not amendments. */
 export async function updateRule(
   id: string,
-  patch: Partial<Pick<DbRule, "title" | "rule_number" | "sub_rule" | "description" | "legal_requirement" | "source_document" | "category" | "severity" | "effective_from" | "effective_to">>,
+  patch: Partial<
+    Pick<
+      DbRule,
+      | "title"
+      | "rule_number"
+      | "sub_rule"
+      | "description"
+      | "legal_requirement"
+      | "source_document"
+      | "source_url"
+      | "category"
+      | "field"
+      | "severity"
+      | "machine_checkability"
+      | "human_review_required"
+      | "effective_from"
+      | "effective_to"
+    >
+  >,
 ): Promise<{ error?: string | undefined }> {
   const { error } = await supabase.from("rules").update(patch).eq("id", id);
   return { error: error?.message };

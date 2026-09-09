@@ -95,6 +95,7 @@ export const createStaffAccount = createServerFn({ method: "POST" })
         district: data.district.trim() || null,
         role: data.role,
         account_status: "active",
+
       },
       { onConflict: "id" },
     );

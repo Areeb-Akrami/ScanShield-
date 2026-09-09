@@ -218,7 +218,7 @@ function StaffPage() {
             </Field>
             <div className="sm:col-span-2">
               <Button onClick={() => void submitNew()} disabled={busy}>
-                {busy ? "Creating…" : `Create ${ROLE_LABEL[role].toLowerCase()}`}
+                {busy ? "Creating…" : "Create & send invitation"}
               </Button>
             </div>
           </div>

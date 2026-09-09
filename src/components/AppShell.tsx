@@ -1,4 +1,4 @@
-import { getSession, homeForRole, signOut, type Session } from "@/lib/auth";
+import { authSnapshot, homeForRole, signOut, subscribeAuth, type Session } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
@@ -32,12 +32,21 @@ export function ScanShieldMark({ small = false }: { small?: boolean }) {
   );
 }
 
-export function useSession(): Session | null {
-  const [session, setSession] = useState<Session | null>(null);
+/** Live authentication state; re-renders when the user signs in or out. */
+export function useAuthState(): { status: "loading" | "ready"; session: Session | null } {
+  const [state, setState] = useState<{ status: "loading" | "ready"; session: Session | null }>({
+    status: "loading",
+    session: null,
+  });
   useEffect(() => {
-    setSession(getSession());
+    setState(authSnapshot());
+    return subscribeAuth(() => setState(authSnapshot()));
   }, []);
-  return session;
+  return state;
+}
+
+export function useSession(): Session | null {
+  return useAuthState().session;
 }
 
 export function useOnline(): boolean {

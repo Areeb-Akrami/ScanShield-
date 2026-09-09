@@ -97,6 +97,7 @@ function CustomersPage() {
                   <th className="px-3 py-2">Name</th>
                   <th className="px-3 py-2">Phone</th>
                   <th className="px-3 py-2">Email</th>
+                  <th className="px-3 py-2">District</th>
                   <th className="px-3 py-2">Checks</th>
                   <th className="px-3 py-2">Complaints</th>
                   <th className="px-3 py-2">Status</th>

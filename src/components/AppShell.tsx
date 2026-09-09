@@ -70,7 +70,7 @@ export function TopBar({ title, subtitle }: { title: string; subtitle?: string }
   const navigate = useNavigate();
 
   return (
-    <header className="sticky top-0 z-20 border-b border-border bg-primary text-primary-foreground">
+    <header className="sticky top-0 z-20 border-b border-border bg-navy text-navy-foreground">
       <GovStripe />
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
         <div className="min-w-0">
@@ -97,12 +97,12 @@ export function TopBar({ title, subtitle }: { title: string; subtitle?: string }
               onClick={() => {
                 void signOut().then(() => navigate({ to: "/", replace: true }));
               }}
-              className="rounded border border-primary-foreground/30 px-2.5 py-1 text-[11px] font-medium hover:bg-primary-foreground/10"
+              className="rounded-md border border-navy-foreground/30 px-2.5 py-1 text-[11px] font-medium transition-colors hover:bg-navy-foreground/10"
             >
               {session.name.split(" ")[0]} · Sign out
             </button>
           ) : (
-            <Link to="/" className="text-[11px] underline underline-offset-2">
+            <Link to="/auth" className="text-[11px] underline underline-offset-2">
               Sign in
             </Link>
           )}
@@ -127,7 +127,7 @@ export function BottomNav({ items }: { items: NavItem[] }) {
               <Link
                 to={item.to}
                 className={cn(
-                  "flex min-h-[56px] flex-col items-center justify-center gap-1 px-1 py-2 text-[10px] font-medium",
+                  "flex min-h-[56px] flex-col items-center justify-center gap-1 px-1 py-2 text-[10px] font-medium transition-colors",
                   active ? "text-accent" : "text-muted-foreground",
                 )}
               >
@@ -154,7 +154,7 @@ export function DesktopNav({ items }: { items: NavItem[] }) {
               <Link
                 to={item.to}
                 className={cn(
-                  "inline-flex items-center gap-2 border-b-2 px-3 py-2.5 text-sm font-medium",
+                  "inline-flex items-center gap-2 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors",
                   active
                     ? "border-accent text-foreground"
                     : "border-transparent text-muted-foreground hover:text-foreground",
@@ -181,7 +181,7 @@ export function RequireRole({
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (status === "ready" && !s) navigate({ to: "/", replace: true });
+    if (status === "ready" && !s) navigate({ to: "/auth", replace: true });
   }, [status, s, navigate]);
 
   if (status === "loading" || (!s && status === "ready")) {

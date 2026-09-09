@@ -403,7 +403,7 @@ function RulesPage() {
             }
           />
           {creating ? (
-            <form onSubmit={submitNewRule} className="grid gap-3 p-4 sm:grid-cols-2">
+            <form onSubmit={(e) => void submitNewRule(e)} className="grid gap-3 p-4 sm:grid-cols-2">
               <Field label="Rule identifier">
                 <input
                   required

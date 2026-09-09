@@ -425,8 +425,14 @@ function RulesPage() {
               <Field label="Title">
                 <input required value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} className={inputClass()} />
               </Field>
+              <Field label="Sub-rule">
+                <input value={draft.sub_rule} onChange={(e) => setDraft({ ...draft, sub_rule: e.target.value })} placeholder="(a)" className={inputClass()} />
+              </Field>
               <Field label="Category">
                 <input value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value })} className={inputClass()} />
+              </Field>
+              <Field label="Declaration field">
+                <input value={draft.field} onChange={(e) => setDraft({ ...draft, field: e.target.value })} placeholder="mrp, net_quantity…" className={inputClass()} />
               </Field>
               <div className="sm:col-span-2">
                 <Field label="Legal requirement (verbatim)">

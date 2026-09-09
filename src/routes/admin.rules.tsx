@@ -52,18 +52,33 @@ function RulesPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [draft, setDraft] = useState({
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [exemptions, setExemptions] = useState<DbExemption[]>([]);
+  const [correcting, setCorrecting] = useState<DbRule | null>(null);
+  const EMPTY_DRAFT = {
     rule_key: "",
     rule_number: "",
+    sub_rule: "",
     title: "",
     category: "",
+    field: "",
     legal_requirement: "",
     description: "",
     effective_from: new Date().toISOString().slice(0, 10),
+    effective_to: "",
     source_document: "",
+    source_url: "",
     severity: "",
+    machine_checkability: "",
+    human_review_required: false,
+    required_evidence: "",
+    applicability: "",
+    provenance: "",
+    amendment_note: "",
     status: "draft" as DbRule["status"],
-  });
+  };
+  const [draft, setDraft] = useState(EMPTY_DRAFT);
 
   async function submitNewRule(e: React.FormEvent) {
     e.preventDefault();

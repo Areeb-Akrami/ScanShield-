@@ -44,6 +44,7 @@ import { Route as InspectorInspectionsIndexRouteImport } from './routes/inspecto
 import { Route as InspectorInspectionsIdRouteImport } from './routes/inspector.inspections.$id'
 import { Route as InspectorReportsIndexRouteImport } from './routes/inspector.reports.index'
 import { Route as InspectorReportsIdRouteImport } from './routes/inspector.reports.$id'
+import { Route as OfficerCasesIdRouteImport } from './routes/officer.cases.$id'
 import { Route as AdminUsersCustomersIndexRouteImport } from './routes/admin.users.customers.index'
 import { Route as AdminUsersCustomersIdRouteImport } from './routes/admin.users.customers.$id'
 
@@ -223,6 +224,11 @@ const InspectorReportsIdRoute = InspectorReportsIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => InspectorReportsRoute,
 } as any)
+const OfficerCasesIdRoute = OfficerCasesIdRouteImport.update({
+  id: '/cases/$id',
+  path: '/cases/$id',
+  getParentRoute: () => OfficerRoute,
+} as any)
 const AdminUsersCustomersIndexRoute =
   AdminUsersCustomersIndexRouteImport.update({
     id: '/customers/',
@@ -268,6 +274,7 @@ export interface FileRoutesByFullPath {
   '/consumer/check/$id': typeof ConsumerCheckIdRoute
   '/inspector/inspections/$id': typeof InspectorInspectionsIdRoute
   '/inspector/reports/$id': typeof InspectorReportsIdRoute
+  '/officer/cases/$id': typeof OfficerCasesIdRoute
   '/admin/users/': typeof AdminUsersIndexRoute
   '/inspector/inspections/': typeof InspectorInspectionsIndexRoute
   '/inspector/reports/': typeof InspectorReportsIndexRoute
@@ -300,6 +307,7 @@ export interface FileRoutesByTo {
   '/consumer/check/$id': typeof ConsumerCheckIdRoute
   '/inspector/inspections/$id': typeof InspectorInspectionsIdRoute
   '/inspector/reports/$id': typeof InspectorReportsIdRoute
+  '/officer/cases/$id': typeof OfficerCasesIdRoute
   '/admin/users': typeof AdminUsersIndexRoute
   '/inspector/inspections': typeof InspectorInspectionsIndexRoute
   '/inspector/reports': typeof InspectorReportsIndexRoute
@@ -340,6 +348,7 @@ export interface FileRoutesById {
   '/consumer/check/$id': typeof ConsumerCheckIdRoute
   '/inspector/inspections/$id': typeof InspectorInspectionsIdRoute
   '/inspector/reports/$id': typeof InspectorReportsIdRoute
+  '/officer/cases/$id': typeof OfficerCasesIdRoute
   '/admin/users/': typeof AdminUsersIndexRoute
   '/inspector/inspections/': typeof InspectorInspectionsIndexRoute
   '/inspector/reports/': typeof InspectorReportsIndexRoute
@@ -381,6 +390,7 @@ export interface FileRouteTypes {
     | '/consumer/check/$id'
     | '/inspector/inspections/$id'
     | '/inspector/reports/$id'
+    | '/officer/cases/$id'
     | '/admin/users/'
     | '/inspector/inspections/'
     | '/inspector/reports/'
@@ -413,6 +423,7 @@ export interface FileRouteTypes {
     | '/consumer/check/$id'
     | '/inspector/inspections/$id'
     | '/inspector/reports/$id'
+    | '/officer/cases/$id'
     | '/admin/users'
     | '/inspector/inspections'
     | '/inspector/reports'
@@ -452,6 +463,7 @@ export interface FileRouteTypes {
     | '/consumer/check/$id'
     | '/inspector/inspections/$id'
     | '/inspector/reports/$id'
+    | '/officer/cases/$id'
     | '/admin/users/'
     | '/inspector/inspections/'
     | '/inspector/reports/'
@@ -715,6 +727,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InspectorReportsIdRouteImport
       parentRoute: typeof InspectorReportsRoute
     }
+    '/officer/cases/$id': {
+      id: '/officer/cases/$id'
+      path: '/cases/$id'
+      fullPath: '/officer/cases/$id'
+      preLoaderRoute: typeof OfficerCasesIdRouteImport
+      parentRoute: typeof OfficerRoute
+    }
     '/admin/users/customers/': {
       id: '/admin/users/customers/'
       path: '/customers'
@@ -849,11 +868,13 @@ const InspectorRouteWithChildren = InspectorRoute._addFileChildren(
 interface OfficerRouteChildren {
   OfficerReviewRoute: typeof OfficerReviewRoute
   OfficerIndexRoute: typeof OfficerIndexRoute
+  OfficerCasesIdRoute: typeof OfficerCasesIdRoute
 }
 
 const OfficerRouteChildren: OfficerRouteChildren = {
   OfficerReviewRoute: OfficerReviewRoute,
   OfficerIndexRoute: OfficerIndexRoute,
+  OfficerCasesIdRoute: OfficerCasesIdRoute,
 }
 
 const OfficerRouteWithChildren =

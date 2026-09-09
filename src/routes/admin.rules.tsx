@@ -3,6 +3,7 @@ import { useSession } from "@/components/AppShell";
 import { Button, Field, Panel, PanelHeader, StatusPill, inputClass } from "@/components/ui";
 import { EXEMPTIONS, sourceTitle } from "@/legal/corpus";
 import {
+  createRule,
   createRuleVersion,
   listDbRules,
   listLegalDocuments,

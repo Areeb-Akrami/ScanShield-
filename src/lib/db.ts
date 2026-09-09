@@ -371,7 +371,7 @@ export async function setRuleStatus(id: string, status: DbRule["status"]): Promi
 export async function listLegalDocuments() {
   const { data } = await supabase
     .from("legal_documents")
-    .select("id, source_id, title, gazette_reference, published_on, ingested, document_url")
+    .select("id, source_id, title, gazette_reference, published_on, ingested, document_url, created_at")
     .order("published_on", { ascending: false });
   return data ?? [];
 }

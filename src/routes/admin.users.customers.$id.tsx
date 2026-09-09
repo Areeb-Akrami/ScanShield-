@@ -60,6 +60,8 @@ function CustomerDetail() {
   const [activity, setActivity] = useState<Awaited<ReturnType<typeof userActivity>>>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
+  const [openCheck, setOpenCheck] = useState<string | null>(null);
+  const [openComplaint, setOpenComplaint] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);

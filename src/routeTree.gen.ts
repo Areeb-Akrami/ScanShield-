@@ -18,6 +18,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AdminInspectionsRouteImport } from './routes/admin.inspections'
+import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
 import { Route as AdminRulesRouteImport } from './routes/admin.rules'
 import { Route as AdminSellersRouteImport } from './routes/admin.sellers'
 import { Route as AdminSourcesRouteImport } from './routes/admin.sources'
@@ -85,6 +86,11 @@ const AdminAuditRoute = AdminAuditRouteImport.update({
 const AdminInspectionsRoute = AdminInspectionsRouteImport.update({
   id: '/inspections',
   path: '/inspections',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminRulesRoute = AdminRulesRouteImport.update({
@@ -214,6 +220,7 @@ export interface FileRoutesByFullPath {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/inspections': typeof AdminInspectionsRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/rules': typeof AdminRulesRoute
   '/admin/sellers': typeof AdminSellersRoute
   '/admin/sources': typeof AdminSourcesRoute
@@ -245,6 +252,7 @@ export interface FileRoutesByTo {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/inspections': typeof AdminInspectionsRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/rules': typeof AdminRulesRoute
   '/admin/sellers': typeof AdminSellersRoute
   '/admin/sources': typeof AdminSourcesRoute
@@ -277,6 +285,7 @@ export interface FileRoutesById {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/inspections': typeof AdminInspectionsRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/rules': typeof AdminRulesRoute
   '/admin/sellers': typeof AdminSellersRoute
   '/admin/sources': typeof AdminSourcesRoute
@@ -313,6 +322,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/audit'
     | '/admin/inspections'
+    | '/admin/notifications'
     | '/admin/rules'
     | '/admin/sellers'
     | '/admin/sources'
@@ -344,6 +354,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/audit'
     | '/admin/inspections'
+    | '/admin/notifications'
     | '/admin/rules'
     | '/admin/sellers'
     | '/admin/sources'
@@ -375,6 +386,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/audit'
     | '/admin/inspections'
+    | '/admin/notifications'
     | '/admin/rules'
     | '/admin/sellers'
     | '/admin/sources'
@@ -472,6 +484,13 @@ declare module '@tanstack/react-router' {
       path: '/inspections'
       fullPath: '/admin/inspections'
       preLoaderRoute: typeof AdminInspectionsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/notifications': {
+      id: '/admin/notifications'
+      path: '/notifications'
+      fullPath: '/admin/notifications'
+      preLoaderRoute: typeof AdminNotificationsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/rules': {
@@ -660,6 +679,7 @@ interface AdminRouteChildren {
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminAuditRoute: typeof AdminAuditRoute
   AdminInspectionsRoute: typeof AdminInspectionsRoute
+  AdminNotificationsRoute: typeof AdminNotificationsRoute
   AdminRulesRoute: typeof AdminRulesRoute
   AdminSellersRoute: typeof AdminSellersRoute
   AdminSourcesRoute: typeof AdminSourcesRoute
@@ -671,6 +691,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminAuditRoute: AdminAuditRoute,
   AdminInspectionsRoute: AdminInspectionsRoute,
+  AdminNotificationsRoute: AdminNotificationsRoute,
   AdminRulesRoute: AdminRulesRoute,
   AdminSellersRoute: AdminSellersRoute,
   AdminSourcesRoute: AdminSourcesRoute,

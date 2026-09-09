@@ -96,16 +96,27 @@ function StaffPage() {
   async function submitNew() {
     setBusy(true);
     setMessage(null);
-    const result = await createStaff({ data: { ...form, role } });
+    const redirectTo =
+      typeof window === "undefined" ? "" : `${window.location.origin}/reset-password`;
+    const result = await createStaff({
+      data: { ...form, role, ...(redirectTo ? { redirectTo } : {}) },
+    });
     setBusy(false);
     if ("error" in result && result.error) {
       setMessage({ kind: "error", text: result.error });
       return;
     }
-    const pwd = (result as { temporaryPassword?: string }).temporaryPassword;
+    const r = result as {
+      email: string;
+      invited: boolean;
+      status: "pending_setup" | "active";
+      inviteIssue?: string | null;
+    };
     setMessage({
       kind: "ok",
-      text: `${ROLE_LABEL[role]} account created. Temporary password: ${pwd}. Share it securely — it is shown only once.`,
+      text: r.invited
+        ? `Account created. Invitation sent to: ${r.email}. Role: ${ROLE_LABEL[role]}. Status: Pending setup — the staff member sets their own password from the invitation link.`
+        : `Account created. Role: ${ROLE_LABEL[role]}. Status: Active. No invitation email could be sent (${r.inviteIssue ?? "email delivery not configured"}), so no password was set or shown. Ask ${r.email} to use "Forgot password" on the sign-in page, or configure email sending for this backend to enable invitation emails.`,
     });
     setForm(EMPTY);
     setCreating(false);
@@ -207,7 +218,7 @@ function StaffPage() {
             </Field>
             <div className="sm:col-span-2">
               <Button onClick={() => void submitNew()} disabled={busy}>
-                {busy ? "Creating…" : `Create ${ROLE_LABEL[role].toLowerCase()}`}
+                {busy ? "Creating…" : "Create & send invitation"}
               </Button>
             </div>
           </div>

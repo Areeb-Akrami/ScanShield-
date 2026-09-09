@@ -151,6 +151,16 @@ function SourcesPage() {
     setBusy(true);
     const { error } = await associateSourceWithRule(assocRule, assocSource);
     setBusy(false);
+    if (!error) {
+      audit({
+        user: session?.email ?? "unknown",
+        action: "LEGAL_SOURCE_ASSOCIATED",
+        entity: "Rule",
+        entityId: assocRule,
+        before: "—",
+        after: `attributed to ${assocSource}`,
+      });
+    }
     setMessage(error ?? `${assocRule} is now attributed to ${assocSource}.`);
     load();
   }

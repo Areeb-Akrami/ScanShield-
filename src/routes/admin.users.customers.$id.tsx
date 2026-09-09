@@ -158,16 +158,31 @@ function CustomerDetail() {
         ) : (
           <ul className="divide-y divide-border">
             {complaints.map((c) => (
-              <li key={c.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 text-sm">
-                <span>
-                  <span className="font-medium">{c.product}</span>
-                  <span className="ml-2 text-xs text-muted-foreground">{c.issue_type}</span>
-                </span>
-                <span className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span>Ref {c.id.slice(0, 8).toUpperCase()}</span>
-                  <span>{c.status}</span>
-                  <span>{new Date(c.created_at).toLocaleDateString()}</span>
-                </span>
+              <li key={c.id} className="px-4 py-2.5 text-sm">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span>
+                    <span className="font-medium">{c.product}</span>
+                    <span className="ml-2 text-xs text-muted-foreground">{c.issue_type}</span>
+                  </span>
+                  <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>Ref {c.id.slice(0, 8).toUpperCase()}</span>
+                    <span>{c.status}</span>
+                    <span>{new Date(c.created_at).toLocaleDateString()}</span>
+                    <button
+                      className="underline underline-offset-2"
+                      onClick={() => setOpenComplaint(openComplaint === c.id ? null : c.id)}
+                    >
+                      {openComplaint === c.id ? "Hide" : "View complaint"}
+                    </button>
+                  </span>
+                </div>
+                {openComplaint === c.id ? (
+                  <div className="mt-2 space-y-1 rounded border border-border bg-surface p-3 text-xs">
+                    <p><span className="text-muted-foreground">Seller:</span> {(c as { seller?: string | null }).seller ?? "—"}</p>
+                    <p><span className="text-muted-foreground">Submitted:</span> {new Date(c.created_at).toLocaleString()}</p>
+                    <p className="whitespace-pre-wrap">{(c as { description?: string | null }).description ?? "—"}</p>
+                  </div>
+                ) : null}
               </li>
             ))}
           </ul>

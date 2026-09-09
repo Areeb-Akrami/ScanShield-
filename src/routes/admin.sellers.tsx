@@ -1,4 +1,6 @@
-import { Panel, PanelHeader, StatusPill } from "@/components/ui";
+import { Button, Panel, PanelHeader, StatusPill } from "@/components/ui";
+import { listDbSellers, setSellerStatus, type DbSeller } from "@/lib/db";
+import { useSession } from "@/components/AppShell";
 import { listInspections, sellerProfiles, type SellerProfile } from "@/lib/store";
 import { hydrateInspections } from "@/lib/store";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -27,6 +29,8 @@ function SellersPage() {
 
   return (
     <div className="space-y-4">
+      <RegisteredSellers />
+
       {profiles.length === 0 ? (
         <Panel className="p-4 text-sm text-muted-foreground">No sellers on record yet.</Panel>
       ) : (
@@ -69,5 +73,61 @@ function SellersPage() {
         ))
       )}
     </div>
+  );
+}
+
+function riskToken(score: number) {
+  if (score >= 0.66) return "HIGH";
+  if (score >= 0.33) return "MEDIUM";
+  return "LOW";
+}
+
+/** Sellers held in the central register, with their recorded risk and status. */
+function RegisteredSellers() {
+  const session = useSession();
+  const isAdmin = session?.role === "ADMIN";
+  const [rows, setRows] = useState<DbSeller[]>([]);
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const load = () => void listDbSellers().then(setRows);
+  useEffect(load, []);
+
+  async function toggle(seller: DbSeller) {
+    setBusy(seller.id);
+    await setSellerStatus(seller.id, seller.status === "flagged" ? "active" : "flagged");
+    setBusy(null);
+    load();
+  }
+
+  return (
+    <Panel>
+      <PanelHeader title={`Registered sellers (${rows.length})`} subtitle="Held in the central database." />
+      {rows.length === 0 ? (
+        <p className="p-4 text-sm text-muted-foreground">No sellers are registered yet.</p>
+      ) : (
+        <ul className="divide-y divide-border">
+          {rows.map((s) => (
+            <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
+              <div className="min-w-0">
+                <p className="text-sm font-medium">{s.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {[s.district, s.state].filter(Boolean).join(", ") || "Location not recorded"}
+                  {s.contact_phone ? ` · ${s.contact_phone}` : ""}
+                </p>
+              </div>
+              <span className="flex items-center gap-2">
+                <StatusPill token={riskToken(Number(s.risk_score))} label={`risk ${Number(s.risk_score).toFixed(2)}`} />
+                <StatusPill token={s.status === "flagged" ? "FAIL" : "PASS"} label={s.status} />
+                {isAdmin ? (
+                  <Button size="sm" variant="outline" disabled={busy === s.id} onClick={() => void toggle(s)}>
+                    {s.status === "flagged" ? "Clear flag" : "Flag"}
+                  </Button>
+                ) : null}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Panel>
   );
 }

@@ -3,7 +3,8 @@ import { Panel, PanelHeader, Stat, StatusPill } from "@/components/ui";
 import { corpusStatistics } from "@/legal/corpus";
 import { listInspections, sellerProfiles, type Inspection } from "@/lib/store";
 import { hydrateInspections } from "@/lib/store";
-import { createFileRoute } from "@tanstack/react-router";
+import { useSession } from "@/components/AppShell";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 
 export const Route = createFileRoute("/admin/")({
@@ -172,6 +173,38 @@ function AdminOverview() {
           )}
         </ul>
       </Panel>
+
+      <AdminShortcuts />
     </div>
+  );
+}
+
+const SHORTCUTS = [
+  { to: "/admin/users", label: "Users" },
+  { to: "/admin/analytics", label: "Analytics" },
+  { to: "/admin/sources", label: "Legal sources & exemptions" },
+  { to: "/admin/audit", label: "Audit log" },
+  { to: "/admin/notifications", label: "Notifications" },
+  { to: "/admin/settings", label: "Settings" },
+] as const;
+
+/** Administrator areas that do not fit in the phone navigation bar. */
+function AdminShortcuts() {
+  const session = useSession();
+  if (session?.role !== "ADMIN") return null;
+  return (
+    <Panel>
+      <PanelHeader title="Administration" />
+      <ul className="divide-y divide-border">
+        {SHORTCUTS.map((s) => (
+          <li key={s.to}>
+            <Link to={s.to} className="flex items-center justify-between px-4 py-3 text-sm hover:bg-muted">
+              <span>{s.label}</span>
+              <span aria-hidden className="text-muted-foreground">&rsaquo;</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </Panel>
   );
 }

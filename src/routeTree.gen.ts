@@ -15,10 +15,14 @@ import { Route as ConsumerRouteImport } from './routes/consumer'
 import { Route as InspectorRouteImport } from './routes/inspector'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AdminInspectionsRouteImport } from './routes/admin.inspections'
+import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
 import { Route as AdminRulesRouteImport } from './routes/admin.rules'
 import { Route as AdminSellersRouteImport } from './routes/admin.sellers'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminSourcesRouteImport } from './routes/admin.sources'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as ConsumerIndexRouteImport } from './routes/consumer.index'
 import { Route as ConsumerAccountRouteImport } from './routes/consumer.account'
@@ -70,6 +74,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminAuditRoute = AdminAuditRouteImport.update({
   id: '/audit',
   path: '/audit',
@@ -80,6 +89,11 @@ const AdminInspectionsRoute = AdminInspectionsRouteImport.update({
   path: '/inspections',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminRulesRoute = AdminRulesRouteImport.update({
   id: '/rules',
   path: '/rules',
@@ -88,6 +102,16 @@ const AdminRulesRoute = AdminRulesRouteImport.update({
 const AdminSellersRoute = AdminSellersRouteImport.update({
   id: '/sellers',
   path: '/sellers',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSourcesRoute = AdminSourcesRouteImport.update({
+  id: '/sources',
+  path: '/sources',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
@@ -199,10 +223,14 @@ export interface FileRoutesByFullPath {
   '/consumer': typeof ConsumerRouteWithChildren
   '/inspector': typeof InspectorRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/inspections': typeof AdminInspectionsRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/rules': typeof AdminRulesRoute
   '/admin/sellers': typeof AdminSellersRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/sources': typeof AdminSourcesRoute
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/consumer/account': typeof ConsumerAccountRoute
   '/consumer/checks': typeof ConsumerChecksRoute
@@ -228,10 +256,14 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/inspections': typeof AdminInspectionsRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/rules': typeof AdminRulesRoute
   '/admin/sellers': typeof AdminSellersRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/sources': typeof AdminSourcesRoute
   '/consumer/account': typeof ConsumerAccountRoute
   '/consumer/checks': typeof ConsumerChecksRoute
   '/consumer/complaints': typeof ConsumerComplaintsRoute
@@ -258,10 +290,14 @@ export interface FileRoutesById {
   '/consumer': typeof ConsumerRouteWithChildren
   '/inspector': typeof InspectorRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/inspections': typeof AdminInspectionsRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/rules': typeof AdminRulesRoute
   '/admin/sellers': typeof AdminSellersRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/sources': typeof AdminSourcesRoute
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/consumer/account': typeof ConsumerAccountRoute
   '/consumer/checks': typeof ConsumerChecksRoute
@@ -292,10 +328,14 @@ export interface FileRouteTypes {
     | '/consumer'
     | '/inspector'
     | '/reset-password'
+    | '/admin/analytics'
     | '/admin/audit'
     | '/admin/inspections'
+    | '/admin/notifications'
     | '/admin/rules'
     | '/admin/sellers'
+    | '/admin/settings'
+    | '/admin/sources'
     | '/admin/users'
     | '/consumer/account'
     | '/consumer/checks'
@@ -321,10 +361,14 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/reset-password'
+    | '/admin/analytics'
     | '/admin/audit'
     | '/admin/inspections'
+    | '/admin/notifications'
     | '/admin/rules'
     | '/admin/sellers'
+    | '/admin/settings'
+    | '/admin/sources'
     | '/consumer/account'
     | '/consumer/checks'
     | '/consumer/complaints'
@@ -350,10 +394,14 @@ export interface FileRouteTypes {
     | '/consumer'
     | '/inspector'
     | '/reset-password'
+    | '/admin/analytics'
     | '/admin/audit'
     | '/admin/inspections'
+    | '/admin/notifications'
     | '/admin/rules'
     | '/admin/sellers'
+    | '/admin/settings'
+    | '/admin/sources'
     | '/admin/users'
     | '/consumer/account'
     | '/consumer/checks'
@@ -429,6 +477,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/audit': {
       id: '/admin/audit'
       path: '/audit'
@@ -443,6 +498,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminInspectionsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/notifications': {
+      id: '/admin/notifications'
+      path: '/notifications'
+      fullPath: '/admin/notifications'
+      preLoaderRoute: typeof AdminNotificationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/rules': {
       id: '/admin/rules'
       path: '/rules'
@@ -455,6 +517,20 @@ declare module '@tanstack/react-router' {
       path: '/sellers'
       fullPath: '/admin/sellers'
       preLoaderRoute: typeof AdminSellersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/sources': {
+      id: '/admin/sources'
+      path: '/sources'
+      fullPath: '/admin/sources'
+      preLoaderRoute: typeof AdminSourcesRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/users': {
@@ -619,19 +695,27 @@ const AdminUsersRouteWithChildren = AdminUsersRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminAuditRoute: typeof AdminAuditRoute
   AdminInspectionsRoute: typeof AdminInspectionsRoute
+  AdminNotificationsRoute: typeof AdminNotificationsRoute
   AdminRulesRoute: typeof AdminRulesRoute
   AdminSellersRoute: typeof AdminSellersRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminSourcesRoute: typeof AdminSourcesRoute
   AdminUsersRoute: typeof AdminUsersRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminAuditRoute: AdminAuditRoute,
   AdminInspectionsRoute: AdminInspectionsRoute,
+  AdminNotificationsRoute: AdminNotificationsRoute,
   AdminRulesRoute: AdminRulesRoute,
   AdminSellersRoute: AdminSellersRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminSourcesRoute: AdminSourcesRoute,
   AdminUsersRoute: AdminUsersRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,
 }

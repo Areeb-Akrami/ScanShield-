@@ -369,3 +369,220 @@ export async function listLegalDocuments() {
     .order("published_on", { ascending: false });
   return data ?? [];
 }
+
+/* ------------------------------------------------------------------ */
+/* Admin: rule creation, sources, exemptions, sellers, notifications   */
+/* ------------------------------------------------------------------ */
+
+/** Creates a brand-new provision (version 1). Only an administrator may do this. */
+export async function createRule(input: {
+  rule_key: string;
+  rule_number: string;
+  sub_rule?: string | null;
+  title: string;
+  description?: string | null;
+  legal_requirement?: string | null;
+  source_document?: string | null;
+  effective_from: string;
+  category?: string | null;
+  severity?: string | null;
+  status?: DbRule["status"];
+}): Promise<{ error?: string | undefined }> {
+  const { data: auth } = await supabase.auth.getUser();
+  const { error } = await supabase.from("rules").insert({
+    rule_key: input.rule_key.trim(),
+    rule_number: input.rule_number.trim(),
+    sub_rule: input.sub_rule?.trim() || null,
+    title: input.title.trim(),
+    description: input.description?.trim() || null,
+    legal_requirement: input.legal_requirement?.trim() || null,
+    source_document: input.source_document || null,
+    effective_from: input.effective_from,
+    status: input.status ?? "draft",
+    version: 1,
+    category: input.category?.trim() || null,
+    severity: input.severity || null,
+    provenance: "ENTERED_BY_ADMINISTRATOR",
+    created_by: auth.user?.id ?? null,
+  });
+  return { error: error?.message };
+}
+
+/** Edits the current version in place — used for corrections, not amendments. */
+export async function updateRule(
+  id: string,
+  patch: Partial<Pick<DbRule, "title" | "rule_number" | "sub_rule" | "description" | "legal_requirement" | "source_document" | "category" | "severity" | "effective_from" | "effective_to">>,
+): Promise<{ error?: string | undefined }> {
+  const { error } = await supabase.from("rules").update(patch).eq("id", id);
+  return { error: error?.message };
+}
+
+export interface DbExemption {
+  id: string;
+  exemption_key: string;
+  title: string;
+  explanation: string | null;
+  rule_keys: unknown;
+  conditions: unknown;
+  source_document: string | null;
+  effective_from: string;
+  effective_to: string | null;
+}
+
+export async function listExemptions(): Promise<DbExemption[]> {
+  const { data } = await supabase
+    .from("rule_exemptions")
+    .select("id, exemption_key, title, explanation, rule_keys, conditions, source_document, effective_from, effective_to")
+    .order("exemption_key");
+  return (data ?? []) as DbExemption[];
+}
+
+/** Uploads an official document file into the private legal-documents bucket. */
+export async function uploadLegalDocumentFile(file: File, sourceId: string): Promise<string | null> {
+  const safe = sourceId.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const path = `${safe}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+  const { error } = await supabase.storage.from("legal-documents").upload(path, file, {
+    upsert: true,
+    contentType: file.type || "application/octet-stream",
+  });
+  return error ? null : path;
+}
+
+export async function addLegalDocument(input: {
+  source_id: string;
+  title: string;
+  gazette_reference?: string | null;
+  published_on?: string | null;
+  document_url?: string | null;
+  ingested?: boolean;
+}): Promise<{ error?: string | undefined }> {
+  const { data: auth } = await supabase.auth.getUser();
+  const { error } = await supabase.from("legal_documents").insert({
+    source_id: input.source_id.trim(),
+    title: input.title.trim(),
+    gazette_reference: input.gazette_reference?.trim() || null,
+    published_on: input.published_on || null,
+    document_url: input.document_url || null,
+    ingested: input.ingested ?? false,
+    uploaded_by: auth.user?.id ?? null,
+  });
+  return { error: error?.message };
+}
+
+/** Points every version of one rule at a source document. */
+export async function associateSourceWithRule(ruleKey: string, sourceId: string): Promise<{ error?: string | undefined }> {
+  const { error } = await supabase.from("rules").update({ source_document: sourceId }).eq("rule_key", ruleKey);
+  return { error: error?.message };
+}
+
+export interface DbSeller {
+  id: string;
+  name: string;
+  address: string | null;
+  district: string | null;
+  state: string | null;
+  contact_phone: string | null;
+  risk_score: number;
+  status: string;
+  updated_at: string;
+}
+
+export async function listDbSellers(): Promise<DbSeller[]> {
+  const { data } = await supabase
+    .from("sellers")
+    .select("id, name, address, district, state, contact_phone, risk_score, status, updated_at")
+    .order("risk_score", { ascending: false });
+  return (data ?? []) as DbSeller[];
+}
+
+export async function setSellerStatus(id: string, status: string): Promise<{ error?: string | undefined }> {
+  const { error } = await supabase.from("sellers").update({ status }).eq("id", id);
+  return { error: error?.message };
+}
+
+/** Sends a notification to one or more accounts. Staff-only by policy. */
+export async function sendNotifications(
+  userIds: string[],
+  title: string,
+  message: string,
+  type = "admin",
+): Promise<{ error?: string | undefined; sent: number }> {
+  if (userIds.length === 0) return { error: "No recipients selected.", sent: 0 };
+  const { error } = await supabase
+    .from("notifications")
+    .insert(userIds.map((user_id) => ({ user_id, title, message, type })));
+  return { error: error?.message, sent: error ? 0 : userIds.length };
+}
+
+export async function listOwnNotifications() {
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) return [];
+  const { data } = await supabase
+    .from("notifications")
+    .select("id, title, message, type, read, created_at")
+    .eq("user_id", auth.user.id)
+    .order("created_at", { ascending: false })
+    .limit(100);
+  return data ?? [];
+}
+
+export async function markNotificationRead(id: string) {
+  await supabase.from("notifications").update({ read: true }).eq("id", id);
+}
+
+/* ------------------------------------------------------------------ */
+/* Admin analytics                                                     */
+/* ------------------------------------------------------------------ */
+
+export interface AdminAnalytics {
+  inspections: number;
+  byStatus: Array<[string, number]>;
+  byDistrict: Array<[string, { total: number; bad: number }]>;
+  topFailedRules: Array<[string, number]>;
+  consumerChecks: number;
+  complaints: number;
+  openComplaints: number;
+  staff: number;
+  customers: number;
+}
+
+export async function fetchAdminAnalytics(): Promise<AdminAnalytics> {
+  const [insp, checks, comps, profs, failed] = await Promise.all([
+    supabase.from("inspections").select("status, district").limit(2000),
+    supabase.from("consumer_checks").select("id").limit(5000),
+    supabase.from("complaints").select("status").limit(2000),
+    supabase.from("profiles").select("role").limit(2000),
+    supabase.from("rule_checks").select("rule_key, result").eq("result", "fail").limit(5000),
+  ]);
+
+  const byStatus = new Map<string, number>();
+  const byDistrict = new Map<string, { total: number; bad: number }>();
+  for (const row of insp.data ?? []) {
+    const status = String(row.status);
+    byStatus.set(status, (byStatus.get(status) ?? 0) + 1);
+    const key = row.district ?? "Unrecorded";
+    const d = byDistrict.get(key) ?? { total: 0, bad: 0 };
+    d.total += 1;
+    if (status === "non_compliant") d.bad += 1;
+    byDistrict.set(key, d);
+  }
+
+  const ruleCount = new Map<string, number>();
+  for (const row of failed.data ?? []) {
+    const key = row.rule_key ?? "—";
+    ruleCount.set(key, (ruleCount.get(key) ?? 0) + 1);
+  }
+
+  const roles = (profs.data ?? []).map((p) => String(p.role));
+  return {
+    inspections: (insp.data ?? []).length,
+    byStatus: [...byStatus.entries()].sort((a, b) => b[1] - a[1]),
+    byDistrict: [...byDistrict.entries()].sort((a, b) => b[1].bad - a[1].bad),
+    topFailedRules: [...ruleCount.entries()].sort((a, b) => b[1] - a[1]).slice(0, 12),
+    consumerChecks: (checks.data ?? []).length,
+    complaints: (comps.data ?? []).length,
+    openComplaints: (comps.data ?? []).filter((c) => String(c.status) !== "resolved").length,
+    staff: roles.filter((r) => r === "inspector" || r === "enforcement_officer" || r === "admin").length,
+    customers: roles.filter((r) => r === "consumer").length,
+  };
+}

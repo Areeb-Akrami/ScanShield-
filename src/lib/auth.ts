@@ -104,7 +104,7 @@ async function loadProfile(userId: string, email: string, expiresAt: string): Pr
   if (!profile) {
     // First sign-in after registration: create the profile row. A database
     // trigger forces the role to `consumer` unless an administrator creates it.
-    await supabase.from("profiles").insert({ id: userId, email, full_name: email.split("@")[0] ?? email });
+    await supabase.from("profiles").upsert({ id: userId, email, full_name: email.split("@")[0] ?? email }, { onConflict: "id", ignoreDuplicates: true });
   }
 
   const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", userId);

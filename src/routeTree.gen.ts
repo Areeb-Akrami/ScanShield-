@@ -36,6 +36,7 @@ import { Route as InspectorProfileRouteImport } from './routes/inspector.profile
 import { Route as InspectorReportsRouteImport } from './routes/inspector.reports'
 import { Route as InspectorScanRouteImport } from './routes/inspector.scan'
 import { Route as OfficerIndexRouteImport } from './routes/officer.index'
+import { Route as OfficerAnalyticsRouteImport } from './routes/officer.analytics'
 import { Route as OfficerReportsRouteImport } from './routes/officer.reports'
 import { Route as OfficerReviewRouteImport } from './routes/officer.review'
 import { Route as OfficerSellersRouteImport } from './routes/officer.sellers'
@@ -185,6 +186,11 @@ const OfficerIndexRoute = OfficerIndexRouteImport.update({
   path: '/',
   getParentRoute: () => OfficerRoute,
 } as any)
+const OfficerAnalyticsRoute = OfficerAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => OfficerRoute,
+} as any)
 const OfficerReportsRoute = OfficerReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
@@ -277,6 +283,7 @@ export interface FileRoutesByFullPath {
   '/inspector/profile': typeof InspectorProfileRoute
   '/inspector/reports': typeof InspectorReportsRouteWithChildren
   '/inspector/scan': typeof InspectorScanRoute
+  '/officer/analytics': typeof OfficerAnalyticsRoute
   '/officer/reports': typeof OfficerReportsRoute
   '/officer/review': typeof OfficerReviewRoute
   '/officer/sellers': typeof OfficerSellersRoute
@@ -312,6 +319,7 @@ export interface FileRoutesByTo {
   '/consumer/rights': typeof ConsumerRightsRoute
   '/inspector/profile': typeof InspectorProfileRoute
   '/inspector/scan': typeof InspectorScanRoute
+  '/officer/analytics': typeof OfficerAnalyticsRoute
   '/officer/reports': typeof OfficerReportsRoute
   '/officer/review': typeof OfficerReviewRoute
   '/officer/sellers': typeof OfficerSellersRoute
@@ -355,6 +363,7 @@ export interface FileRoutesById {
   '/inspector/profile': typeof InspectorProfileRoute
   '/inspector/reports': typeof InspectorReportsRouteWithChildren
   '/inspector/scan': typeof InspectorScanRoute
+  '/officer/analytics': typeof OfficerAnalyticsRoute
   '/officer/reports': typeof OfficerReportsRoute
   '/officer/review': typeof OfficerReviewRoute
   '/officer/sellers': typeof OfficerSellersRoute
@@ -399,6 +408,7 @@ export interface FileRouteTypes {
     | '/inspector/profile'
     | '/inspector/reports'
     | '/inspector/scan'
+    | '/officer/analytics'
     | '/officer/reports'
     | '/officer/review'
     | '/officer/sellers'
@@ -434,6 +444,7 @@ export interface FileRouteTypes {
     | '/consumer/rights'
     | '/inspector/profile'
     | '/inspector/scan'
+    | '/officer/analytics'
     | '/officer/reports'
     | '/officer/review'
     | '/officer/sellers'
@@ -476,6 +487,7 @@ export interface FileRouteTypes {
     | '/inspector/profile'
     | '/inspector/reports'
     | '/inspector/scan'
+    | '/officer/analytics'
     | '/officer/reports'
     | '/officer/review'
     | '/officer/sellers'
@@ -695,6 +707,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OfficerIndexRouteImport
       parentRoute: typeof OfficerRoute
     }
+    '/officer/analytics': {
+      id: '/officer/analytics'
+      path: '/analytics'
+      fullPath: '/officer/analytics'
+      preLoaderRoute: typeof OfficerAnalyticsRouteImport
+      parentRoute: typeof OfficerRoute
+    }
     '/officer/reports': {
       id: '/officer/reports'
       path: '/reports'
@@ -904,6 +923,7 @@ const InspectorRouteWithChildren = InspectorRoute._addFileChildren(
 )
 
 interface OfficerRouteChildren {
+  OfficerAnalyticsRoute: typeof OfficerAnalyticsRoute
   OfficerReportsRoute: typeof OfficerReportsRoute
   OfficerReviewRoute: typeof OfficerReviewRoute
   OfficerSellersRoute: typeof OfficerSellersRoute
@@ -912,6 +932,7 @@ interface OfficerRouteChildren {
 }
 
 const OfficerRouteChildren: OfficerRouteChildren = {
+  OfficerAnalyticsRoute: OfficerAnalyticsRoute,
   OfficerReportsRoute: OfficerReportsRoute,
   OfficerReviewRoute: OfficerReviewRoute,
   OfficerSellersRoute: OfficerSellersRoute,

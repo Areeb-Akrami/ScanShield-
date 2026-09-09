@@ -83,7 +83,7 @@ function CaseFile() {
         <PanelHeader
           title={detail.product_name ?? "Unnamed product"}
           subtitle={`${detail.seller_name ?? "Unknown seller"} · ${detail.district ?? "—"} · ${new Date(detail.inspection_date).toLocaleString()}`}
-          right={<StatusPill token={statusToken(detail.status)} />}
+          action={<StatusPill token={statusToken(detail.status)} />}
         />
         <dl className="divide-y divide-border text-sm">
           {[

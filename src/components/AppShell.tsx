@@ -1,4 +1,4 @@
-import { getSession, homeForRole, signOut, type Session } from "@/lib/auth";
+import { authSnapshot, homeForRole, signOut, subscribeAuth, type Session } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
@@ -32,12 +32,21 @@ export function ScanShieldMark({ small = false }: { small?: boolean }) {
   );
 }
 
-export function useSession(): Session | null {
-  const [session, setSession] = useState<Session | null>(null);
+/** Live authentication state; re-renders when the user signs in or out. */
+export function useAuthState(): { status: "loading" | "ready"; session: Session | null } {
+  const [state, setState] = useState<{ status: "loading" | "ready"; session: Session | null }>({
+    status: "loading",
+    session: null,
+  });
   useEffect(() => {
-    setSession(getSession());
+    setState(authSnapshot());
+    return subscribeAuth(() => setState(authSnapshot()));
   }, []);
-  return session;
+  return state;
+}
+
+export function useSession(): Session | null {
+  return useAuthState().session;
 }
 
 export function useOnline(): boolean {
@@ -86,8 +95,7 @@ export function TopBar({ title, subtitle }: { title: string; subtitle?: string }
           {session ? (
             <button
               onClick={() => {
-                signOut();
-                navigate({ to: "/" });
+                void signOut().then(() => navigate({ to: "/", replace: true }));
               }}
               className="rounded border border-primary-foreground/30 px-2.5 py-1 text-[11px] font-medium hover:bg-primary-foreground/10"
             >
@@ -166,32 +174,21 @@ export function RequireRole({
   allowed: Session["role"][];
   children: ReactNode;
 }) {
-  const [state, setState] = useState<"checking" | "ok" | "denied">("checking");
+  const { status, session: s } = useAuthState();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const s = getSession();
-    if (!s) {
-      navigate({ to: "/" });
-      return;
-    }
-    if (!allowed.includes(s.role)) {
-      setState("denied");
-      return;
-    }
-    setState("ok");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (status === "ready" && !s) navigate({ to: "/", replace: true });
+  }, [status, s, navigate]);
 
-  if (state === "checking") {
+  if (status === "loading" || (!s && status === "ready")) {
     return (
       <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">
         Verifying session…
       </div>
     );
   }
-  if (state === "denied") {
-    const s = getSession();
+  if (s && !allowed.includes(s.role)) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-3 px-6 text-center">
         <h1 className="text-lg font-semibold">Access restricted</h1>

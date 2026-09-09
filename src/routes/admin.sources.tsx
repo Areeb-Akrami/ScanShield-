@@ -219,6 +219,47 @@ function SourcesPage() {
           )}
         </Panel>
 
+        {editing ? (
+          <Panel>
+            <PanelHeader
+              title={`Edit ${editing.source_id}`}
+              subtitle="Corrects the record's metadata. Mark a document ingested only once its provisions are entered in the rule catalogue."
+            />
+            <form onSubmit={(e) => void saveMetadata(e)} className="space-y-3 p-4">
+              <Field label="Title">
+                <input required value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })} className={inputClass()} />
+              </Field>
+              <Field label="Gazette reference">
+                <input
+                  value={editing.gazette_reference ?? ""}
+                  onChange={(e) => setEditing({ ...editing, gazette_reference: e.target.value })}
+                  className={inputClass()}
+                />
+              </Field>
+              <Field label="Published on">
+                <input
+                  type="date"
+                  value={editing.published_on ?? ""}
+                  onChange={(e) => setEditing({ ...editing, published_on: e.target.value || null })}
+                  className={inputClass()}
+                />
+              </Field>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={editing.ingested} onChange={(e) => setEditing({ ...editing, ingested: e.target.checked })} />
+                Provisions ingested into the rule catalogue
+              </label>
+              <div className="flex gap-2">
+                <Button type="submit" disabled={busy}>
+                  {busy ? "Saving…" : "Save changes"}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setEditing(null)}>
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </Panel>
+        ) : null}
+
         <Panel>
           <PanelHeader title="Upload a source document" subtitle="The file is stored privately; only the record is listed here." />
           <form onSubmit={upload} className="space-y-3 p-4">

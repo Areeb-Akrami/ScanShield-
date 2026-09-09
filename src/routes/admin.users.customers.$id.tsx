@@ -11,8 +11,46 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 
 export const Route = createFileRoute("/admin/users/customers/$id")({
+  head: () => ({
+    meta: [
+      { title: "Customer account — ScanShield admin" },
+      {
+        name: "description",
+        content:
+          "Customer profile, package check history, complaints and account status administration in ScanShield.",
+      },
+      { property: "og:title", content: "Customer account — ScanShield admin" },
+      { property: "og:description", content: "Customer account administration for ScanShield." },
+    ],
+  }),
   component: CustomerDetail,
 });
+
+/** Compact, read-only summary of a stored consumer check result. */
+function CheckFindings({ findings }: { findings: unknown }) {
+  const list = Array.isArray(findings) ? findings : [];
+  if (list.length === 0)
+    return <p className="text-xs text-muted-foreground">No stored declaration findings for this check.</p>;
+  return (
+    <ul className="space-y-1 text-xs">
+      {list.slice(0, 40).map((f, i) => {
+        const row = (f ?? {}) as Record<string, unknown>;
+        const label = String(row["title"] ?? row["ruleKey"] ?? row["rule_key"] ?? row["field"] ?? "Finding");
+        const result = String(row["result"] ?? row["status"] ?? "—").replaceAll("_", " ").toLowerCase();
+        const reason = row["reason"] ?? row["detail"];
+        return (
+          <li key={i} className="flex flex-wrap justify-between gap-2">
+            <span>{label}</span>
+            <span className="text-muted-foreground">
+              {result}
+              {reason ? ` — ${String(reason)}` : ""}
+            </span>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
 
 function CustomerDetail() {
   const { id } = Route.useParams();

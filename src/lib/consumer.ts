@@ -235,3 +235,14 @@ export async function markNotificationRead(id: string): Promise<void> {
 export async function deleteNotification(id: string): Promise<void> {
   await supabase.from("notifications").delete().eq("id", id);
 }
+
+/** Lets a shopper close their own account; an administrator can restore it later. */
+export async function deactivateMyAccount(): Promise<{ error?: string }> {
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) return { error: "Not signed in." };
+  const { error } = await supabase
+    .from("profiles")
+    .update({ account_status: "deactivated" })
+    .eq("id", auth.user.id);
+  return error ? { error: error.message } : {};
+}

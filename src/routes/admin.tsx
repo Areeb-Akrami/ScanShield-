@@ -10,6 +10,7 @@ const items: NavItem[] = [
   { to: "/admin/inspections", label: "Review", icon: "◎" },
   { to: "/admin/rules", label: "Rules", icon: "§" },
   { to: "/admin/sellers", label: "Sellers", icon: "◈" },
+  { to: "/admin/users", label: "Users", icon: "☰" },
   { to: "/admin/audit", label: "Audit", icon: "▤" },
 ];
 

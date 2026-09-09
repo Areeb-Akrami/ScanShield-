@@ -464,6 +464,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_status: string
           created_at: string
           department: string | null
           district: string | null
@@ -477,6 +478,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          account_status?: string
           created_at?: string
           department?: string | null
           district?: string | null
@@ -490,6 +492,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          account_status?: string
           created_at?: string
           department?: string | null
           district?: string | null

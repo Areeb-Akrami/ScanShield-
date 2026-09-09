@@ -19,6 +19,7 @@ import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AdminInspectionsRouteImport } from './routes/admin.inspections'
 import { Route as AdminRulesRouteImport } from './routes/admin.rules'
 import { Route as AdminSellersRouteImport } from './routes/admin.sellers'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as ConsumerIndexRouteImport } from './routes/consumer.index'
 import { Route as ConsumerAccountRouteImport } from './routes/consumer.account'
 import { Route as ConsumerChecksRouteImport } from './routes/consumer.checks'
@@ -29,11 +30,15 @@ import { Route as InspectorInspectionsRouteImport } from './routes/inspector.ins
 import { Route as InspectorProfileRouteImport } from './routes/inspector.profile'
 import { Route as InspectorReportsRouteImport } from './routes/inspector.reports'
 import { Route as InspectorScanRouteImport } from './routes/inspector.scan'
+import { Route as AdminUsersIndexRouteImport } from './routes/admin.users.index'
+import { Route as AdminUsersStaffRouteImport } from './routes/admin.users.staff'
 import { Route as ConsumerCheckIdRouteImport } from './routes/consumer.check.$id'
 import { Route as InspectorInspectionsIndexRouteImport } from './routes/inspector.inspections.index'
 import { Route as InspectorInspectionsIdRouteImport } from './routes/inspector.inspections.$id'
 import { Route as InspectorReportsIndexRouteImport } from './routes/inspector.reports.index'
 import { Route as InspectorReportsIdRouteImport } from './routes/inspector.reports.$id'
+import { Route as AdminUsersCustomersIndexRouteImport } from './routes/admin.users.customers.index'
+import { Route as AdminUsersCustomersIdRouteImport } from './routes/admin.users.customers.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -83,6 +88,11 @@ const AdminRulesRoute = AdminRulesRouteImport.update({
 const AdminSellersRoute = AdminSellersRouteImport.update({
   id: '/sellers',
   path: '/sellers',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
   getParentRoute: () => AdminRoute,
 } as any)
 const ConsumerIndexRoute = ConsumerIndexRouteImport.update({
@@ -135,6 +145,16 @@ const InspectorScanRoute = InspectorScanRouteImport.update({
   path: '/scan',
   getParentRoute: () => InspectorRoute,
 } as any)
+const AdminUsersIndexRoute = AdminUsersIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminUsersRoute,
+} as any)
+const AdminUsersStaffRoute = AdminUsersStaffRouteImport.update({
+  id: '/staff',
+  path: '/staff',
+  getParentRoute: () => AdminUsersRoute,
+} as any)
 const ConsumerCheckIdRoute = ConsumerCheckIdRouteImport.update({
   id: '/check/$id',
   path: '/check/$id',
@@ -161,6 +181,17 @@ const InspectorReportsIdRoute = InspectorReportsIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => InspectorReportsRoute,
 } as any)
+const AdminUsersCustomersIndexRoute =
+  AdminUsersCustomersIndexRouteImport.update({
+    id: '/customers/',
+    path: '/customers/',
+    getParentRoute: () => AdminUsersRoute,
+  } as any)
+const AdminUsersCustomersIdRoute = AdminUsersCustomersIdRouteImport.update({
+  id: '/customers/$id',
+  path: '/customers/$id',
+  getParentRoute: () => AdminUsersRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -172,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/admin/inspections': typeof AdminInspectionsRoute
   '/admin/rules': typeof AdminRulesRoute
   '/admin/sellers': typeof AdminSellersRoute
+  '/admin/users': typeof AdminUsersRouteWithChildren
   '/consumer/account': typeof ConsumerAccountRoute
   '/consumer/checks': typeof ConsumerChecksRoute
   '/consumer/complaints': typeof ConsumerComplaintsRoute
@@ -183,11 +215,15 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/consumer/': typeof ConsumerIndexRoute
   '/inspector/': typeof InspectorIndexRoute
+  '/admin/users/staff': typeof AdminUsersStaffRoute
   '/consumer/check/$id': typeof ConsumerCheckIdRoute
   '/inspector/inspections/$id': typeof InspectorInspectionsIdRoute
   '/inspector/reports/$id': typeof InspectorReportsIdRoute
+  '/admin/users/': typeof AdminUsersIndexRoute
   '/inspector/inspections/': typeof InspectorInspectionsIndexRoute
   '/inspector/reports/': typeof InspectorReportsIndexRoute
+  '/admin/users/customers/$id': typeof AdminUsersCustomersIdRoute
+  '/admin/users/customers/': typeof AdminUsersCustomersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -205,11 +241,15 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/consumer': typeof ConsumerIndexRoute
   '/inspector': typeof InspectorIndexRoute
+  '/admin/users/staff': typeof AdminUsersStaffRoute
   '/consumer/check/$id': typeof ConsumerCheckIdRoute
   '/inspector/inspections/$id': typeof InspectorInspectionsIdRoute
   '/inspector/reports/$id': typeof InspectorReportsIdRoute
+  '/admin/users': typeof AdminUsersIndexRoute
   '/inspector/inspections': typeof InspectorInspectionsIndexRoute
   '/inspector/reports': typeof InspectorReportsIndexRoute
+  '/admin/users/customers/$id': typeof AdminUsersCustomersIdRoute
+  '/admin/users/customers': typeof AdminUsersCustomersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -222,6 +262,7 @@ export interface FileRoutesById {
   '/admin/inspections': typeof AdminInspectionsRoute
   '/admin/rules': typeof AdminRulesRoute
   '/admin/sellers': typeof AdminSellersRoute
+  '/admin/users': typeof AdminUsersRouteWithChildren
   '/consumer/account': typeof ConsumerAccountRoute
   '/consumer/checks': typeof ConsumerChecksRoute
   '/consumer/complaints': typeof ConsumerComplaintsRoute
@@ -233,11 +274,15 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/consumer/': typeof ConsumerIndexRoute
   '/inspector/': typeof InspectorIndexRoute
+  '/admin/users/staff': typeof AdminUsersStaffRoute
   '/consumer/check/$id': typeof ConsumerCheckIdRoute
   '/inspector/inspections/$id': typeof InspectorInspectionsIdRoute
   '/inspector/reports/$id': typeof InspectorReportsIdRoute
+  '/admin/users/': typeof AdminUsersIndexRoute
   '/inspector/inspections/': typeof InspectorInspectionsIndexRoute
   '/inspector/reports/': typeof InspectorReportsIndexRoute
+  '/admin/users/customers/$id': typeof AdminUsersCustomersIdRoute
+  '/admin/users/customers/': typeof AdminUsersCustomersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -251,6 +296,7 @@ export interface FileRouteTypes {
     | '/admin/inspections'
     | '/admin/rules'
     | '/admin/sellers'
+    | '/admin/users'
     | '/consumer/account'
     | '/consumer/checks'
     | '/consumer/complaints'
@@ -262,11 +308,15 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/consumer/'
     | '/inspector/'
+    | '/admin/users/staff'
     | '/consumer/check/$id'
     | '/inspector/inspections/$id'
     | '/inspector/reports/$id'
+    | '/admin/users/'
     | '/inspector/inspections/'
     | '/inspector/reports/'
+    | '/admin/users/customers/$id'
+    | '/admin/users/customers/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -284,11 +334,15 @@ export interface FileRouteTypes {
     | '/admin'
     | '/consumer'
     | '/inspector'
+    | '/admin/users/staff'
     | '/consumer/check/$id'
     | '/inspector/inspections/$id'
     | '/inspector/reports/$id'
+    | '/admin/users'
     | '/inspector/inspections'
     | '/inspector/reports'
+    | '/admin/users/customers/$id'
+    | '/admin/users/customers'
   id:
     | '__root__'
     | '/'
@@ -300,6 +354,7 @@ export interface FileRouteTypes {
     | '/admin/inspections'
     | '/admin/rules'
     | '/admin/sellers'
+    | '/admin/users'
     | '/consumer/account'
     | '/consumer/checks'
     | '/consumer/complaints'
@@ -311,11 +366,15 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/consumer/'
     | '/inspector/'
+    | '/admin/users/staff'
     | '/consumer/check/$id'
     | '/inspector/inspections/$id'
     | '/inspector/reports/$id'
+    | '/admin/users/'
     | '/inspector/inspections/'
     | '/inspector/reports/'
+    | '/admin/users/customers/$id'
+    | '/admin/users/customers/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -398,6 +457,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSellersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/consumer/': {
       id: '/consumer/'
       path: '/'
@@ -468,6 +534,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InspectorScanRouteImport
       parentRoute: typeof InspectorRoute
     }
+    '/admin/users/': {
+      id: '/admin/users/'
+      path: '/'
+      fullPath: '/admin/users/'
+      preLoaderRoute: typeof AdminUsersIndexRouteImport
+      parentRoute: typeof AdminUsersRoute
+    }
+    '/admin/users/staff': {
+      id: '/admin/users/staff'
+      path: '/staff'
+      fullPath: '/admin/users/staff'
+      preLoaderRoute: typeof AdminUsersStaffRouteImport
+      parentRoute: typeof AdminUsersRoute
+    }
     '/consumer/check/$id': {
       id: '/consumer/check/$id'
       path: '/check/$id'
@@ -503,14 +583,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InspectorReportsIdRouteImport
       parentRoute: typeof InspectorReportsRoute
     }
+    '/admin/users/customers/': {
+      id: '/admin/users/customers/'
+      path: '/customers'
+      fullPath: '/admin/users/customers/'
+      preLoaderRoute: typeof AdminUsersCustomersIndexRouteImport
+      parentRoute: typeof AdminUsersRoute
+    }
+    '/admin/users/customers/$id': {
+      id: '/admin/users/customers/$id'
+      path: '/customers/$id'
+      fullPath: '/admin/users/customers/$id'
+      preLoaderRoute: typeof AdminUsersCustomersIdRouteImport
+      parentRoute: typeof AdminUsersRoute
+    }
   }
 }
+
+interface AdminUsersRouteChildren {
+  AdminUsersStaffRoute: typeof AdminUsersStaffRoute
+  AdminUsersIndexRoute: typeof AdminUsersIndexRoute
+  AdminUsersCustomersIdRoute: typeof AdminUsersCustomersIdRoute
+  AdminUsersCustomersIndexRoute: typeof AdminUsersCustomersIndexRoute
+}
+
+const AdminUsersRouteChildren: AdminUsersRouteChildren = {
+  AdminUsersStaffRoute: AdminUsersStaffRoute,
+  AdminUsersIndexRoute: AdminUsersIndexRoute,
+  AdminUsersCustomersIdRoute: AdminUsersCustomersIdRoute,
+  AdminUsersCustomersIndexRoute: AdminUsersCustomersIndexRoute,
+}
+
+const AdminUsersRouteWithChildren = AdminUsersRoute._addFileChildren(
+  AdminUsersRouteChildren,
+)
 
 interface AdminRouteChildren {
   AdminAuditRoute: typeof AdminAuditRoute
   AdminInspectionsRoute: typeof AdminInspectionsRoute
   AdminRulesRoute: typeof AdminRulesRoute
   AdminSellersRoute: typeof AdminSellersRoute
+  AdminUsersRoute: typeof AdminUsersRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -519,6 +632,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminInspectionsRoute: AdminInspectionsRoute,
   AdminRulesRoute: AdminRulesRoute,
   AdminSellersRoute: AdminSellersRoute,
+  AdminUsersRoute: AdminUsersRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,
 }
 

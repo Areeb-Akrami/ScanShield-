@@ -11,6 +11,7 @@ export interface Session {
   district: string;
   employeeId?: string | null;
   department?: string | null;
+  accountStatus?: "active" | "suspended" | "deactivated";
   issuedAt: string;
   expiresAt: string;
 }
@@ -97,7 +98,7 @@ export function getSession(): Session | null {
 async function loadProfile(userId: string, email: string, expiresAt: string): Promise<Session> {
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, email, district, employee_id, department, role")
+    .select("full_name, email, district, employee_id, department, role, account_status")
     .eq("id", userId)
     .maybeSingle();
 
@@ -120,6 +121,7 @@ async function loadProfile(userId: string, email: string, expiresAt: string): Pr
     district: profile?.district ?? "—",
     employeeId: profile?.employee_id ?? null,
     department: profile?.department ?? null,
+    accountStatus: (profile?.account_status as Session["accountStatus"]) ?? "active",
     issuedAt: new Date().toISOString(),
     expiresAt,
   };
@@ -139,6 +141,12 @@ async function refreshFromSupabase() {
   const expiresAt = new Date((s.expires_at ?? Date.now() / 1000 + 3600) * 1000).toISOString();
   try {
     const session = await loadProfile(s.user.id, s.user.email ?? "", expiresAt);
+    if (session.accountStatus && session.accountStatus !== "active") {
+      // Suspended or deactivated accounts are signed out on the next check.
+      await supabase.auth.signOut();
+      setState({ status: "ready", session: null });
+      return;
+    }
     setState({ status: "ready", session });
   } catch {
     setState({ status: "ready", session: state.session });
@@ -177,6 +185,16 @@ export async function signIn(email: string, password: string): Promise<Session |
   }
   const expiresAt = new Date((data.session.expires_at ?? Date.now() / 1000 + 3600) * 1000).toISOString();
   const session = await loadProfile(data.session.user.id, data.session.user.email ?? email, expiresAt);
+  if (session.accountStatus && session.accountStatus !== "active") {
+    await supabase.auth.signOut();
+    setState({ status: "ready", session: null });
+    return {
+      error:
+        session.accountStatus === "suspended"
+          ? "This account has been suspended by an administrator."
+          : "This account has been deactivated.",
+    };
+  }
   setState({ status: "ready", session });
   return session;
 }

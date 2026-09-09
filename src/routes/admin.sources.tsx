@@ -1,4 +1,4 @@
-import { RequireRole } from "@/components/AppShell";
+import { RequireRole, useSession } from "@/components/AppShell";
 import { Button, Field, Panel, PanelHeader, StatusPill, inputClass } from "@/components/ui";
 import {
   addLegalDocument,
@@ -7,10 +7,12 @@ import {
   listExemptions,
   listLegalDocuments,
   signedUrl,
+  updateLegalDocument,
   uploadLegalDocumentFile,
   type DbExemption,
   type DbRule,
 } from "@/lib/db";
+import { audit } from "@/lib/store";
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 

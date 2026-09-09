@@ -17,9 +17,16 @@ export interface CreateStaffInput {
   department: string;
   district: string;
   role: "inspector" | "enforcement_officer";
+  /** Where the invitation link should land the staff member (password setup page). */
+  redirectTo?: string;
 }
 
-function temporaryPassword(): string {
+/**
+ * A password is only generated when an invitation email cannot be delivered.
+ * It stays on the server, is never returned to the browser and is never stored
+ * in application tables — the staff member sets their own via password reset.
+ */
+function unrevealedPassword(): string {
   const bytes = new Uint8Array(12);
   crypto.getRandomValues(bytes);
   return `Sc$${Array.from(bytes, (b) => b.toString(36)).join("").slice(0, 14)}A1`;

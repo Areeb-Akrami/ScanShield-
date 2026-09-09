@@ -1,5 +1,6 @@
 import { Panel, PanelHeader, StatusPill } from "@/components/ui";
 import { listInspections, sellerProfiles, type SellerProfile } from "@/lib/store";
+import { hydrateInspections } from "@/lib/store";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
@@ -21,7 +22,7 @@ function SellersPage() {
 
   useEffect(() => {
     setProfiles(sellerProfiles());
-    setInspections(listInspections());
+    void hydrateInspections().then(setInspections);
   }, []);
 
   return (

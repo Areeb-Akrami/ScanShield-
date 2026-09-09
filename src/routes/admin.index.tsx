@@ -2,6 +2,7 @@ import { CorpusBanner } from "@/components/CorpusBanner";
 import { Panel, PanelHeader, Stat, StatusPill } from "@/components/ui";
 import { corpusStatistics } from "@/legal/corpus";
 import { listInspections, sellerProfiles, type Inspection } from "@/lib/store";
+import { hydrateInspections } from "@/lib/store";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/admin/")({
 
 function AdminOverview() {
   const [all, setAll] = useState<Inspection[]>([]);
-  useEffect(() => setAll(listInspections()), []);
+  useEffect(() => { void hydrateInspections().then(setAll); }, []);
 
   const stats = useMemo(() => corpusStatistics(new Date().toISOString().slice(0, 10)), []);
   const total = all.length;

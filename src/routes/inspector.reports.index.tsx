@@ -1,5 +1,6 @@
 import { Panel, PanelHeader, StatusPill } from "@/components/ui";
 import { listInspections, type Inspection } from "@/lib/store";
+import { hydrateInspections } from "@/lib/store";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
@@ -17,7 +18,7 @@ export const Route = createFileRoute("/inspector/reports/")({
 
 function ReportsIndex() {
   const [all, setAll] = useState<Inspection[]>([]);
-  useEffect(() => setAll(listInspections()), []);
+  useEffect(() => { void hydrateInspections().then(setAll); }, []);
 
   return (
     <Panel>

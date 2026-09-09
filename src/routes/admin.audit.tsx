@@ -1,4 +1,5 @@
 import { Panel, PanelHeader, inputClass } from "@/components/ui";
+import { fetchAudit } from "@/lib/db";
 import { listAudit, type AuditEntry } from "@/lib/store";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
@@ -19,7 +20,13 @@ function AuditPage() {
   const [entries, setEntries] = useState<AuditEntry[]>([]);
   const [q, setQ] = useState("");
 
-  useEffect(() => setEntries(listAudit()), []);
+  useEffect(() => {
+    // The database trail is authoritative; the local trail covers anything
+    // recorded while the device was offline and not yet uploaded.
+    void fetchAudit()
+      .then((remote) => setEntries(remote.length > 0 ? remote : listAudit()))
+      .catch(() => setEntries(listAudit()));
+  }, []);
 
   const rows = useMemo(() => {
     const n = q.trim().toLowerCase();
@@ -35,7 +42,7 @@ function AuditPage() {
   return (
     <div className="space-y-4">
       <Panel>
-        <PanelHeader title="Audit trail" subtitle={`${entries.length} entries. Records are appended, never edited.`} />
+        <PanelHeader title="Audit trail" subtitle={`${entries.length} entries from the central trail. Records are appended, never edited or deleted.`} />
         <div className="p-4">
           <input
             className={inputClass()}

@@ -114,6 +114,37 @@ export function audit(entry: Omit<AuditEntry, "id" | "timestamp">): void {
   const all = read<AuditEntry[]>(AUDIT_KEY, []);
   all.push({ ...entry, id: `AUD-${all.length + 1}-${Date.now()}`, timestamp: new Date().toISOString() });
   write(AUDIT_KEY, all.slice(-500));
+  // Mirror into the append-only database audit trail. Imported lazily so the
+  // legal engine and this store stay usable without a network round-trip.
+  if (typeof window !== "undefined") {
+    void import("@/lib/db").then((db) => db.pushAudit(entry)).catch(() => undefined);
+  }
+}
+
+/**
+ * Merges the inspections stored in the database into the local working copy.
+ * Enforcement staff see every inspection; an inspector sees their own.
+ */
+export async function hydrateInspections(): Promise<Inspection[]> {
+  if (typeof window === "undefined") return listInspections();
+  try {
+    const { fetchRemoteInspections } = await import("@/lib/db");
+    const remote = await fetchRemoteInspections();
+    if (remote.length > 0) {
+      const local = read<Inspection[]>(INSPECTIONS_KEY, []);
+      const byId = new Map(local.map((i) => [i.localId, i]));
+      for (const r of remote) {
+        const existing = byId.get(r.localId);
+        // Keep the local copy when it is newer or still carries unsynced work.
+        if (existing && (existing.syncStatus !== "SYNCED" || existing.updatedAt > r.updatedAt)) continue;
+        byId.set(r.localId, { ...existing, ...r, images: r.images?.length ? r.images : (existing?.images ?? []) });
+      }
+      write(INSPECTIONS_KEY, [...byId.values()]);
+    }
+  } catch {
+    /* offline or not signed in — the local copy remains authoritative */
+  }
+  return listInspections();
 }
 
 /* ------------------------------------------------------------------ */
@@ -174,18 +205,32 @@ export function queueForSync(localId: string, user: string): void {
   audit({ user, action: "SYNC_QUEUED", entity: "Inspection", entityId: localId, before: null, after: insp.syncStatus });
 }
 
-export function processSyncQueue(user: string): number {
+/** Uploads every queued inspection to the database. Returns how many landed. */
+export async function processSyncQueue(user: string): Promise<number> {
   const all = read<Inspection[]>(INSPECTIONS_KEY, []);
   let moved = 0;
   const online = typeof navigator !== "undefined" ? navigator.onLine : true;
+  const { pushInspection } = await import("@/lib/db");
+
   for (const insp of all) {
     if (insp.syncStatus === "PENDING_SYNC" || insp.syncStatus === "OFFLINE" || insp.syncStatus === "SYNC_FAILED") {
       if (!online) {
         insp.syncStatus = "OFFLINE";
         continue;
       }
+      let serverId: string | null = null;
+      try {
+        serverId = await pushInspection(insp);
+      } catch {
+        serverId = null;
+      }
+      if (!serverId) {
+        insp.syncStatus = "SYNC_FAILED";
+        insp.lastError = "The record could not be saved to the server. It stays queued and will retry.";
+        continue;
+      }
       insp.syncStatus = "SYNCED";
-      insp.serverId = insp.serverId ?? `SS-${insp.localId.slice(-6).toUpperCase()}`;
+      insp.serverId = serverId;
       insp.updatedAt = new Date().toISOString();
       insp.lastError = null;
       moved += 1;

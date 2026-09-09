@@ -2,6 +2,7 @@ import { Button, Panel, PanelHeader, StatusPill, inputClass } from "@/components
 import type { FinalStatus } from "@/legal/engine";
 import { getSession } from "@/lib/auth";
 import { evaluateStored, listInspections, overrideFinalStatus, type Inspection } from "@/lib/store";
+import { hydrateInspections } from "@/lib/store";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 
@@ -30,7 +31,7 @@ function AdminInspections() {
   const [filter, setFilter] = useState<"ALL" | FinalStatus>("ALL");
   const user = getSession()?.name ?? "Unknown officer";
 
-  useEffect(() => setAll(listInspections()), []);
+  useEffect(() => { void hydrateInspections().then(setAll); }, []);
 
   const rows = useMemo(
     () => (filter === "ALL" ? all : all.filter((i) => i.finalStatus === filter)),

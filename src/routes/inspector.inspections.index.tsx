@@ -1,5 +1,6 @@
 import { Panel, PanelHeader, StatusPill, inputClass } from "@/components/ui";
 import { listInspections, type Inspection } from "@/lib/store";
+import { hydrateInspections } from "@/lib/store";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 
@@ -22,7 +23,7 @@ function InspectionList() {
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("ALL");
 
-  useEffect(() => setAll(listInspections()), []);
+  useEffect(() => { void hydrateInspections().then(setAll); }, []);
 
   const rows = useMemo(
     () =>

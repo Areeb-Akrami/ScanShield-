@@ -696,3 +696,7 @@ drop trigger if exists profiles_guard_role_insert on public.profiles;
 create trigger profiles_guard_role_insert
 before insert on public.profiles
 for each row execute function public.guard_role_insert();
+
+-- ===== next step =====
+-- Run db/004_seed_demo_data.sql to load the verified Legal Metrology corpus
+-- (29 provisions, 6 exemptions, 1 legal source, demo sellers) into this project.

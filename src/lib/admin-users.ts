@@ -130,7 +130,7 @@ export async function listCustomers(): Promise<CustomerSummary[]> {
 export async function customerChecks(id: string) {
   const { data } = await supabase
     .from("consumer_checks")
-    .select("id, product_name, status, confidence, created_at")
+    .select("id, product_name, status, confidence, findings, created_at")
     .eq("consumer_id", id)
     .order("created_at", { ascending: false })
     .limit(100);

@@ -245,15 +245,24 @@ function RulesPage() {
             c.versions.find((v) => v.effective_from <= asOf && (!v.effective_to || v.effective_to >= asOf)) ?? null,
         }))
         .filter((c) => {
+          const shown = c.onDate ?? c.latest;
+          if (statusFilter !== "all" && shown.status !== statusFilter) return false;
+          if (categoryFilter !== "all" && (shown.category ?? "") !== categoryFilter) return false;
           const n = q.trim().toLowerCase();
           return (
             n === "" ||
             c.latest.title.toLowerCase().includes(n) ||
             c.key.toLowerCase().includes(n) ||
+            c.latest.rule_number.toLowerCase().includes(n) ||
             (c.latest.category ?? "").toLowerCase().includes(n)
           );
         }),
-    [chains, asOf, q],
+    [chains, asOf, q, statusFilter, categoryFilter],
+  );
+
+  const categories = useMemo(
+    () => [...new Set(rules.map((r) => r.category).filter(Boolean))].sort() as string[],
+    [rules],
   );
 
   const counts = useMemo(() => {
